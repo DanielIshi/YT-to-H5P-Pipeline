@@ -1,0 +1,73 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+env/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment
+.env
+.env.local
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project Specific
+C:UsersDaniel.sshid_claude_nopass
+C:UsersDaniel.sshid_claude_nopass.pub
+
+# Temporary
+*.tmp
+*.bak
+*.backup-*
+03 Adobe Stock/**
+assets/**
+.work/
+# Test Data (Root only)
+/scene_495_test_data.json
+/test_icons.json
+/test_*.json
+tests/fading_tests/**
+tests/output_overlay/**
+

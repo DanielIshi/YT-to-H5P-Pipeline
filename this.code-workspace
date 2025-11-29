@@ -1,0 +1,23 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"workbench.colorCustomizations": {
+			"titleBar.activeBackground": "#005f73",
+			"titleBar.activeForeground": "#ffffff",
+			"titleBar.inactiveBackground": "#0a9396",
+			"titleBar.inactiveForeground": "#cccccc",
+			"editor.background": "#001219",
+			"activityBar.background": "#003543",
+			"sideBar.background": "#001219"
+		},
+		"workbench.colorTheme": "Default Dark+",
+		"workbench.iconTheme": "vscode-icons",
+		"files.autoSave": "afterDelay",
+		"files.autoSaveDelay": 1000,
+		"editor.formatOnSave": true
+	}
+}

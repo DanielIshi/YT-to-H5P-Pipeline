@@ -1,0 +1,137 @@
+diff --git a/src/services/video/audio_enrichment.py b/src/services/video/audio_enrichment.py
+index b589e69..e7eecf1 100644
+--- a/src/services/video/audio_enrichment.py
++++ b/src/services/video/audio_enrichment.py
+@@ -15,6 +15,7 @@ import json
+ 
+ from src.services.audio.elevenlabs_client import ElevenLabsClient
+ from src.services.supabase.client import SupabaseClient
++from src.services.video.cli_adjust_video_to_audio import adjust_video_to_audio_duration
+ from supabase import create_client
+ import os
+ from dotenv import load_dotenv
+@@ -141,7 +142,8 @@ def merge_video_audio(
+     print(f"   Mode: {'Replace' if replace_audio else 'Mix'}", file=sys.stderr)
+ 
+     if replace_audio:
+-        # Replace audio: map video stream + audio stream, use shortest duration
++        # Replace audio: map video stream + audio stream
++        # NOTE: No -shortest flag needed - video is pre-adjusted to match audio duration
+         cmd = [
+             "ffmpeg", "-y",
+             "-i", str(video_path),
+@@ -149,7 +151,6 @@ def merge_video_audio(
+             "-c:v", "copy",  # Copy video codec
+             "-map", "0:v",   # Video from first input
+             "-map", "1:a",   # Audio from second input
+-            "-shortest",     # End when shortest stream ends
+             str(output_path)
+         ]
+     else:
+@@ -255,14 +256,22 @@ def enrich_scene_with_voice(
+ 
+     print(f"   TTS Text: {tts_text[:80]}{'...' if len(tts_text) > 80 else ''}", file=sys.stderr)
+ 
+-    # Generate audio
+-    tts_client = ElevenLabsClient(voice_id=voice_id)
++    # Audio caching: Reuse existing audio if available (saves ElevenLabs credits)
+     audio_path = workdir / f"scene_{scene_id}_audio.mp3"
+ 
+-    tts_client.generate_audio(
+-        text=tts_text,
+-        output_path=audio_path
+-    )
++    if scene.audio_url:
++        print(f"\n🔄 Audio already exists, reusing from cache...", file=sys.stderr)
++        print(f"   Audio URL: {scene.audio_url}", file=sys.stderr)
++        urllib.request.urlretrieve(scene.audio_url, audio_path)
++        print(f"   ✅ Audio downloaded from cache (no ElevenLabs credits used)", file=sys.stderr)
++    else:
++        print(f"\n🎙️  Generating new audio with ElevenLabs...", file=sys.stderr)
++        tts_client = ElevenLabsClient(voice_id=voice_id)
++        tts_client.generate_audio(
++            text=tts_text,
++            output_path=audio_path
++        )
++        print(f"   ✅ Audio generated", file=sys.stderr)
+ 
+     audio_duration = probe_duration(audio_path, stream_type="audio")
+     print(f"   Audio Duration: {audio_duration:.2f}s" if audio_duration else "   Audio Duration: Unknown", file=sys.stderr)
+@@ -291,10 +300,53 @@ def enrich_scene_with_voice(
+     else:
+         print(f"\n🔇 Video has no audio stream (silent video)", file=sys.stderr)
+ 
+-    # Duration check
+-    if audio_duration and video_duration and abs(audio_duration - video_duration) > 2.0:
+-        print(f"\n⚠️  Duration mismatch: Audio {audio_duration:.2f}s vs. Video {video_duration:.2f}s", file=sys.stderr)
+-        print(f"   Video will be trimmed/extended to match audio", file=sys.stderr)
++    # Video-Adjustment Logic (WF3): Adjust video duration to match audio
++    # NOTE: Avatar scenes skip enrich_scene_with_voice() entirely (see cli_scene_complete_overlay.py)
++    # This logic runs ONLY for Icons/Bulletpoints scenes with separated_audio_generation=true
++    if audio_duration and video_duration:
++        duration_diff = abs(audio_duration - video_duration)
++
++        if duration_diff > 0.2:  # Tolerance: 0.2s
++            print(f"\n🎬 Adjusting video duration to match audio...", file=sys.stderr)
++            print(f"   Current: {video_duration:.2f}s → Target: {audio_duration:.2f}s", file=sys.stderr)
++
++            adjusted_video = workdir / f"scene_{scene_id}_adjusted.mp4"
++
++            try:
++                adjustment_result = adjust_video_to_audio_duration(
++                    video_path=video_for_merge,
++                    target_duration=audio_duration,
++                    output_path=adjusted_video,
++                    tolerance=0.2,
++                    verbose=False
++                )
++
++                print(f"   ✅ Strategy: {adjustment_result['strategy']}", file=sys.stderr)
++                print(f"   ✅ Adjusted: {adjustment_result['final_duration']:.2f}s (diff: {adjustment_result['final_difference']:.2f}s)", file=sys.stderr)
++
++                # Use adjusted video for merge
++                video_for_merge = adjusted_video
++                video_duration = adjustment_result['final_duration']
++
++            except Exception as e:
++                # GOLDEN RULE: Audio darf NIEMALS getrimmt werden!
++                # Wenn Video-Adjustment fehlschlägt → FAIL FAST (nicht mit zu kurzem Video weitermachen)
++                raise RuntimeError(
++                    f"Video adjustment failed - cannot continue (would violate GOLDEN RULE: audio would be trimmed): {e}"
++                ) from e
++        else:
++            print(f"\n✅ Video/Audio durations match (diff: {duration_diff:.2f}s)", file=sys.stderr)
++
++    # PRE-MERGE VALIDATION: Video MUSS lang genug für Audio sein (GOLDEN RULE)
++    if audio_duration and video_duration:
++        if video_duration < audio_duration - 0.1:  # Tolerance: 0.1s
++            raise RuntimeError(
++                f"GOLDEN RULE VIOLATION: Video too short for audio!\n"
++                f"  Video: {video_duration:.2f}s\n"
++                f"  Audio: {audio_duration:.2f}s\n"
++                f"  Audio would be trimmed by {audio_duration - video_duration:.2f}s"
++            )
++        print(f"✅ Pre-merge validation passed: Video ({video_duration:.2f}s) >= Audio ({audio_duration:.2f}s)", file=sys.stderr)
+ 
+     # Merge video + audio
+     merge_video_audio(
+@@ -351,15 +403,17 @@ def enrich_scene_with_voice(
+         print(f"   ✅ Video: {video_cdn_url}", file=sys.stderr)
+         print(f"   ✅ Audio: {audio_cdn_url}", file=sys.stderr)
+ 
+-        # Update DB: Set normalized_video_url and audio_url
++        # Update DB: Set normalized_video_url, audio_url AND target_duration
+         # NOTE: This function only runs when separated_audio_generation=true (checked above)
+         # normalized_video_url gets updated with audio-enriched video
++        # target_duration MUST be saved here (not calculated in WF1c when separated_audio_generation=true)
+         # XFade will disable audio (preserve_audio=false) because final video gets new audio overlay
+         db_client._execute_query(
+             'PATCH', f'/video_scenes?id=eq.{scene_id}',
+             data={
+                 'normalized_video_url': video_cdn_url,  # Enriched video replaces normalized
+-                'audio_url': audio_cdn_url  # Also store audio separately for reference
++                'audio_url': audio_cdn_url,  # Also store audio separately for reference
++                'target_duration': audio_duration  # CRITICAL: Save for consistency (NULL when separated_audio_generation=true)
+             }
+         )
+ 
