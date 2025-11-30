@@ -22,6 +22,7 @@ class NotebookLMConfig:
     default_timeout: int = 30000
     upload_timeout: int = 60000
     audio_generation_timeout: int = 300000  # 5 min for audio generation
+    video_generation_timeout: int = 600000  # 10 min for video generation
 
     # Chrome profile for persistent login
     user_data_dir: Optional[Path] = None
@@ -34,6 +35,8 @@ class NotebookLMConfig:
     # Output directories
     output_dir: Path = field(default_factory=lambda: Path("output/notebooklm"))
     audio_dir: Path = field(default_factory=lambda: Path("output/notebooklm/audio"))
+    video_dir: Path = field(default_factory=lambda: Path("output/notebooklm/video"))
+    mindmap_dir: Path = field(default_factory=lambda: Path("output/notebooklm/mindmap"))
 
     def __post_init__(self):
         """Setup directories and defaults"""
@@ -49,6 +52,8 @@ class NotebookLMConfig:
         # Ensure output directories exist
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.audio_dir.mkdir(parents=True, exist_ok=True)
+        self.video_dir.mkdir(parents=True, exist_ok=True)
+        self.mindmap_dir.mkdir(parents=True, exist_ok=True)
 
 
 # Selectors for NotebookLM UI elements (may need updates if UI changes)
@@ -102,3 +107,25 @@ class Selectors:
     # Error states
     ERROR_MESSAGE = '[data-testid="error-message"]'
     RETRY_BUTTON = 'button:has-text("Retry")'
+
+    # Mindmap (Studio panel)
+    MINDMAP_TAB = 'button:has-text("Mind map")'
+    MINDMAP_CONTAINER = '[class*="mindmap"], [data-testid="mindmap"]'
+    MINDMAP_SVG = 'svg[class*="mindmap"], svg'
+    MINDMAP_NODE = 'g[class*="node"], g[data-node]'
+    MINDMAP_EXPAND_ALL = 'button:has-text("Expand all")'
+    MINDMAP_COLLAPSE_ALL = 'button:has-text("Collapse")'
+    MINDMAP_NODE_TEXT = 'text, [class*="label"]'
+    MINDMAP_CONNECTION = 'path[class*="link"], line'
+
+    # Video Overview (Studio panel)
+    VIDEO_OVERVIEW_TAB = 'button:has-text("Video Overview")'
+    VIDEO_FORMAT_EXPLAINER = 'button:has-text("Explainer")'
+    VIDEO_FORMAT_BRIEF = 'button:has-text("Brief")'
+    VIDEO_STYLE_SELECTOR = '[class*="style-selector"], [data-testid="style-selector"]'
+    VIDEO_STYLE_CLASSIC = 'button:has-text("Classic")'
+    VIDEO_STYLE_WHITEBOARD = 'button:has-text("Whiteboard")'
+    VIDEO_STYLE_WATERCOLOR = 'button:has-text("Watercolor")'
+    GENERATE_VIDEO_BUTTON = 'button:has-text("Generate")'
+    VIDEO_PLAYER = 'video'
+    DOWNLOAD_VIDEO_BUTTON = 'button[aria-label*="Download"]'

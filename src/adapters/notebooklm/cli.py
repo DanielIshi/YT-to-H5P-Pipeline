@@ -33,6 +33,8 @@ from src.adapters.notebooklm.config import NotebookLMConfig
 from src.adapters.notebooklm.notebook_manager import NotebookManager
 from src.adapters.notebooklm.content_extractor import ContentExtractor
 from src.adapters.notebooklm.audio_downloader import AudioDownloader
+from src.adapters.notebooklm.video_downloader import VideoDownloader, VideoFormat, VideoStyle
+from src.adapters.notebooklm.mindmap_extractor import MindmapExtractor
 
 # Setup logging
 logging.basicConfig(
@@ -128,7 +130,9 @@ async def main(args: argparse.Namespace) -> int:
     config = NotebookLMConfig(
         headless=args.headless,
         output_dir=output_dir,
-        audio_dir=output_dir / "audio"
+        audio_dir=output_dir / "audio",
+        video_dir=output_dir / "video",
+        mindmap_dir=output_dir / "mindmap"
     )
 
     # Run automation
@@ -158,7 +162,9 @@ async def main(args: argparse.Namespace) -> int:
 
             # Generate requested content types
             extractor = ContentExtractor(client)
-            downloader = AudioDownloader(client)
+            audio_downloader = AudioDownloader(client)
+            video_downloader = VideoDownloader(client)
+            mindmap_extractor = MindmapExtractor(client)
 
             # FAQ
             if args.faq or args.all:
@@ -203,13 +209,63 @@ async def main(args: argparse.Namespace) -> int:
             # Audio Overview (Podcast)
             if args.audio or args.all:
                 logger.info("Generating Audio Overview (this may take several minutes)...")
-                audio = await downloader.generate_and_download(notebook)
+                audio = await audio_downloader.generate_and_download(notebook)
                 if audio.file_path:
                     results["outputs"]["audio"] = str(audio.file_path)
                     results["audio_duration"] = audio.duration_seconds
                     logger.info(f"Audio saved: {audio.file_path}")
                 else:
                     logger.warning("Audio generation failed")
+
+            # Video Overview (AI-generated educational video)
+            if args.video or args.all:
+                logger.info("Generating Video Overview (this may take 5-10 minutes)...")
+                # Determine video style
+                video_style = VideoStyle.CLASSIC
+                if args.video_style:
+                    try:
+                        video_style = VideoStyle(args.video_style.lower())
+                    except ValueError:
+                        logger.warning(f"Unknown video style: {args.video_style}, using Classic")
+
+                # Determine video format
+                video_format = VideoFormat.EXPLAINER
+                if args.video_format:
+                    try:
+                        video_format = VideoFormat(args.video_format.lower())
+                    except ValueError:
+                        pass
+
+                video = await video_downloader.generate_and_download(
+                    notebook,
+                    format=video_format,
+                    style=video_style
+                )
+                if video.file_path:
+                    results["outputs"]["video"] = str(video.file_path)
+                    results["video_duration"] = video.duration_seconds
+                    logger.info(f"Video saved: {video.file_path}")
+                else:
+                    logger.warning("Video generation failed")
+
+            # Mindmap (SVG + JSON)
+            if args.mindmap or args.all:
+                logger.info("Extracting Mindmap...")
+                mindmap = await mindmap_extractor.extract_mindmap(notebook)
+                if mindmap.svg_content:
+                    paths = await mindmap_extractor.save_mindmap(mindmap, output_dir / "mindmap")
+                    results["outputs"]["mindmap_svg"] = str(paths.get("svg", ""))
+                    results["outputs"]["mindmap_json"] = str(paths.get("json", ""))
+                    results["mindmap_nodes"] = len(mindmap.nodes)
+                    logger.info(f"Mindmap saved: {len(mindmap.nodes)} nodes")
+
+                    # Also save as markdown
+                    md_content = mindmap_extractor.export_to_markdown(mindmap)
+                    md_path = output_dir / "mindmap" / f"{title}_mindmap.md"
+                    md_path.write_text(md_content, encoding="utf-8")
+                    results["outputs"]["mindmap_md"] = str(md_path)
+                else:
+                    logger.warning("Mindmap extraction failed")
 
             # Export all as markdown
             if args.export_markdown:
@@ -337,6 +393,33 @@ Examples:
         action="store_true",
         help="Export all content to single Markdown file"
     )
+    content_group.add_argument(
+        "--video",
+        action="store_true",
+        help="Generate Video Overview (AI-generated educational video, ~5-10 min)"
+    )
+    content_group.add_argument(
+        "--mindmap",
+        action="store_true",
+        help="Extract Mindmap (SVG + JSON structure)"
+    )
+
+    # Video options
+    video_group = parser.add_argument_group("Video Options")
+    video_group.add_argument(
+        "--video-style",
+        type=str,
+        choices=["classic", "whiteboard", "watercolor", "retro_print", "heritage", "papercraft", "kawaii", "anime"],
+        default="classic",
+        help="Visual style for video generation (default: classic)"
+    )
+    video_group.add_argument(
+        "--video-format",
+        type=str,
+        choices=["explainer", "brief"],
+        default="explainer",
+        help="Video format: explainer (~5-10 min) or brief (~2-3 min)"
+    )
 
     # Behavior options
     behavior_group = parser.add_argument_group("Behavior Options")
@@ -371,8 +454,8 @@ if __name__ == "__main__":
         logging.getLogger().setLevel(logging.DEBUG)
 
     # Check if any content type is requested
-    if not any([args.all, args.audio, args.faq, args.study_guide, args.briefing, args.timeline]):
-        logger.warning("No content type specified. Use --all or specific types like --audio, --faq")
+    if not any([args.all, args.audio, args.faq, args.study_guide, args.briefing, args.timeline, args.video, args.mindmap]):
+        logger.warning("No content type specified. Use --all or specific types like --audio, --faq, --video, --mindmap")
         args.all = True  # Default to all
 
     exit_code = asyncio.run(main(args))
