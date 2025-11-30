@@ -72,8 +72,8 @@ async def test_patched_libraries():
             await page.screenshot(path=str(screenshot_path), full_page=True)
             print(f"Screenshot: {screenshot_path.name}")
 
-            # Check for H5P iframe
-            iframe = await page.query_selector("iframe.h5p-iframe")
+            # Check for H5P iframe (Moodle uses class h5p-player)
+            iframe = await page.query_selector("iframe.h5p-player")
             has_iframe = iframe is not None
 
             # Check for specific errors
