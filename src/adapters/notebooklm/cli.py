@@ -128,6 +128,7 @@ async def main(args: argparse.Namespace) -> int:
 
     # Configure client
     config = NotebookLMConfig(
+        cdp_url=args.cdp_url if hasattr(args, 'cdp_url') else None,
         headless=args.headless,
         output_dir=output_dir,
         audio_dir=output_dir / "audio",
@@ -423,6 +424,12 @@ Examples:
 
     # Behavior options
     behavior_group = parser.add_argument_group("Behavior Options")
+    behavior_group.add_argument(
+        "--cdp-url",
+        type=str,
+        default="http://localhost:9222",
+        help="CDP URL for connecting to existing Chrome (default: http://localhost:9222)"
+    )
     behavior_group.add_argument(
         "--headless",
         action="store_true",

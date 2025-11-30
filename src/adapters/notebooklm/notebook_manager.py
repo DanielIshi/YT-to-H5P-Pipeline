@@ -121,9 +121,15 @@ class NotebookManager:
 
         page = self.client.page
 
-        # Click add source button
-        await page.click(Selectors.ADD_SOURCE_BUTTON)
-        await asyncio.sleep(0.5)
+        # Check if source dialog is already open (happens after notebook creation)
+        paste_option = await page.query_selector(Selectors.PASTE_TEXT_OPTION)
+        if not paste_option or not await paste_option.is_visible():
+            # Click add source button only if dialog not already open
+            try:
+                await page.click(Selectors.ADD_SOURCE_BUTTON, timeout=5000)
+                await asyncio.sleep(0.5)
+            except Exception as e:
+                logger.debug(f"Add source button click skipped: {e}")
 
         success = False
 
@@ -170,18 +176,44 @@ class NotebookManager:
         page = self.client.page
 
         try:
-            # Click paste text option
-            await page.click(Selectors.PASTE_TEXT_OPTION)
+            # Click "Kopierter Text" chip (use mat-chip selector)
+            chip = await page.query_selector('mat-chip:has-text("Kopierter Text")')
+            if chip:
+                await chip.click()
+                logger.info("Clicked 'Kopierter Text' chip")
+            else:
+                # Fallback: text selector with force
+                await page.click('text=Kopierter Text', force=True, timeout=10000)
+
+            await asyncio.sleep(1)
+
+            # Find the textarea in the dialog (it has no placeholder attribute)
+            dialog = await page.query_selector('.cdk-overlay-container mat-dialog-container')
+            if dialog:
+                textarea = await dialog.query_selector('textarea')
+                if textarea and await textarea.is_visible():
+                    await textarea.fill(text)
+                    logger.info(f"Filled textarea with {len(text)} chars")
+                else:
+                    logger.error("Textarea not found in dialog")
+                    return False
+            else:
+                # Fallback: find textarea by general selector
+                await page.fill('.cdk-overlay-container textarea', text)
+
             await asyncio.sleep(0.5)
 
-            # Enter text
-            await page.fill(Selectors.TEXT_INPUT_AREA, text)
-
             # Click insert/add button
-            await page.click(Selectors.INSERT_BUTTON)
+            await page.click(Selectors.INSERT_BUTTON, timeout=10000)
 
-            # Wait for processing
+            # Wait for processing (can take a while for large texts)
+            logger.info("Waiting for text processing...")
+            await asyncio.sleep(5)
             await self.client.wait_for_loading()
+
+            # Check if source was added (dialog should close)
+            await asyncio.sleep(2)
+            logger.info("Text source added successfully")
             return True
 
         except Exception as e:

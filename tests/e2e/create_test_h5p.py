@@ -86,10 +86,11 @@ def build_summary(intro: str, statements: list) -> dict:
         ]
     }
     # Build summary panels - each panel has statements, first is correct
+    # H5P.Summary expects summary as array of HTML strings (first one is correct!)
     panels = []
     for stmt_group in statements:
         panel = {
-            "summary": [{"text": s} for s in stmt_group],
+            "summary": [f"<p>{s}</p>" for s in stmt_group],
             "tip": ""
         }
         panels.append(panel)
@@ -215,7 +216,7 @@ def main():
     )
     pkg_path = str(output_dir / "test_truefalse.h5p")
     create_h5p_package(h5p, content, pkg_path)
-    result = upload_and_import(pkg_path, "Test: TrueFalse (Patch-Check)")
+    result = upload_and_import(pkg_path, "Test: TrueFalse")
     if result:
         results.append(("TrueFalse", result.get('cmid'), result.get('url')))
 
@@ -227,7 +228,7 @@ def main():
     )
     pkg_path = str(output_dir / "test_blanks.h5p")
     create_h5p_package(h5p, content, pkg_path)
-    result = upload_and_import(pkg_path, "Test: Blanks (Patch-Check)")
+    result = upload_and_import(pkg_path, "Test: Blanks")
     if result:
         results.append(("Blanks", result.get('cmid'), result.get('url')))
 
@@ -242,7 +243,7 @@ def main():
     )
     pkg_path = str(output_dir / "test_summary.h5p")
     create_h5p_package(h5p, content, pkg_path)
-    result = upload_and_import(pkg_path, "Test: Summary (Patch-Check)")
+    result = upload_and_import(pkg_path, "Test: Summary")
     if result:
         results.append(("Summary", result.get('cmid'), result.get('url')))
 
@@ -254,7 +255,7 @@ def main():
     )
     pkg_path = str(output_dir / "test_dragtext.h5p")
     create_h5p_package(h5p, content, pkg_path)
-    result = upload_and_import(pkg_path, "Test: DragText (Patch-Check)")
+    result = upload_and_import(pkg_path, "Test: DragText")
     if result:
         results.append(("DragText", result.get('cmid'), result.get('url')))
 

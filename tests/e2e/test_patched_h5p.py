@@ -13,10 +13,10 @@ PASSWORD = "Student2025!"
 
 # Test the newly imported activities (with embedTypes fix)
 TEST_ACTIVITIES = {
-    125: "TrueFalse",
-    126: "Blanks",
-    127: "Summary",
-    128: "DragText",
+    129: "TrueFalse",
+    130: "Blanks",
+    131: "Summary",
+    132: "DragText",
 }
 
 SCREENSHOT_DIR = Path(__file__).parent / "screenshots"

@@ -6,7 +6,8 @@
       "Bash(curl:*)",
       "Bash(ssh root@148.230.71.150 \"docker exec moodle-db psql -U bn_moodle -d bitnami_moodle -t -c \"\"SELECT cs.section, cs.name, COUNT(cm.id) as activities FROM mdl_course_sections cs LEFT JOIN mdl_course_modules cm ON cm.section = cs.id WHERE cs.course = 2 GROUP BY cs.id, cs.section, cs.name ORDER BY cs.section LIMIT 15;\"\"\")",
       "Bash(ssh root@148.230.71.150 \"echo ''=== Docker Moodle ==='' && docker ps | grep -i moodle && echo '''' && echo ''=== Standalone Moodle (Port 80/443) ==='' && netstat -tlnp | grep -E '':80|:443'' && echo '''' && echo ''=== Moodle Configs ==='' && ls -la /var/www/ 2>/dev/null | head -5 && echo '''' && echo ''=== Docker Moodle Port ==='' && docker port moodle-app 2>/dev/null\")",
-      "Bash(ssh root@148.230.71.150:*)"
+      "Bash(ssh root@148.230.71.150:*)",
+      "WebFetch(domain:github.com)"
     ],
     "deny": [],
     "ask": []

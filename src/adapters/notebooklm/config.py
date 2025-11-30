@@ -14,6 +14,9 @@ class NotebookLMConfig:
     # URLs
     base_url: str = "https://notebooklm.google.com"
 
+    # CDP connection (for connecting to existing Chrome with pre-authenticated session)
+    cdp_url: Optional[str] = None  # e.g., "http://localhost:9222"
+
     # Browser settings
     headless: bool = False  # NotebookLM requires visible browser for auth
     slow_mo: int = 100  # Milliseconds between actions (avoid rate limiting)
@@ -60,10 +63,10 @@ class NotebookLMConfig:
 class Selectors:
     """CSS/XPath selectors for NotebookLM UI elements"""
 
-    # Navigation & Auth
-    SIGN_IN_BUTTON = 'button:has-text("Sign in")'
-    CREATE_NOTEBOOK_BUTTON = 'button:has-text("Create")'
-    NEW_NOTEBOOK_BUTTON = 'button:has-text("New notebook")'
+    # Navigation & Auth (supports English and German UI)
+    SIGN_IN_BUTTON = 'button:has-text("Sign in"), button:has-text("Anmelden")'
+    CREATE_NOTEBOOK_BUTTON = 'button:has-text("Create"), button:has-text("Neu erstellen"), button:has-text("add")'
+    NEW_NOTEBOOK_BUTTON = 'button:has-text("New notebook"), button:has-text("Neues Notebook")'
 
     # Notebook management
     NOTEBOOK_TITLE_INPUT = 'input[aria-label="Notebook title"]'
@@ -71,30 +74,38 @@ class Selectors:
     NOTEBOOK_ITEM = '[data-testid="notebook-item"]'
     DELETE_NOTEBOOK = 'button:has-text("Delete")'
 
-    # Source upload
-    ADD_SOURCE_BUTTON = 'button:has-text("Add source")'
-    UPLOAD_FILE_OPTION = 'button:has-text("Upload")'
-    PASTE_TEXT_OPTION = 'button:has-text("Paste text")'
-    YOUTUBE_OPTION = 'button:has-text("YouTube")'
-    WEBSITE_OPTION = 'button:has-text("Website")'
+    # Source upload (EN/DE)
+    ADD_SOURCE_BUTTON = 'button:has-text("Add source"), button:has-text("Quelle hinzufügen"), button:has-text("Quellen hinzufügen")'
+    UPLOAD_FILE_OPTION = 'button:has-text("Upload"), button:has-text("Hochladen"), button:has-text("Quellen hochladen")'
+    PASTE_TEXT_OPTION = 'text=Paste text, text=Kopierter Text, text=Text einfügen'
+    YOUTUBE_OPTION = 'text=YouTube'
+    WEBSITE_OPTION = 'text=Website'
 
     FILE_INPUT = 'input[type="file"]'
-    TEXT_INPUT_AREA = 'textarea[placeholder*="Paste"]'
+    TEXT_INPUT_AREA = 'textarea[placeholder*="Paste"], textarea[placeholder*="Text hier einfügen"], textarea[placeholder*="einfügen"]'
     URL_INPUT = 'input[placeholder*="URL"]'
-    INSERT_BUTTON = 'button:has-text("Insert")'
+    INSERT_BUTTON = 'button:has-text("Insert"), button:has-text("Einfügen")'
 
-    # Studio panel (right side)
+    # Studio panel (right side) - EN/DE - Updated Nov 2025 UI
     STUDIO_PANEL = '[data-testid="studio-panel"]'
-    AUDIO_OVERVIEW_TAB = 'button:has-text("Audio Overview")'
-    GENERATE_AUDIO_BUTTON = 'button:has-text("Generate")'
+    AUDIO_OVERVIEW_TAB = 'button:has-text("Audio Overview"), button:has-text("Audio-Zusammenfassung")'
+    GENERATE_AUDIO_BUTTON = 'button:has-text("Generate"), button:has-text("Generieren"), button:has-text("Erstellen")'
     AUDIO_PLAYER = 'audio'
-    DOWNLOAD_AUDIO_BUTTON = 'button[aria-label*="Download"]'
+    DOWNLOAD_AUDIO_BUTTON = 'button[aria-label*="Download"], button[aria-label*="Herunterladen"]'
 
-    # Content generation
-    FAQ_TAB = 'button:has-text("FAQ")'
-    STUDY_GUIDE_TAB = 'button:has-text("Study Guide")'
-    BRIEFING_TAB = 'button:has-text("Briefing Doc")'
-    TIMELINE_TAB = 'button:has-text("Timeline")'
+    # Content generation - EN/DE - Updated Nov 2025 UI
+    # New Studio panel cards (not tabs anymore)
+    REPORTS_CARD = 'button:has-text("Reports"), button:has-text("Berichte")'
+    FLASHCARDS_CARD = 'button:has-text("Flashcards"), button:has-text("Karteikarten")'
+    QUIZ_CARD = 'button:has-text("Quiz")'
+    INFOGRAPHIC_CARD = 'button:has-text("Infographic"), button:has-text("Infografik")'
+    PRESENTATION_CARD = 'button:has-text("Presentation"), button:has-text("Präsentation")'
+
+    # Legacy selectors (may still work in some regions)
+    FAQ_TAB = 'button:has-text("FAQ"), button:has-text("Häufig gestellte Fragen")'
+    STUDY_GUIDE_TAB = 'button:has-text("Study Guide"), button:has-text("Lernhilfe"), button:has-text("Lernleitfaden")'
+    BRIEFING_TAB = 'button:has-text("Briefing Doc"), button:has-text("Briefing-Dok"), button:has-text("Briefing")'
+    TIMELINE_TAB = 'button:has-text("Timeline"), button:has-text("Zeitleiste")'
 
     # Content extraction
     GENERATED_CONTENT = '[data-testid="generated-content"]'
@@ -108,24 +119,24 @@ class Selectors:
     ERROR_MESSAGE = '[data-testid="error-message"]'
     RETRY_BUTTON = 'button:has-text("Retry")'
 
-    # Mindmap (Studio panel)
-    MINDMAP_TAB = 'button:has-text("Mind map")'
+    # Mindmap (Studio panel) - EN/DE
+    MINDMAP_TAB = 'button:has-text("Mind map"), button:has-text("Mindmap"), button:has-text("Gedankenkarte")'
     MINDMAP_CONTAINER = '[class*="mindmap"], [data-testid="mindmap"]'
     MINDMAP_SVG = 'svg[class*="mindmap"], svg'
     MINDMAP_NODE = 'g[class*="node"], g[data-node]'
-    MINDMAP_EXPAND_ALL = 'button:has-text("Expand all")'
-    MINDMAP_COLLAPSE_ALL = 'button:has-text("Collapse")'
+    MINDMAP_EXPAND_ALL = 'button:has-text("Expand all"), button:has-text("Alle erweitern"), button:has-text("Alle einblenden")'
+    MINDMAP_COLLAPSE_ALL = 'button:has-text("Collapse"), button:has-text("Zuklappen"), button:has-text("Einklappen")'
     MINDMAP_NODE_TEXT = 'text, [class*="label"]'
     MINDMAP_CONNECTION = 'path[class*="link"], line'
 
-    # Video Overview (Studio panel)
-    VIDEO_OVERVIEW_TAB = 'button:has-text("Video Overview")'
-    VIDEO_FORMAT_EXPLAINER = 'button:has-text("Explainer")'
-    VIDEO_FORMAT_BRIEF = 'button:has-text("Brief")'
+    # Video Overview (Studio panel) - EN/DE - Updated Nov 2025 UI
+    VIDEO_OVERVIEW_TAB = 'button:has-text("Video Overview"), button:has-text("Videoübersicht"), button:has-text("Video-Zusammenfassung")'
+    VIDEO_FORMAT_EXPLAINER = 'button:has-text("Explainer"), button:has-text("Erklärvideo")'
+    VIDEO_FORMAT_BRIEF = 'button:has-text("Brief"), button:has-text("Kurz")'
     VIDEO_STYLE_SELECTOR = '[class*="style-selector"], [data-testid="style-selector"]'
-    VIDEO_STYLE_CLASSIC = 'button:has-text("Classic")'
+    VIDEO_STYLE_CLASSIC = 'button:has-text("Classic"), button:has-text("Klassisch")'
     VIDEO_STYLE_WHITEBOARD = 'button:has-text("Whiteboard")'
-    VIDEO_STYLE_WATERCOLOR = 'button:has-text("Watercolor")'
-    GENERATE_VIDEO_BUTTON = 'button:has-text("Generate")'
+    VIDEO_STYLE_WATERCOLOR = 'button:has-text("Watercolor"), button:has-text("Aquarell")'
+    GENERATE_VIDEO_BUTTON = 'button:has-text("Generate"), button:has-text("Generieren"), button:has-text("Erstellen")'
     VIDEO_PLAYER = 'video'
-    DOWNLOAD_VIDEO_BUTTON = 'button[aria-label*="Download"]'
+    DOWNLOAD_VIDEO_BUTTON = 'button[aria-label*="Download"], button[aria-label*="Herunterladen"]'

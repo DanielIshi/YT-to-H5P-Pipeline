@@ -25,6 +25,11 @@ class NotebookLMClient:
         async with NotebookLMClient() as client:
             await client.ensure_authenticated()
             # ... use client
+
+    Supports connecting to existing Chrome via CDP:
+        config = NotebookLMConfig(cdp_url="http://localhost:9222")
+        async with NotebookLMClient(config) as client:
+            ...
     """
 
     def __init__(self, config: Optional[NotebookLMConfig] = None):
@@ -33,6 +38,7 @@ class NotebookLMClient:
         self._browser: Optional[Browser] = None
         self._context: Optional[BrowserContext] = None
         self._page: Optional[Page] = None
+        self._connected_via_cdp: bool = False
 
     async def __aenter__(self) -> "NotebookLMClient":
         await self.start()
@@ -47,6 +53,44 @@ class NotebookLMClient:
 
         self._playwright = await async_playwright().start()
 
+        # Option 1: Connect to existing Chrome via CDP (preferred for pre-authenticated sessions)
+        if self.config.cdp_url:
+            logger.info(f"Connecting to existing Chrome via CDP: {self.config.cdp_url}")
+            try:
+                self._browser = await self._playwright.chromium.connect_over_cdp(self.config.cdp_url)
+                self._connected_via_cdp = True
+
+                # Get the default context and page
+                contexts = self._browser.contexts
+                if contexts:
+                    self._context = contexts[0]
+                    if self._context.pages:
+                        # Use existing page or create new one
+                        self._page = await self._context.new_page()
+                    else:
+                        self._page = await self._context.new_page()
+                else:
+                    self._context = await self._browser.new_context()
+                    self._page = await self._context.new_page()
+
+                logger.info("Connected to existing Chrome browser")
+            except Exception as e:
+                logger.error(f"Failed to connect via CDP: {e}")
+                logger.info("Falling back to launching new browser...")
+                self._connected_via_cdp = False
+                await self._launch_new_browser()
+        else:
+            await self._launch_new_browser()
+
+        # Set default timeout
+        self._page.set_default_timeout(self.config.default_timeout)
+
+        # Navigate to NotebookLM
+        await self._page.goto(self.config.base_url)
+        logger.info(f"Navigated to {self.config.base_url}")
+
+    async def _launch_new_browser(self) -> None:
+        """Launch a new browser instance"""
         # Launch browser with persistent context for login persistence
         self._browser = await self._playwright.chromium.launch(
             headless=self.config.headless,
@@ -65,22 +109,22 @@ class NotebookLMClient:
             self._context = await self._browser.new_context()
             self._page = await self._context.new_page()
 
-        # Set default timeout
-        self._page.set_default_timeout(self.config.default_timeout)
-
-        # Navigate to NotebookLM
-        await self._page.goto(self.config.base_url)
-        logger.info(f"Navigated to {self.config.base_url}")
-
     async def close(self) -> None:
         """Clean up browser resources"""
-        if self._context:
-            await self._context.close()
-        if self._browser:
-            await self._browser.close()
+        # Only close the page we created, not the entire browser (for CDP connections)
+        if self._connected_via_cdp:
+            if self._page:
+                await self._page.close()
+            logger.info("NotebookLM client closed (CDP page only, browser kept alive)")
+        else:
+            if self._context:
+                await self._context.close()
+            if self._browser:
+                await self._browser.close()
+            logger.info("NotebookLM client closed")
+
         if self._playwright:
             await self._playwright.stop()
-        logger.info("NotebookLM client closed")
 
     @property
     def page(self) -> Page:

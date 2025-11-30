@@ -168,6 +168,44 @@ SUPABASE_SERVICE_KEY=eyJ...
 3. **ImageHotspots benötigt Bild-URLs** - Keine automatische Bildextraktion
    - **TODO:** YouTube Thumbnails als Fallback
 
+## H5P Testing Regeln
+
+**NIEMALS neue Test-Aktivitäten hinzufügen bei Fixes!**
+
+### Test-Kurs: ID 22 (KIQuizKurs_1764356017)
+- Pro Content-Type nur EINE Test-Aktivität
+- Namen: "Test: TrueFalse", "Test: Blanks", "Test: Summary", "Test: DragText"
+
+### Bei Iteration/Fix:
+1. Fehlerhafte Aktivität **löschen**
+2. Code fixen
+3. **Gleiche Aktivität** (gleicher Name) neu erstellen
+4. Testen als Student (nicht Admin!)
+
+### NICHT:
+- Zusätzliche Test-Aktivitäten anlegen
+- "(Patch-Check)", "(v2)" etc. anhängen
+- Alte Aktivitäten behalten
+
+### H5P Package Requirements:
+- `embedTypes: ["iframe"]` MUSS in h5p.json sein (sonst Validierungsfehler)
+- Admin-Preview funktioniert nicht immer - **Student-View ist maßgeblich**
+
+## Content-Type Strategie (Schlüsseldokument!)
+
+**→ `src/doc/CONTENT_TYPE_MATRIX.md`**
+
+Definiert:
+- Passiv vs. Aktiv Lernmodi mit Engagement-Levels
+- Optimaler Einsatz jedes H5P Content-Types
+- Didaktische Reihenfolge (Lernpfad-Phasen)
+- Gewichtung für LLM-Generierung
+- Bildgenerierung-Strategie (Gemini 3)
+- Audio-Content-Strategie (NotebookLM)
+- Qualitätskriterien für interessante Lernpfade
+
+**Goldene Regel:** 30% Passiv (interessant!) → 60% Aktiv → 10% Reflexion
+
 ## Typischer Workflow
 
 1. YouTube-Video in Supabase speichern (mit Untertiteln)

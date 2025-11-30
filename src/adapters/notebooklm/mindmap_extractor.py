@@ -83,10 +83,14 @@ class MindmapExtractor:
             # Navigate to notebook if needed
             await self._ensure_notebook_open(notebook)
 
-            # Click Mind map tab
-            logger.info("Opening Mind map tab...")
-            await page.click(Selectors.MINDMAP_TAB, timeout=10000)
-            await asyncio.sleep(2)
+            # Try to find existing mindmap in Studio panel (Nov 2025 UI)
+            mindmap_opened = await self._open_mindmap_from_studio()
+
+            if not mindmap_opened:
+                # Fallback: Click Mind map tab/button
+                logger.info("Opening Mind map via button...")
+                await page.click(Selectors.MINDMAP_TAB, timeout=10000)
+                await asyncio.sleep(2)
 
             # Wait for mindmap to render
             await self._wait_for_mindmap_render()
@@ -94,16 +98,15 @@ class MindmapExtractor:
             # Expand all nodes (important for complete extraction!)
             await self._expand_all_nodes()
 
-            # Extract SVG content
+            # Extract SVG content (look for large SVG)
             data.svg_content = await self._extract_svg()
 
-            # Parse node structure
-            data.nodes = await self._extract_nodes()
-            data.connections = await self._extract_connections()
+            # Parse node structure from SVG text elements
+            data.nodes = self._extract_nodes_from_svg(data.svg_content)
 
-            # Build hierarchy
+            # Build hierarchy from nodes
             if data.nodes:
-                data.root_node = self._build_hierarchy(data.nodes, data.connections)
+                data.root_node = self._build_hierarchy(data.nodes, [])
 
             logger.info(f"Mindmap extracted: {len(data.nodes)} nodes")
             return data
@@ -111,6 +114,41 @@ class MindmapExtractor:
         except Exception as e:
             logger.error(f"Mindmap extraction failed: {e}")
             return data
+
+    async def _open_mindmap_from_studio(self) -> bool:
+        """Try to open existing mindmap from Studio panel (Nov 2025 UI)"""
+        page = self.client.page
+
+        try:
+            # Wait for mindmap to be generated (look for card with "Quelle" text)
+            logger.info("Waiting for mindmap generation...")
+            max_wait = 60  # 60 seconds max
+            for _ in range(max_wait // 2):
+                buttons = await page.query_selector_all('button')
+                for btn in buttons:
+                    text = await btn.text_content()
+                    if text and 'Quelle' in text and ('flowchart' in text or 'Mindmap' in text or 'Konzept' in text or 'KI' in text):
+                        await btn.click()
+                        logger.info(f"Clicked mindmap card: {text[:50]}")
+                        await asyncio.sleep(3)
+                        return True
+                await asyncio.sleep(2)
+
+            # Fallback: Look for any button with flowchart icon
+            flowchart_buttons = await page.query_selector_all('button:has-text("flowchart")')
+            for btn in flowchart_buttons:
+                text = await btn.text_content()
+                if text and 'Quelle' in text:
+                    await btn.click()
+                    logger.info(f"Clicked flowchart button: {text[:50]}")
+                    await asyncio.sleep(3)
+                    return True
+
+            return False
+
+        except Exception as e:
+            logger.debug(f"Studio mindmap open failed: {e}")
+            return False
 
     async def _ensure_notebook_open(self, notebook: Notebook) -> None:
         """Navigate to notebook if not already open"""
@@ -179,29 +217,87 @@ class MindmapExtractor:
             logger.warning(f"Expand nodes: {e}")
 
     async def _extract_svg(self) -> Optional[str]:
-        """Extract raw SVG content from DOM"""
+        """Extract raw SVG content from DOM - find the largest SVG (the mindmap)"""
         page = self.client.page
         logger.info("Extracting SVG content...")
 
         try:
-            # Find SVG element
+            # Find all SVG elements and get the largest one (likely the mindmap)
+            svgs = await page.query_selector_all('svg')
+            largest_svg = None
+            largest_size = 0
+
+            for svg in svgs:
+                try:
+                    html = await svg.evaluate("el => el.outerHTML")
+                    if len(html) > largest_size:
+                        largest_size = len(html)
+                        largest_svg = html
+                except Exception:
+                    continue
+
+            if largest_svg and largest_size > 1000:
+                logger.info(f"Found mindmap SVG: {largest_size} chars")
+                return largest_svg
+
+            # Fallback: Try specific selectors
             svg_element = await page.query_selector(Selectors.MINDMAP_SVG)
             if svg_element:
-                # Get outer HTML (includes SVG tag)
                 svg_content = await svg_element.evaluate("el => el.outerHTML")
                 return svg_content
-
-            # Fallback: Try container
-            container = await page.query_selector(Selectors.MINDMAP_CONTAINER)
-            if container:
-                svg_in_container = await container.query_selector("svg")
-                if svg_in_container:
-                    return await svg_in_container.evaluate("el => el.outerHTML")
 
         except Exception as e:
             logger.error(f"SVG extraction failed: {e}")
 
         return None
+
+    def _extract_nodes_from_svg(self, svg_content: Optional[str]) -> List[MindmapNode]:
+        """Extract nodes from SVG text elements"""
+        nodes = []
+
+        if not svg_content:
+            return nodes
+
+        try:
+            # Parse node-name text elements from SVG using regex
+            # NotebookLM mindmap uses <text class="node-name">Text</text>
+            node_pattern = r'<text class="node-name"[^>]*>([^<]+)</text>'
+            matches = re.findall(node_pattern, svg_content)
+
+            # Also try to extract transform positions for hierarchy
+            transform_pattern = r'<g class="node" transform="translate\(([^,]+),\s*([^)]+)\)">'
+            transforms = re.findall(transform_pattern, svg_content)
+
+            for i, text in enumerate(matches):
+                text = text.strip()
+                # Decode HTML entities
+                text = text.replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>')
+
+                if len(text) < 2:
+                    continue
+
+                # Estimate level from x-coordinate (if available)
+                level = 0
+                if i < len(transforms):
+                    x = float(transforms[i][0])
+                    # Root is at x=0, children at x~460
+                    level = 0 if x < 100 else 1
+
+                node = MindmapNode(
+                    id=f"node_{i}",
+                    text=text,
+                    level=level,
+                    x=float(transforms[i][0]) if i < len(transforms) else None,
+                    y=float(transforms[i][1]) if i < len(transforms) else None
+                )
+                nodes.append(node)
+
+            logger.info(f"Extracted {len(nodes)} nodes from SVG")
+
+        except Exception as e:
+            logger.error(f"Node extraction from SVG failed: {e}")
+
+        return nodes
 
     async def _extract_nodes(self) -> List[MindmapNode]:
         """Extract node information from SVG"""
