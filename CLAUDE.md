@@ -191,6 +191,24 @@ SUPABASE_SERVICE_KEY=eyJ...
 - `embedTypes: ["iframe"]` MUSS in h5p.json sein (sonst Validierungsfehler)
 - Admin-Preview funktioniert nicht immer - **Student-View ist maßgeblich**
 
+## Moodle Kurs-Konfiguration
+
+**WICHTIG: Alle neuen Kurse müssen Selbsteinschreibung aktiviert haben!**
+
+Bei Kurserstellung oder nach Import IMMER Selbsteinschreibung aktivieren:
+```php
+// Self-enrolment aktivieren für Kurs
+$enrol = $DB->get_record('enrol', ['courseid' => $courseid, 'enrol' => 'self']);
+if ($enrol) {
+    $enrol->status = 0; // 0 = enabled
+    $DB->update_record('enrol', $enrol);
+}
+```
+
+**PHP-Script auf VPS:** `/tmp/enable_self_enrol.php`
+
+Oder manuell: Kurs → Teilnehmer → Einschreibemethoden → "Selbsteinschreibung" aktivieren
+
 ## Content-Type Strategie (Schlüsseldokument!)
 
 **→ `src/doc/CONTENT_TYPE_MATRIX.md`**

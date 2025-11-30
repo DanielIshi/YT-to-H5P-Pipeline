@@ -1,0 +1,7 @@
+  1. "Neu erstellen" Button: /html/body/labs-tailwind-root/div/welcome-page/div/div[1]/div/div[2]/div/div/button
+  2. "Text einfügen" Chip: //*[@id="mat-mdc-chip-7"]/span[2]/span/span[2]/span[1]
+  3. Text Input: //*[@id="mat-input-2"]
+  4. "Einfügen" Button: //*[@id="mat-mdc-dialog-11"]/div/div/upload-dialog/div/div[2]/paste-text/form/button
+  5. Mind map Button im Studio: /html/body/labs-tailwind-root/div/notebook/div/section[3]/studio-panel/div/div[1]/basic-create-artifact-button[3]
+  6. Artifact Library: /html/body/labs-tailwind-root/div/notebook/div/section[3]/studio-panel/div/div[3]/artifact-library
+  7. Flowchart Icon: <mat-icon>flowchart</mat-icon>

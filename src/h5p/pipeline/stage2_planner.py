@@ -29,9 +29,17 @@ class ActivityPlan(TypedDict):
     brief: str
 
 
+class ColumnPlan(TypedDict):
+    """Ein Column-Block mit mehreren Aktivitäten"""
+    title: str
+    phase: str  # "passive", "active", "reflect"
+    activities: list[ActivityPlan]
+
+
 class LearningPathPlan(TypedDict):
     """Output von Stage 2"""
-    learning_path: list[ActivityPlan]
+    learning_path: list[ActivityPlan]  # Legacy: flache Liste
+    columns: list[ColumnPlan]  # NEU: gruppierte Columns
     phase_distribution: dict[str, int]
 
 
@@ -60,61 +68,105 @@ VERFÜGBARE CONTENT-TYPES für Milestone "{config['name']}":
 {content_types_formatted}
 
 AUFGABE:
-Erstelle einen Lernpfad-Plan basierend auf dem strukturierten Skript.
-Wähle für jedes Konzept den passenden Content-Type.
+Erstelle einen Lernpfad-Plan mit THEMATISCHEN COLUMNS (Blöcken).
+Jeder Column wird in Moodle als EIN Menüpunkt angezeigt.
+Ziel: 3-4 Columns mit je 2-3 Aktivitäten (bildschirmfüllend, kein Scrollen).
+
+COLUMN-STRUKTUR:
+1. Column "Einführung" (passive Phase): Dialogcards + Accordion
+2. Column "Wissenstest" (active Phase): TrueFalse + MultiChoice
+3. Column "Anwendung" (active Phase): Blanks + DragText
+4. Column "Abschluss" (reflect Phase): Summary
 
 DIDAKTISCHE REGELN:
 1. Beginne mit PASSIVEN Elementen (Einführung, Begriffe erklären)
 2. Dann AKTIVE Elemente (Übungen, Quiz, Anwendung)
-3. Ende mit REFLEXION (Summary - muss letzte Aktivität sein!)
+3. Ende mit REFLEXION (Summary - muss in letztem Column sein!)
 4. Keine zwei gleichen Content-Types direkt hintereinander
-5. 8-12 Aktivitäten insgesamt
-6. Jede Aktivität braucht eine Begründung (rationale)
+5. 7-10 Aktivitäten insgesamt, verteilt auf 3-4 Columns
+6. Pro Column 2-3 Aktivitäten (nicht mehr, damit Bildschirm gefüllt ohne Scroll)
 
 CONTENT-TYPE MATCHING (wähle basierend auf Konzept-Typ):
 {chr(10).join(matching_rules)}
 
-PHASE-GEWICHTUNG:
-- Passiv: ~25% der Aktivitäten (Einführung, Begriffe)
-- Aktiv: ~50% der Aktivitäten (Übungen, Quiz)
-- Reflexion: ~15% der Aktivitäten (Summary)
-
 OUTPUT FORMAT (JSON):
 {{
-  "learning_path": [
+  "columns": [
     {{
-      "order": 1,
-      "content_type": "dialogcards",
-      "concept_refs": ["Begriff1", "Begriff2"],
-      "rationale": "Einführung der Kernbegriffe als Karteikarten zum Durchblättern",
-      "brief": "Erstelle Karteikarten für: Begriff1 (Definition...), Begriff2 (Definition...)"
+      "title": "Einführung: Grundbegriffe",
+      "phase": "passive",
+      "activities": [
+        {{
+          "order": 1,
+          "content_type": "dialogcards",
+          "concept_refs": ["Begriff1", "Begriff2"],
+          "rationale": "Einführung der Kernbegriffe als Karteikarten",
+          "brief": "Erstelle Karteikarten für: Begriff1 (Definition...), Begriff2 (Definition...)"
+        }},
+        {{
+          "order": 2,
+          "content_type": "accordion",
+          "concept_refs": ["Prozess1"],
+          "rationale": "Detaillierte Erklärung des Prozesses",
+          "brief": "Erkläre die Schritte von Prozess1 in 3-4 Panels"
+        }}
+      ]
     }},
     {{
-      "order": 2,
-      "content_type": "accordion",
-      "concept_refs": ["Prozess1"],
-      "rationale": "Detaillierte Erklärung des Prozesses in aufklappbaren Panels",
-      "brief": "Erkläre die Schritte von Prozess1 in 3-4 Panels"
+      "title": "Wissenstest: Fakten prüfen",
+      "phase": "active",
+      "activities": [
+        {{
+          "order": 3,
+          "content_type": "truefalse",
+          "concept_refs": ["Fakt1"],
+          "rationale": "Schnelle Faktenprüfung",
+          "brief": "Frage: 'Aussage über Fakt1' - Wahr/Falsch"
+        }},
+        {{
+          "order": 4,
+          "content_type": "multichoice",
+          "concept_refs": ["Konzept1"],
+          "rationale": "Verständnisprüfung mit Auswahl",
+          "brief": "Frage: 'Was ist richtig über Konzept1?' mit 4 Optionen"
+        }}
+      ]
     }},
     {{
-      "order": 3,
-      "content_type": "blanks",
-      "concept_refs": ["Begriff1"],
-      "rationale": "Aktive Anwendung: Begriff in Kontext einsetzen",
-      "brief": "Lückentext wo Begriff1 eingesetzt werden muss"
+      "title": "Anwendung & Abschluss",
+      "phase": "active",
+      "activities": [
+        {{
+          "order": 5,
+          "content_type": "blanks",
+          "concept_refs": ["Begriff1"],
+          "rationale": "Aktive Anwendung im Kontext",
+          "brief": "Lückentext wo Begriff1 eingesetzt werden muss"
+        }},
+        {{
+          "order": 6,
+          "content_type": "summary",
+          "concept_refs": ["Alle"],
+          "rationale": "Kernpunkte zusammenfassen",
+          "brief": "Fasse die wichtigsten Punkte zusammen"
+        }}
+      ]
     }}
   ],
+  "learning_path": [/* Flache Liste aller activities in order */],
   "phase_distribution": {{
     "passive": 2,
-    "active": 6,
+    "active": 3,
     "reflect": 1
   }}
 }}
 
 WICHTIG:
+- Column-Titel sollen thematisch passend und kurz sein (max 30 Zeichen)
 - Der "brief" muss konkret genug sein, dass Stage 3 den Content generieren kann
 - Referenziere nur Konzepte/Begriffe die im Skript vorkommen
-- Die letzte Aktivität MUSS "summary" sein
+- Summary MUSS im letzten Column sein
+- "learning_path" enthält ALLE activities flach sortiert nach order (für Kompatibilität)
 
 STRUKTURIERTES SKRIPT:
 """

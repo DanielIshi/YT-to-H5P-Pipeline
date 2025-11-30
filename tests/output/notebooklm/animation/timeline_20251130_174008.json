@@ -1,0 +1,47 @@
+{
+  "steps": [
+    {
+      "timestamp": 0.0,
+      "action": "expand",
+      "node_id": "node_0",
+      "node_text": "KI-Transformation in Unternehmen",
+      "duration": 2.0
+    },
+    {
+      "timestamp": 2.0,
+      "action": "expand",
+      "node_id": "node_1",
+      "node_text": "Einf\u00fchrung",
+      "duration": 2.0
+    },
+    {
+      "timestamp": 4.0,
+      "action": "expand",
+      "node_id": "node_2",
+      "node_text": "Anwendungsbereiche",
+      "duration": 2.0
+    },
+    {
+      "timestamp": 6.0,
+      "action": "expand",
+      "node_id": "node_3",
+      "node_text": "Implementierung (Erfolgsfaktoren)",
+      "duration": 2.0
+    },
+    {
+      "timestamp": 8.0,
+      "action": "expand",
+      "node_id": "node_4",
+      "node_text": "Herausforderungen",
+      "duration": 2.0
+    },
+    {
+      "timestamp": 10.0,
+      "action": "expand",
+      "node_id": "node_5",
+      "node_text": "Zukunftsperspektiven",
+      "duration": 2.0
+    }
+  ],
+  "total_duration": 12.0
+}
