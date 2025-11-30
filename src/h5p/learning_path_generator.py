@@ -29,6 +29,8 @@ VERFÜGBARE CONTENT-TYPEN:
 5. blanks - Lückentext zum Ausfüllen
 6. summary - Zusammenfassung mit Aussagen-Auswahl
 7. draganddrop - Begriffe in Kategorien ziehen
+8. interactivevideo - YouTube-Video mit eingebetteten Quizfragen (NUR wenn video_url vorhanden!)
+9. imagehotspots - Interaktives Bild mit klickbaren Hotspots (NUR wenn image_url vorhanden!)
 
 OUTPUT FORMAT (JSON):
 {
@@ -36,26 +38,68 @@ OUTPUT FORMAT (JSON):
   "activities": [
     {
       "order": 1,
+      "type": "imagehotspots",
+      "title": "1. Themenübersicht",
+      "image_url": "{{IMAGE_URL}}",
+      "hotspots": [
+        {"x": 20, "y": 30, "header": "Thema A", "content": "Kurze Erklärung zu Thema A..."},
+        {"x": 60, "y": 50, "header": "Thema B", "content": "Kurze Erklärung zu Thema B..."},
+        {"x": 80, "y": 70, "header": "Thema C", "content": "Kurze Erklärung zu Thema C..."}
+      ]
+    },
+    {
+      "order": 2,
       "type": "dialogcards",
-      "title": "1. Wichtige Begriffe",
+      "title": "2. Wichtige Begriffe",
       "cards": [
         {"front": "Begriff 1", "back": "Definition/Erklärung zu Begriff 1"},
         {"front": "Begriff 2", "back": "Definition/Erklärung zu Begriff 2"}
       ]
     },
     {
-      "order": 2,
+      "order": 3,
       "type": "accordion",
-      "title": "2. Kernaussagen",
+      "title": "3. Kernaussagen",
       "panels": [
         {"title": "Kernaussage 1", "content": "<p>Detaillierte Erklärung zur ersten Kernaussage...</p>"},
         {"title": "Kernaussage 2", "content": "<p>Detaillierte Erklärung zur zweiten Kernaussage...</p>"}
       ]
     },
     {
-      "order": 3,
+      "order": 4,
+      "type": "interactivevideo",
+      "title": "4. Video mit Quizfragen",
+      "video_url": "{{VIDEO_URL}}",
+      "interactions": [
+        {
+          "time": 60,
+          "type": "multichoice",
+          "label": "Verständnisfrage",
+          "question": "Was wurde gerade erklärt?",
+          "answers": [
+            {"text": "Korrekte Antwort", "correct": true, "feedback": "Genau!"},
+            {"text": "Falsche Option", "correct": false, "feedback": "Nicht ganz..."}
+          ]
+        },
+        {
+          "time": 180,
+          "type": "truefalse",
+          "label": "Faktencheck",
+          "statement": "Diese Aussage ist korrekt.",
+          "correct": true
+        },
+        {
+          "time": 300,
+          "type": "text",
+          "label": "Wichtiger Hinweis",
+          "text": "Achte auf diesen wichtigen Punkt..."
+        }
+      ]
+    },
+    {
+      "order": 5,
       "type": "multichoice",
-      "title": "3. Verständnischeck",
+      "title": "5. Verständnischeck",
       "question": "Was ist die Hauptaussage des Videos?",
       "answers": [
         {"text": "Korrekte Antwort", "correct": true, "feedback": "Genau richtig!"},
@@ -65,24 +109,24 @@ OUTPUT FORMAT (JSON):
       ]
     },
     {
-      "order": 4,
+      "order": 6,
       "type": "blanks",
-      "title": "4. Lückentext",
+      "title": "6. Lückentext",
       "text": "Das wichtigste Konzept ist *Antwort1*. Es wird verwendet für *Antwort2*."
     },
     {
-      "order": 5,
+      "order": 7,
       "type": "truefalse",
-      "title": "5. Faktencheck",
+      "title": "7. Faktencheck",
       "statement": "Diese Aussage aus dem Video ist korrekt.",
       "correct": true,
       "feedback_correct": "Richtig! Diese Aussage stimmt weil...",
       "feedback_wrong": "Falsch! Diese Aussage ist korrekt weil..."
     },
     {
-      "order": 6,
+      "order": 8,
       "type": "draganddrop",
-      "title": "6. Zuordnung",
+      "title": "8. Zuordnung",
       "task": "Ordne die Begriffe den richtigen Kategorien zu.",
       "categories": ["Kategorie A", "Kategorie B"],
       "items": [
@@ -92,9 +136,9 @@ OUTPUT FORMAT (JSON):
       ]
     },
     {
-      "order": 7,
+      "order": 9,
       "type": "summary",
-      "title": "7. Zusammenfassung",
+      "title": "9. Zusammenfassung",
       "intro": "Wähle die korrekten Aussagen:",
       "statements": [
         {
@@ -112,7 +156,9 @@ OUTPUT FORMAT (JSON):
 
 REGELN:
 - Erstelle 8-12 Aktivitäten in didaktischer Reihenfolge
-- Beginne mit passiven Elementen (Dialogcards, Accordion) zur Wissensvermittlung
+- Beginne mit ImageHotspots als Themenübersicht (NUR wenn {{IMAGE_URL}} vorhanden)
+- Dann passive Elemente (Dialogcards, Accordion) zur Wissensvermittlung
+- InteractiveVideo in der Mitte platzieren (NUR wenn {{VIDEO_URL}} vorhanden)
 - Dann aktive Elemente (MultiChoice, Blanks, TrueFalse, DragAndDrop) zur Überprüfung
 - Ende mit Summary als Abschluss
 - Nummeriere alle Titel (1., 2., 3., ...)
@@ -120,7 +166,10 @@ REGELN:
 - Keine Emojis
 - Bei blanks: Markiere Lücken mit *Antwort*
 - Bei draganddrop: category ist der Index (0, 1, 2...)
+- Bei interactivevideo: time in Sekunden, verteile 3-5 Interaktionen über das Video
+- Bei imagehotspots: x/y sind Prozentwerte (0-100), verteile 3-5 Hotspots sinnvoll
 - Verwende mindestens 5 verschiedene Content-Typen
+- WICHTIG: Ersetze {{VIDEO_URL}} und {{IMAGE_URL}} durch die tatsächlichen URLs unten!
 
 VIDEO-TRANSKRIPT:
 """
@@ -136,7 +185,50 @@ def call_openai_learning_path(transcript: str, title: str = "Lernmodul", video_u
     if len(transcript) > 18000:
         transcript = transcript[:18000] + "... [gekürzt]"
 
-    prompt = LEARNING_PATH_PROMPT + transcript
+    # Build prompt with URL placeholders replaced
+    prompt = LEARNING_PATH_PROMPT
+
+    # Extract video ID and generate thumbnail URL
+    image_url = ""
+    if video_url:
+        # Import here to avoid circular dependency issues
+        import re
+        video_id_match = re.search(
+            r'(?:youtube\.com/watch\?v=|youtu\.be/|youtube\.com/embed/)([a-zA-Z0-9_-]{11})',
+            video_url
+        )
+        if video_id_match:
+            video_id = video_id_match.group(1)
+            image_url = f"https://img.youtube.com/vi/{video_id}/maxresdefault.jpg"
+
+    # Replace placeholders or remove related examples if URLs not available
+    if video_url:
+        prompt = prompt.replace("{{VIDEO_URL}}", video_url)
+    else:
+        # Remove interactivevideo example if no video URL
+        prompt = prompt.replace(
+            '8. interactivevideo - YouTube-Video mit eingebetteten Quizfragen (NUR wenn video_url vorhanden!)',
+            '8. interactivevideo - (NICHT VERWENDEN - keine video_url vorhanden)'
+        )
+
+    if image_url:
+        prompt = prompt.replace("{{IMAGE_URL}}", image_url)
+    else:
+        # Remove imagehotspots example if no image URL
+        prompt = prompt.replace(
+            '9. imagehotspots - Interaktives Bild mit klickbaren Hotspots (NUR wenn image_url vorhanden!)',
+            '9. imagehotspots - (NICHT VERWENDEN - keine image_url vorhanden)'
+        )
+
+    prompt = prompt + transcript
+
+    # Add URL context at the end
+    if video_url or image_url:
+        prompt += f"\n\nVERFÜGBARE URLs:\n"
+        if video_url:
+            prompt += f"- VIDEO_URL: {video_url}\n"
+        if image_url:
+            prompt += f"- IMAGE_URL: {image_url}\n"
 
     response = httpx.post(
         "https://api.openai.com/v1/chat/completions",
@@ -150,11 +242,11 @@ def call_openai_learning_path(transcript: str, title: str = "Lernmodul", video_u
                 {"role": "system", "content": "Du antwortest ausschliesslich mit validem JSON."},
                 {"role": "user", "content": prompt}
             ],
-            "max_tokens": 4000,
+            "max_tokens": 5000,  # Increased for more content types
             "temperature": 0.7,
             "response_format": {"type": "json_object"}
         },
-        timeout=90.0
+        timeout=120.0  # Increased timeout for longer responses
     )
     response.raise_for_status()
 
@@ -237,7 +329,13 @@ def build_multichoice_h5p(data: Dict[str, Any], output_path: str) -> str:
 
 
 def build_truefalse_h5p(data: Dict[str, Any], output_path: str) -> str:
-    """Build H5P.TrueFalse package"""
+    """Build H5P.TrueFalse package
+
+    WICHTIG: H5P.TrueFalse erwartet:
+    - "question": HTML-String mit der Aussage
+    - "correct": "true" oder "false" als STRING (nicht boolean!)
+    - Vollständige l10n mit a11y-Feldern
+    """
     content_json = {
         "question": f"<p>{data.get('statement', 'Aussage')}</p>",
         "correct": "true" if data.get("correct", True) else "false",
@@ -253,13 +351,29 @@ def build_truefalse_h5p(data: Dict[str, Any], output_path: str) -> str:
             "trueText": "Wahr",
             "falseText": "Falsch",
             "checkAnswer": "Überprüfen",
+            "submitAnswer": "Absenden",
             "showSolutionButton": "Lösung anzeigen",
             "tryAgain": "Wiederholen",
+            "score": "Du hast @score von @total Punkten.",
             "wrongAnswerMessage": data.get("feedback_wrong", "Das ist leider falsch."),
-            "correctAnswerMessage": data.get("feedback_correct", "Das ist richtig!")
+            "correctAnswerMessage": data.get("feedback_correct", "Das ist richtig!"),
+            "scoreBarLabel": "Du hast :num von :total Punkten erreicht.",
+            "a11yCheck": "Überprüfe die Antworten. Die Antworten werden als richtig, falsch oder unbeantwortet markiert.",
+            "a11yShowSolution": "Zeige die Lösung. Die Aufgabe wird mit der korrekten Lösung markiert.",
+            "a11yRetry": "Wiederhole die Aufgabe. Setze alle Antworten zurück und beginne von vorne."
         },
-        "confirmCheck": {"header": "Beenden?", "body": "Bist du sicher?", "cancelLabel": "Abbrechen", "confirmLabel": "Beenden"},
-        "confirmRetry": {"header": "Wiederholen?", "body": "Bist du sicher?", "cancelLabel": "Abbrechen", "confirmLabel": "Bestätigen"}
+        "confirmCheck": {
+            "header": "Beenden?",
+            "body": "Bist du sicher?",
+            "cancelLabel": "Abbrechen",
+            "confirmLabel": "Beenden"
+        },
+        "confirmRetry": {
+            "header": "Wiederholen?",
+            "body": "Bist du sicher?",
+            "cancelLabel": "Abbrechen",
+            "confirmLabel": "Bestätigen"
+        }
     }
 
     h5p_json = {
@@ -273,6 +387,7 @@ def build_truefalse_h5p(data: Dict[str, Any], output_path: str) -> str:
             {"machineName": "H5P.JoubelUI", "majorVersion": 1, "minorVersion": 3},
             {"machineName": "H5P.Question", "majorVersion": 1, "minorVersion": 5},
             {"machineName": "H5P.Transition", "majorVersion": 1, "minorVersion": 0},
+            {"machineName": "H5P.FontIcons", "majorVersion": 1, "minorVersion": 0},
             {"machineName": "FontAwesome", "majorVersion": 4, "minorVersion": 5}
         ]
     }
@@ -281,12 +396,27 @@ def build_truefalse_h5p(data: Dict[str, Any], output_path: str) -> str:
 
 
 def build_blanks_h5p(data: Dict[str, Any], output_path: str) -> str:
-    """Build H5P.Blanks package (Fill in the blanks)"""
-    # Convert *word* format to H5P format
-    text = data.get("text", "Das *Wort* fehlt.")
+    """Build H5P.Blanks package (Fill in the blanks)
+
+    WICHTIG: H5P.Blanks erwartet:
+    - "questions": Liste von HTML-Strings mit *Lücken* (NICHT "text"!)
+    - "text": Optionale Aufgabenbeschreibung
+    """
+    # Get the text with blanks - can be single string or list
+    text_input = data.get("text", "Das *Wort* fehlt.")
+
+    # Convert to questions list (H5P.Blanks requires "questions" as a list!)
+    if isinstance(text_input, list):
+        questions = [f"<p>{t}</p>\n" if not t.startswith("<p>") else t for t in text_input]
+    else:
+        # Single text becomes single-item list
+        questions = [f"<p>{text_input}</p>\n"]
 
     content_json = {
-        "text": f"<p>{text}</p>",
+        # "questions" ist das Hauptfeld für den Lückentext (NICHT "text"!)
+        "questions": questions,
+        # "text" ist nur die optionale Aufgabenbeschreibung
+        "text": f"<p>{data.get('description', 'Fülle die Lücken aus.')}</p>\n",
         "overallFeedback": [{"from": 0, "to": 100, "feedback": "Gut gemacht!"}],
         "showSolutions": "Lösung anzeigen",
         "tryAgain": "Wiederholen",
@@ -313,10 +443,23 @@ def build_blanks_h5p(data: Dict[str, Any], output_path: str) -> str:
             "confirmRetryDialog": False,
             "acceptSpellingErrors": False
         },
+        "confirmCheck": {
+            "header": "Beenden?",
+            "body": "Bist du sicher?",
+            "cancelLabel": "Abbrechen",
+            "confirmLabel": "Beenden"
+        },
+        "confirmRetry": {
+            "header": "Wiederholen?",
+            "body": "Bist du sicher?",
+            "cancelLabel": "Abbrechen",
+            "confirmLabel": "Bestätigen"
+        },
         "scoreBarLabel": "Du hast :num von :total Punkten erreicht.",
         "a11yCheck": "Überprüfen",
         "a11yShowSolution": "Lösung anzeigen",
-        "a11yRetry": "Wiederholen"
+        "a11yRetry": "Wiederholen",
+        "a11yCheckingModeHeader": "Überprüfungsmodus"
     }
 
     h5p_json = {
@@ -330,6 +473,8 @@ def build_blanks_h5p(data: Dict[str, Any], output_path: str) -> str:
             {"machineName": "H5P.JoubelUI", "majorVersion": 1, "minorVersion": 3},
             {"machineName": "H5P.Question", "majorVersion": 1, "minorVersion": 5},
             {"machineName": "H5P.Transition", "majorVersion": 1, "minorVersion": 0},
+            {"machineName": "H5P.TextUtilities", "majorVersion": 1, "minorVersion": 3},
+            {"machineName": "H5P.FontIcons", "majorVersion": 1, "minorVersion": 0},
             {"machineName": "FontAwesome", "majorVersion": 4, "minorVersion": 5}
         ]
     }
@@ -439,15 +584,31 @@ def build_accordion_h5p(data: Dict[str, Any], output_path: str) -> str:
 
 
 def build_summary_h5p(data: Dict[str, Any], output_path: str) -> str:
-    """Build H5P.Summary package"""
+    """Build H5P.Summary package
+
+    WICHTIG: H5P.Summary erwartet:
+    - summaries[].summary: Liste von HTML-Strings (erster ist korrekt!)
+    - summaries[].tip: Optionaler Tipp-String
+    - summaries[].subContentId: UUID für jeden Summary-Block
+    """
+    import uuid
+
     statements = data.get("statements", [])
     summary_items = []
-    for stmt in statements:
+    for i, stmt in enumerate(statements):
         # Each statement has one correct and multiple wrong options
-        options = [stmt.get("correct", "Korrekte Aussage")]
-        options.extend(stmt.get("wrong", ["Falsche Alternative"]))
+        # First option MUST be the correct one!
+        correct = stmt.get("correct", "Korrekte Aussage")
+        wrong_list = stmt.get("wrong", ["Falsche Alternative"])
+
+        # Format as HTML paragraphs
+        options = [f"<p>{correct}</p>\n"]
+        options.extend([f"<p>{w}</p>\n" for w in wrong_list])
+
         summary_items.append({
-            "summary": options
+            "summary": options,
+            "tip": stmt.get("tip", ""),
+            "subContentId": str(uuid.uuid4())
         })
 
     content_json = {
@@ -478,7 +639,9 @@ def build_summary_h5p(data: Dict[str, Any], output_path: str) -> str:
         "preloadedDependencies": [
             {"machineName": "H5P.Summary", "majorVersion": 1, "minorVersion": 10},
             {"machineName": "H5P.JoubelUI", "majorVersion": 1, "minorVersion": 3},
+            {"machineName": "H5P.Question", "majorVersion": 1, "minorVersion": 5},
             {"machineName": "H5P.Transition", "majorVersion": 1, "minorVersion": 0},
+            {"machineName": "H5P.FontIcons", "majorVersion": 1, "minorVersion": 0},
             {"machineName": "FontAwesome", "majorVersion": 4, "minorVersion": 5}
         ]
     }
@@ -489,25 +652,27 @@ def build_summary_h5p(data: Dict[str, Any], output_path: str) -> str:
 def build_draganddrop_h5p(data: Dict[str, Any], output_path: str) -> str:
     """Build H5P.DragText package (simpler drag-and-drop for text)
 
-    Note: Using DragText instead of DragAndDrop because it's simpler and
-    doesn't require image coordinates.
+    WICHTIG: H5P.DragText erwartet:
+    - "taskDescription": Aufgabenbeschreibung (optional)
+    - "textField": Der Text mit *Lücken* die gefüllt werden sollen
+    - Vollständige a11y-Felder für Accessibility
     """
     # Convert to DragText format: "Drag the *word* to complete the sentence"
     categories = data.get("categories", ["Kategorie A", "Kategorie B"])
     items = data.get("items", [])
 
     # Build drag text with categories
-    text_parts = [f"<p><strong>{data.get('task', 'Ordne die Begriffe zu:')}</strong></p>"]
-
+    text_lines = []
     for i, cat in enumerate(categories):
         cat_items = [item["text"] for item in items if item.get("category", 0) == i]
         if cat_items:
             # Format: Category: *item1* *item2*
             items_str = " ".join([f"*{item}*" for item in cat_items])
-            text_parts.append(f"<p>{cat}: {items_str}</p>")
+            text_lines.append(f"{cat}: {items_str}")
 
     content_json = {
-        "textField": "\n".join(text_parts),
+        "taskDescription": f"<p>{data.get('task', 'Ordne die Begriffe den richtigen Kategorien zu.')}</p>",
+        "textField": "\n".join(text_lines),
         "distractors": "",
         "overallFeedback": [{"from": 0, "to": 100, "feedback": "Gut gemacht!"}],
         "checkAnswer": "Überprüfen",
@@ -526,13 +691,17 @@ def build_draganddrop_h5p(data: Dict[str, Any], output_path: str) -> str:
         "grabbed": "Ziehbar aufgenommen.",
         "cancelledDragging": "Ziehen abgebrochen.",
         "correctAnswer": "Korrekte Antwort:",
+        "feedbackHeader": "Feedback",
         "scoreBarLabel": "Du hast @score von @total Punkten erreicht.",
         "behaviour": {
             "enableRetry": True,
             "enableSolutionsButton": True,
             "enableCheckButton": True,
             "instantFeedback": False
-        }
+        },
+        "a11yCheck": "Überprüfe die Antworten. Die Antworten werden als richtig, falsch oder unbeantwortet markiert.",
+        "a11yShowSolution": "Zeige die Lösung. Die Aufgabe wird mit der korrekten Lösung markiert.",
+        "a11yRetry": "Wiederhole die Aufgabe. Setze alle Antworten zurück und beginne von vorne."
     }
 
     h5p_json = {
@@ -546,6 +715,7 @@ def build_draganddrop_h5p(data: Dict[str, Any], output_path: str) -> str:
             {"machineName": "H5P.JoubelUI", "majorVersion": 1, "minorVersion": 3},
             {"machineName": "H5P.Question", "majorVersion": 1, "minorVersion": 5},
             {"machineName": "H5P.Transition", "majorVersion": 1, "minorVersion": 0},
+            {"machineName": "jQuery.ui", "majorVersion": 1, "minorVersion": 10},
             {"machineName": "FontAwesome", "majorVersion": 4, "minorVersion": 5}
         ]
     }
@@ -553,17 +723,383 @@ def build_draganddrop_h5p(data: Dict[str, Any], output_path: str) -> str:
     return _create_h5p_package(content_json, h5p_json, output_path)
 
 
-# Placeholder builders for future implementation
-def build_interactive_video_h5p(data: Dict[str, Any], output_path: str) -> str:
-    """Build H5P.InteractiveVideo package - TODO: Full implementation"""
-    # For now, skip if no video_url
-    raise NotImplementedError("InteractiveVideo requires YouTube URL - not yet implemented")
+# ============================================================================
+# HELPER FUNCTIONS
+# ============================================================================
 
+def extract_video_id(url: str) -> Optional[str]:
+    """Extract YouTube video ID from URL"""
+    import re
+    patterns = [
+        r'(?:youtube\.com/watch\?v=|youtu\.be/|youtube\.com/embed/)([a-zA-Z0-9_-]{11})',
+        r'youtube\.com/v/([a-zA-Z0-9_-]{11})',
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, url)
+        if match:
+            return match.group(1)
+    return None
+
+
+def extract_timestamps_from_subtitles(subtitles: str) -> list:
+    """
+    Extract timestamps from YouTube subtitles.
+    Supports formats:
+    - "00:01:30 Text..." (YouTube auto-generated)
+    - "[00:01:30] Text..." (bracketed)
+    - "1:30 Text..." (short format)
+
+    Returns list of (seconds, text) tuples
+    """
+    import re
+    timestamps = []
+
+    # Pattern for HH:MM:SS or MM:SS or M:SS
+    patterns = [
+        r'(?:\[)?(\d{1,2}):(\d{2}):(\d{2})(?:\])?\s*(.+?)(?=(?:\[)?\d{1,2}:\d{2}|\Z)',  # HH:MM:SS
+        r'(?:\[)?(\d{1,2}):(\d{2})(?:\])?\s*(.+?)(?=(?:\[)?\d{1,2}:\d{2}|\Z)',  # MM:SS
+    ]
+
+    # Try HH:MM:SS format first
+    matches = re.findall(r'(?:\[)?(\d{1,2}):(\d{2}):(\d{2})(?:\])?\s*([^\[\n]+)', subtitles)
+    if matches:
+        for h, m, s, text in matches:
+            seconds = int(h) * 3600 + int(m) * 60 + int(s)
+            timestamps.append((seconds, text.strip()))
+    else:
+        # Try MM:SS format
+        matches = re.findall(r'(?:\[)?(\d{1,2}):(\d{2})(?:\])?\s*([^\[\n]+)', subtitles)
+        for m, s, text in matches:
+            seconds = int(m) * 60 + int(s)
+            timestamps.append((seconds, text.strip()))
+
+    return timestamps
+
+
+def get_youtube_thumbnail(video_id: str) -> str:
+    """Get YouTube thumbnail URL from video ID"""
+    return f"https://img.youtube.com/vi/{video_id}/maxresdefault.jpg"
+
+
+# ============================================================================
+# INTERACTIVE VIDEO BUILDER
+# ============================================================================
+
+def build_interactive_video_h5p(data: Dict[str, Any], output_path: str) -> str:
+    """
+    Build H5P.InteractiveVideo package
+
+    Expected data format:
+    {
+        "type": "interactivevideo",
+        "title": "Video mit Quizfragen",
+        "video_url": "https://www.youtube.com/watch?v=...",
+        "interactions": [
+            {
+                "time": 30,  # seconds
+                "type": "multichoice",
+                "question": "Was wurde erklärt?",
+                "answers": [
+                    {"text": "Antwort A", "correct": true},
+                    {"text": "Antwort B", "correct": false}
+                ]
+            },
+            {
+                "time": 120,
+                "type": "truefalse",
+                "statement": "Diese Aussage ist korrekt.",
+                "correct": true
+            },
+            {
+                "time": 180,
+                "type": "text",
+                "label": "Wichtiger Hinweis",
+                "text": "Hier passiert etwas Wichtiges..."
+            }
+        ]
+    }
+    """
+    video_url = data.get("video_url", "")
+    if not video_url:
+        raise ValueError("InteractiveVideo requires video_url")
+
+    video_id = extract_video_id(video_url)
+    if not video_id:
+        raise ValueError(f"Could not extract video ID from: {video_url}")
+
+    interactions = data.get("interactions", [])
+    h5p_interactions = []
+
+    for i, interaction in enumerate(interactions):
+        time_sec = interaction.get("time", 0)
+        int_type = interaction.get("type", "text").lower()
+
+        # Base interaction structure
+        h5p_int = {
+            "x": 45 + (i % 3) * 5,  # Slightly vary position
+            "y": 40 + (i % 2) * 10,
+            "width": 10,
+            "height": 10,
+            "duration": {
+                "from": time_sec,
+                "to": time_sec + 10  # Show for 10 seconds
+            },
+            "pause": True,  # Pause video when interaction appears
+            "displayType": "poster",  # Show as overlay
+            "label": f"<p>{interaction.get('label', f'Frage {i+1}')}</p>"
+        }
+
+        if int_type == "multichoice":
+            answers = []
+            for ans in interaction.get("answers", []):
+                answers.append({
+                    "text": f"<div>{ans.get('text', '')}</div>",
+                    "correct": ans.get("correct", False),
+                    "tipsAndFeedback": {
+                        "chosenFeedback": f"<div>{ans.get('feedback', '')}</div>",
+                        "notChosenFeedback": ""
+                    }
+                })
+
+            h5p_int["action"] = {
+                "library": "H5P.MultiChoice 1.16",
+                "params": {
+                    "question": f"<p>{interaction.get('question', 'Frage?')}</p>",
+                    "answers": answers,
+                    "behaviour": {
+                        "enableRetry": True,
+                        "enableSolutionsButton": True,
+                        "singlePoint": True,
+                        "randomAnswers": True
+                    },
+                    "UI": {
+                        "checkAnswerButton": "Überprüfen",
+                        "showSolutionButton": "Lösung anzeigen",
+                        "tryAgainButton": "Wiederholen"
+                    }
+                },
+                "subContentId": f"mc-{i}-{time_sec}"
+            }
+
+        elif int_type == "truefalse":
+            h5p_int["action"] = {
+                "library": "H5P.TrueFalse 1.8",
+                "params": {
+                    "question": f"<p>{interaction.get('statement', 'Aussage')}</p>",
+                    "correct": "true" if interaction.get("correct", True) else "false",
+                    "behaviour": {
+                        "enableRetry": True,
+                        "enableSolutionsButton": True
+                    },
+                    "l10n": {
+                        "trueText": "Wahr",
+                        "falseText": "Falsch",
+                        "checkAnswer": "Überprüfen",
+                        "showSolutionButton": "Lösung anzeigen",
+                        "tryAgain": "Wiederholen"
+                    }
+                },
+                "subContentId": f"tf-{i}-{time_sec}"
+            }
+
+        else:  # text/label
+            h5p_int["action"] = {
+                "library": "H5P.Text 1.1",
+                "params": {
+                    "text": f"<p><strong>{interaction.get('label', 'Info')}</strong></p><p>{interaction.get('text', '')}</p>"
+                },
+                "subContentId": f"txt-{i}-{time_sec}"
+            }
+            h5p_int["pause"] = False  # Don't pause for text
+
+        h5p_interactions.append(h5p_int)
+
+    content_json = {
+        "interactiveVideo": {
+            "video": {
+                "startScreenOptions": {
+                    "title": data.get("title", "Interaktives Video"),
+                    "hideStartTitle": False
+                },
+                "textTracks": {
+                    "videoTrack": []
+                },
+                "files": [
+                    {
+                        "path": f"https://www.youtube.com/watch?v={video_id}",
+                        "mime": "video/YouTube",
+                        "copyright": {"license": "U"}
+                    }
+                ]
+            },
+            "assets": {
+                "interactions": h5p_interactions,
+                "bookmarks": [],
+                "endscreens": []
+            },
+            "summary": {
+                "task": {
+                    "library": "H5P.Summary 1.10",
+                    "params": {
+                        "intro": "Zusammenfassung",
+                        "summaries": [],
+                        "overallFeedback": [{"from": 0, "to": 100, "feedback": "Gut gemacht!"}]
+                    }
+                },
+                "displayAt": 3
+            }
+        },
+        "override": {
+            "autoplay": False,
+            "loop": False,
+            "showBookmarksmenuOnLoad": False,
+            "showRewind10": True,
+            "preventSkipping": False,
+            "deactivateSound": False
+        },
+        "l10n": {
+            "interaction": "Interaktion",
+            "play": "Abspielen",
+            "pause": "Pause",
+            "mute": "Stumm",
+            "unmute": "Ton an",
+            "quality": "Qualität",
+            "captions": "Untertitel",
+            "close": "Schließen",
+            "fullscreen": "Vollbild",
+            "exitFullscreen": "Vollbild beenden",
+            "summary": "Zusammenfassung",
+            "bookmarks": "Lesezeichen",
+            "defaultAdaptivitySeekLabel": "Weiter",
+            "continueWithVideo": "Video fortsetzen",
+            "playbackRate": "Geschwindigkeit",
+            "rewind10": "10 Sekunden zurück",
+            "navDisabled": "Navigation deaktiviert",
+            "sndDisabled": "Ton deaktiviert",
+            "requiresCompletionWarning": "Du musst alle Interaktionen abschließen.",
+            "back": "Zurück",
+            "hours": "Stunden",
+            "minutes": "Minuten",
+            "seconds": "Sekunden",
+            "currentTime": "Aktuelle Zeit:",
+            "totalTime": "Gesamtzeit:",
+            "singleInteractionAnnouncement": "Interaktion erschienen",
+            "multipleInteractionsAnnouncement": "@count Interaktionen erschienen",
+            "videoPausedAnnouncement": "Video pausiert",
+            "content": "Inhalt"
+        }
+    }
+
+    h5p_json = {
+        "title": data.get("title", "Interaktives Video"),
+        "language": "de",
+        "mainLibrary": "H5P.InteractiveVideo",
+        "embedTypes": ["iframe"],
+        "license": "U",
+        "preloadedDependencies": [
+            {"machineName": "H5P.InteractiveVideo", "majorVersion": 1, "minorVersion": 26},
+            {"machineName": "H5P.MultiChoice", "majorVersion": 1, "minorVersion": 16},
+            {"machineName": "H5P.TrueFalse", "majorVersion": 1, "minorVersion": 8},
+            {"machineName": "H5P.Text", "majorVersion": 1, "minorVersion": 1},
+            {"machineName": "H5P.Summary", "majorVersion": 1, "minorVersion": 10},
+            {"machineName": "H5P.JoubelUI", "majorVersion": 1, "minorVersion": 3},
+            {"machineName": "H5P.Question", "majorVersion": 1, "minorVersion": 5},
+            {"machineName": "H5P.Video", "majorVersion": 1, "minorVersion": 6},
+            {"machineName": "H5P.Transition", "majorVersion": 1, "minorVersion": 0},
+            {"machineName": "FontAwesome", "majorVersion": 4, "minorVersion": 5}
+        ]
+    }
+
+    return _create_h5p_package(content_json, h5p_json, output_path)
+
+
+# ============================================================================
+# IMAGE HOTSPOTS BUILDER
+# ============================================================================
 
 def build_image_hotspots_h5p(data: Dict[str, Any], output_path: str) -> str:
-    """Build H5P.ImageHotspots package - TODO: Full implementation"""
-    # For now, skip if no image_url
-    raise NotImplementedError("ImageHotspots requires image URL - not yet implemented")
+    """
+    Build H5P.ImageHotspots package
+
+    Expected data format:
+    {
+        "type": "imagehotspots",
+        "title": "Themen-Übersicht",
+        "image_url": "https://img.youtube.com/vi/{VIDEO_ID}/maxresdefault.jpg",
+        "hotspots": [
+            {
+                "x": 25,  # percentage from left
+                "y": 40,  # percentage from top
+                "header": "Thema A",
+                "content": "Erklärung zu Thema A..."
+            },
+            {
+                "x": 70,
+                "y": 60,
+                "header": "Thema B",
+                "content": "Erklärung zu Thema B..."
+            }
+        ]
+    }
+    """
+    image_url = data.get("image_url", "")
+    if not image_url:
+        raise ValueError("ImageHotspots requires image_url")
+
+    hotspots = data.get("hotspots", [])
+    h5p_hotspots = []
+
+    for i, hs in enumerate(hotspots):
+        h5p_hotspots.append({
+            "position": {
+                "x": hs.get("x", 50),
+                "y": hs.get("y", 50)
+            },
+            "header": hs.get("header", f"Punkt {i+1}"),
+            "content": [
+                {
+                    "library": "H5P.Text 1.1",
+                    "params": {
+                        "text": f"<p>{hs.get('content', '')}</p>"
+                    },
+                    "subContentId": f"hotspot-text-{i}"
+                }
+            ],
+            "alwaysFullscreen": False,
+            "iconType": "icon",
+            "icon": "plus"
+        })
+
+    content_json = {
+        "image": {
+            "path": image_url,
+            "mime": "image/jpeg",
+            "copyright": {"license": "U"},
+            "width": 1280,
+            "height": 720
+        },
+        "hotspots": h5p_hotspots,
+        "hotspotNumberLabel": "Hotspot #num",
+        "closeButtonLabel": "Schließen",
+        "iconType": "icon",
+        "icon": "plus",
+        "color": "#981d99"
+    }
+
+    h5p_json = {
+        "title": data.get("title", "Interaktives Bild"),
+        "language": "de",
+        "mainLibrary": "H5P.ImageHotspots",
+        "embedTypes": ["div"],
+        "license": "U",
+        "preloadedDependencies": [
+            {"machineName": "H5P.ImageHotspots", "majorVersion": 1, "minorVersion": 10},
+            {"machineName": "H5P.Text", "majorVersion": 1, "minorVersion": 1},
+            {"machineName": "FontAwesome", "majorVersion": 4, "minorVersion": 5}
+        ]
+    }
+
+    return _create_h5p_package(content_json, h5p_json, output_path)
 
 
 # ============================================================================
@@ -578,7 +1114,6 @@ BUILDERS = {
     "accordion": build_accordion_h5p,
     "summary": build_summary_h5p,
     "draganddrop": build_draganddrop_h5p,
-    # Future:
     "interactivevideo": build_interactive_video_h5p,
     "imagehotspots": build_image_hotspots_h5p,
 }

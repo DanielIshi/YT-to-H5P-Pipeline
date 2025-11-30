@@ -40,6 +40,7 @@ htmlcov/
 *.swp
 *.swo
 *~
+*.code-workspace
 
 # Environment
 .env
@@ -53,21 +54,11 @@ logs/
 .DS_Store
 Thumbs.db
 
-# Project Specific
-C:UsersDaniel.sshid_claude_nopass
-C:UsersDaniel.sshid_claude_nopass.pub
-
-# Temporary
+# Temporary & Work
 *.tmp
 *.bak
 *.backup-*
-03 Adobe Stock/**
-assets/**
 .work/
-# Test Data (Root only)
-/scene_495_test_data.json
-/test_icons.json
-/test_*.json
-tests/fading_tests/**
-tests/output_overlay/**
 
+# Test Output
+test/output/
