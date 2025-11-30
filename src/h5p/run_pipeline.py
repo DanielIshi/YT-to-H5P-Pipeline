@@ -206,11 +206,18 @@ async def run_full_pipeline(
 
     # 6. Build H5P packages and import to Moodle
     config = get_milestone_config(milestone)
-    auto_check = config.get("rules", {}).get("auto_advance_on_correct", False)
+    auto_check = config.get("rules", {}).get("auto_advance_on_correct", True)
     if auto_check:
-        log_info("Auto-check enabled (Milestone 1.1+ UX feature)")
+        log_info("Auto-check enabled (default)")
 
     results = []
+
+    # Map generated content by activity order for quick lookup
+    content_by_order = {}
+    for activity, content in zip(activities, h5p_contents):
+        order = activity.get("order")
+        if order is not None:
+            content_by_order[order] = content
 
     # Check if LLM returned columns structure (new format)
     columns = learning_path.get("columns", [])
@@ -229,20 +236,22 @@ async def run_full_pipeline(
                 order = activity.get("order", 0)
                 content_type = activity.get("content_type")
 
-                # Find matching content from h5p_contents (by order)
-                content = None
-                for i, act in enumerate(activities):
-                    if act.get("order") == order:
-                        content = h5p_contents[i] if i < len(h5p_contents) else None
-                        break
+                content = content_by_order.get(order)
 
-                if content and "_error" not in content:
-                    prepared = prepare_activity_for_column(
-                        content_type,
-                        content,
-                        auto_check=auto_check
-                    )
-                    column_activities.append(prepared)
+                if not content:
+                    log_info(f"No generated content for order {order} ({content_type})")
+                    continue
+
+                if "_error" in content:
+                    log_info(f"Skipping activity with generation error (order={order}, type={content_type})")
+                    continue
+
+                prepared = prepare_activity_for_column(
+                    content_type,
+                    content,
+                    auto_check=auto_check
+                )
+                column_activities.append(prepared)
 
             if not column_activities:
                 log_info(f"Skipping empty column: {col_title}")

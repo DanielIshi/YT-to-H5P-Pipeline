@@ -301,6 +301,34 @@ async def plan_learning_path(
     print(f"Planning learning path for milestone '{milestone}'...")
     result = await call_openai(prompt, script_json)
 
+    # Ensure legacy "learning_path" is present (flattened) even when LLM only returns columns
+    if not result.get("learning_path") and result.get("columns"):
+        flattened: list[ActivityPlan] = []
+        next_order = 1
+
+        for column in result.get("columns", []):
+            for activity in column.get("activities", []):
+                # Assign missing order sequentially to preserve didactic flow
+                if "order" not in activity or activity.get("order") is None:
+                    activity["order"] = next_order
+                flattened.append(activity)
+                next_order = max(next_order, activity["order"] + 1)
+
+        # Sort by order to keep Stage 3 deterministic
+        flattened.sort(key=lambda a: a.get("order", 0))
+        result["learning_path"] = flattened
+
+    # Compute simple phase distribution if LLM omitted it
+    if not result.get("phase_distribution"):
+        distribution = {"passive": 0, "active": 0, "reflect": 0}
+        for activity in result.get("learning_path", []):
+            ct = activity.get("content_type")
+            for phase, cfg in config["phases"].items():
+                if ct in cfg.get("types", []):
+                    distribution[phase] += 1
+                    break
+        result["phase_distribution"] = distribution
+
     # Validierung
     is_valid, errors = validate_learning_path(result, config)
     if not is_valid:

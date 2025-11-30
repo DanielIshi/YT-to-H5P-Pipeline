@@ -22,6 +22,8 @@ from playwright.async_api import Page
 from .client import NotebookLMClient
 from .mindmap_extractor import MindmapData, MindmapNode
 from .config import Selectors
+from .browser_manager import BrowserManager
+from .recorder import Recorder
 
 logger = logging.getLogger(__name__)
 
@@ -97,7 +99,7 @@ class MindmapAnimator:
         self.client = client
         self.state = AnimationState.IDLE
         self._expanded_nodes: List[str] = []  # Currently expanded node IDs
-        self._recording_context = None
+        self.page: Optional[Page] = None
 
     async def animate(
         self,
@@ -121,18 +123,25 @@ class MindmapAnimator:
         logger.info(f"Starting animation with {len(timeline.steps)} steps")
         self.state = AnimationState.PLAYING
 
-        page = self.client.page
+        self.page = await BrowserManager.new_page()
         video_path = None
+        recorder = None
 
         try:
             # Start recording if requested
             if record:
                 video_path = output_path or self._default_video_path(mindmap_data)
-                await self._start_recording(video_path)
+                recorder = Recorder(output_dir=str(video_path.parent))
+                recorder.start()
+
+            # Go to the mindmap url - client should have it
+            await self.page.goto(self.client.get_current_url())
 
             # Collapse all nodes first
             await self._collapse_all_nodes()
             await asyncio.sleep(1)
+            if recorder:
+                recorder.capture_frame("Initial state: all collapsed")
 
             # Execute each animation step
             current_time = 0.0
@@ -145,6 +154,9 @@ class MindmapAnimator:
                 # Execute the action
                 await self._execute_step(step)
                 current_time = step.timestamp + step.duration
+                
+                if recorder:
+                    recorder.capture_frame(f"{step.action} {step.node_text}")
 
                 # Brief pause for visual effect
                 await asyncio.sleep(step.duration)
@@ -152,6 +164,9 @@ class MindmapAnimator:
             # Final view: expand all
             await self._expand_all_nodes()
             await asyncio.sleep(2)
+            if recorder:
+                recorder.capture_frame("Final state: all expanded")
+
 
             self.state = AnimationState.FINISHED
 
@@ -162,8 +177,12 @@ class MindmapAnimator:
 
         finally:
             # Stop recording
-            if record and self._recording_context:
-                await self._stop_recording()
+            if recorder:
+                recorder.stop()
+                recorder.create_video(video_filename=video_path.name)
+            
+            await BrowserManager.close_browser()
+
 
         logger.info(f"Animation complete. Video: {video_path}")
         return video_path
@@ -183,7 +202,8 @@ class MindmapAnimator:
 
     async def _expand_node(self, node_id: str, node_text: str) -> None:
         """Expand a specific node by clicking it"""
-        page = self.client.page
+        if not self.page:
+            return
 
         try:
             # Find node by text content
@@ -191,7 +211,7 @@ class MindmapAnimator:
             node_selector = f'g.node:has(text.node-name:text("{node_text[:30]}"))'
 
             # Try to click the expand circle/button
-            expand_btn = await page.query_selector(
+            expand_btn = await self.page.query_selector(
                 f'{node_selector} circle, {node_selector} text.expand-symbol'
             )
 
@@ -202,7 +222,7 @@ class MindmapAnimator:
                 await asyncio.sleep(0.5)  # Animation time
             else:
                 # Fallback: click the node rect
-                node_rect = await page.query_selector(f'{node_selector} rect')
+                node_rect = await self.page.query_selector(f'{node_selector} rect')
                 if node_rect:
                     await node_rect.click()
                     self._expanded_nodes.append(node_id)
@@ -212,17 +232,18 @@ class MindmapAnimator:
 
     async def _collapse_node(self, node_id: str, node_text: str) -> None:
         """Collapse a specific node"""
-        page = self.client.page
+        if not self.page:
+            return
 
         try:
             # Find already-expanded node (expand-symbol shows "<")
             node_selector = f'g.node:has(text.node-name:text("{node_text[:30]}"))'
-            expand_symbol = await page.query_selector(f'{node_selector} text.expand-symbol')
+            expand_symbol = await self.page.query_selector(f'{node_selector} text.expand-symbol')
 
             if expand_symbol:
                 symbol_text = await expand_symbol.text_content()
                 if symbol_text and "<" in symbol_text:  # Node is expanded
-                    circle = await page.query_selector(f'{node_selector} circle')
+                    circle = await self.page.query_selector(f'{node_selector} circle')
                     if circle:
                         await circle.click()
                         if node_id in self._expanded_nodes:
@@ -241,11 +262,12 @@ class MindmapAnimator:
 
     async def _focus_node(self, node_id: str, node_text: str) -> None:
         """Scroll/pan to center a node in view"""
-        page = self.client.page
+        if not self.page:
+            return
 
         try:
             node_selector = f'g.node:has(text.node-name:text("{node_text[:30]}"))'
-            node = await page.query_selector(node_selector)
+            node = await self.page.query_selector(node_selector)
 
             if node:
                 await node.scroll_into_view_if_needed()
@@ -255,12 +277,13 @@ class MindmapAnimator:
 
     async def _collapse_all_nodes(self) -> None:
         """Collapse all expanded nodes"""
-        page = self.client.page
+        if not self.page:
+            return
         logger.info("Collapsing all nodes...")
 
         try:
             # Click "Collapse all" button if available
-            collapse_btn = await page.query_selector(Selectors.MINDMAP_COLLAPSE_ALL)
+            collapse_btn = await self.page.query_selector(Selectors.MINDMAP_COLLAPSE_ALL)
             if collapse_btn and await collapse_btn.is_visible():
                 await collapse_btn.click()
                 await asyncio.sleep(1)
@@ -270,7 +293,7 @@ class MindmapAnimator:
             # Fallback: click all expanded nodes (those showing "<")
             max_iterations = 20
             for _ in range(max_iterations):
-                expanded_symbols = await page.query_selector_all('text.expand-symbol')
+                expanded_symbols = await self.page.query_selector_all('text.expand-symbol')
 
                 clicked = False
                 for symbol in expanded_symbols:
@@ -296,12 +319,13 @@ class MindmapAnimator:
 
     async def _expand_all_nodes(self) -> None:
         """Expand all nodes for final overview"""
-        page = self.client.page
+        if not self.page:
+            return
         logger.info("Expanding all nodes...")
 
         try:
             # Click "Expand all" button if available
-            expand_btn = await page.query_selector(Selectors.MINDMAP_EXPAND_ALL)
+            expand_btn = await self.page.query_selector(Selectors.MINDMAP_EXPAND_ALL)
             if expand_btn and await expand_btn.is_visible():
                 await expand_btn.click()
                 await asyncio.sleep(2)
@@ -310,7 +334,7 @@ class MindmapAnimator:
             # Fallback: click all collapsed nodes (those showing ">")
             max_iterations = 20
             for _ in range(max_iterations):
-                collapsed_symbols = await page.query_selector_all('text.expand-symbol')
+                collapsed_symbols = await self.page.query_selector_all('text.expand-symbol')
 
                 clicked = False
                 for symbol in collapsed_symbols:
@@ -520,50 +544,6 @@ class MindmapAnimator:
 
         # Jaccard similarity
         return len(intersection) / len(union)
-
-    async def _start_recording(self, output_path: Path) -> None:
-        """Start video recording using Playwright"""
-        logger.info(f"Starting recording to {output_path}")
-
-        # Playwright supports video recording via context
-        # Since we're using an existing context, we'll use a workaround
-        # Option 1: Screenshot-based recording (simpler)
-        # Option 2: Start new context with recording
-
-        # For now, we'll mark that recording should happen
-        # Full implementation requires either:
-        # 1. New browser context with record_video_dir
-        # 2. External screen recording (FFmpeg)
-        # 3. Screenshot sequence + FFmpeg combine
-
-        self._recording_context = {
-            "output_path": output_path,
-            "start_time": datetime.now(),
-            "screenshots": []
-        }
-
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-
-    async def _stop_recording(self) -> Optional[Path]:
-        """Stop recording and save video"""
-        if not self._recording_context:
-            return None
-
-        logger.info("Stopping recording...")
-
-        # For MVP: Just log that we would save here
-        # Full implementation would combine screenshots or use FFmpeg
-
-        output_path = self._recording_context.get("output_path")
-        self._recording_context = None
-
-        # TODO: Implement actual video creation
-        # This requires either:
-        # 1. Playwright context with record_video_dir (new context)
-        # 2. FFmpeg screen capture
-        # 3. Screenshot sequence → video
-
-        return output_path
 
     def _default_video_path(self, mindmap_data: MindmapData) -> Path:
         """Generate default output path for video"""

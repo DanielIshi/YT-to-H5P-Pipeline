@@ -8,6 +8,13 @@ from typing import Dict, Any, List
 import uuid
 
 from .base import create_h5p_package, COMMON_DEPENDENCIES
+from .accordion import build_accordion_params
+from .blanks import build_blanks_params
+from .dialogcards import build_dialogcards_params
+from .dragtext import build_dragtext_params
+from .multichoice import build_multichoice_params
+from .summary import build_summary_params
+from .truefalse import build_truefalse_params
 
 
 # Library-Versionen für Column-Inhalte
@@ -71,6 +78,17 @@ LIBRARY_DEPENDENCIES = {
         COMMON_DEPENDENCIES["transition"],
         COMMON_DEPENDENCIES["fontawesome"],
     ],
+}
+
+# Map content types to their param builders (stage3 output -> H5P params)
+CONTENT_PARAM_BUILDERS = {
+    "accordion": lambda content, auto: build_accordion_params(content),
+    "dialogcards": lambda content, auto: build_dialogcards_params(content),
+    "multichoice": lambda content, auto: build_multichoice_params(content, auto_check=auto),
+    "truefalse": lambda content, auto: build_truefalse_params(content, auto_check=auto),
+    "blanks": lambda content, auto: build_blanks_params(content, auto_check=auto),
+    "dragtext": lambda content, auto: build_dragtext_params(content),
+    "summary": lambda content, auto: build_summary_params(content),
 }
 
 
@@ -169,18 +187,22 @@ def prepare_activity_for_column(content_type: str, content: Dict[str, Any], auto
     Returns:
         Fertiges Activity-Dict für build_column_h5p
     """
-    # Kopiere content um Original nicht zu verändern
-    prepared = dict(content)
+    ct = content_type.lower()
+    builder_fn = CONTENT_PARAM_BUILDERS.get(ct)
+    if not builder_fn:
+        raise ValueError(f"Unsupported content type for Column: {content_type}")
 
-    # AutoCheck für Quiz-Types
-    if auto_check and content_type in ["multichoice", "truefalse", "blanks"]:
-        if "behaviour" not in prepared:
-            prepared["behaviour"] = {}
-        prepared["behaviour"]["autoCheck"] = True
-        prepared["behaviour"]["enableCheckButton"] = False
+    prepared = builder_fn(dict(content), auto_check)
+
+    title = (
+        content.get("title")
+        or content.get("question")
+        or content.get("statement")
+        or ct
+    )
 
     return {
-        "content_type": content_type,
+        "content_type": ct,
         "content": prepared,
-        "title": content.get("title", content_type)
+        "title": title
     }

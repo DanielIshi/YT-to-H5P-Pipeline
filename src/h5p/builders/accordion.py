@@ -8,21 +8,8 @@ from typing import Dict, Any
 from .base import create_h5p_package, COMMON_DEPENDENCIES
 
 
-def build_accordion_h5p(data: Dict[str, Any], output_path: str) -> str:
-    """
-    Build H5P.Accordion package.
-
-    Args:
-        data: Dict with keys:
-            - title: Activity title
-            - panels: List of {title, content} dicts
-                - title: Panel header
-                - content: Panel content (can be HTML)
-        output_path: Path for the .h5p file
-
-    Returns:
-        Path to created H5P package
-    """
+def build_accordion_params(data: Dict[str, Any]) -> Dict[str, Any]:
+    """Transform stage3 output into H5P.Accordion params (content.json payload)."""
     panels = data.get("panels", [])
     accordion_panels = []
 
@@ -38,10 +25,28 @@ def build_accordion_h5p(data: Dict[str, Any], output_path: str) -> str:
             }
         })
 
-    content_json = {
+    return {
         "panels": accordion_panels,
         "hTag": "h2"
     }
+
+
+def build_accordion_h5p(data: Dict[str, Any], output_path: str) -> str:
+    """
+    Build H5P.Accordion package.
+
+    Args:
+        data: Dict with keys:
+            - title: Activity title
+            - panels: List of {title, content} dicts
+                - title: Panel header
+                - content: Panel content (can be HTML)
+        output_path: Path for the .h5p file
+
+    Returns:
+        Path to created H5P package
+    """
+    content_json = build_accordion_params(data)
 
     h5p_json = {
         "title": data.get("title", "Accordion"),

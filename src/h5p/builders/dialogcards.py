@@ -8,21 +8,8 @@ from typing import Dict, Any
 from .base import create_h5p_package, COMMON_DEPENDENCIES
 
 
-def build_dialogcards_h5p(data: Dict[str, Any], output_path: str) -> str:
-    """
-    Build H5P.Dialogcards package (Flashcards).
-
-    Args:
-        data: Dict with keys:
-            - title: Activity title
-            - cards: List of {front, back} dicts
-                - front: Front side text (term/question)
-                - back: Back side text (definition/answer)
-        output_path: Path for the .h5p file
-
-    Returns:
-        Path to created H5P package
-    """
+def build_dialogcards_params(data: Dict[str, Any]) -> Dict[str, Any]:
+    """Transform stage3 output into H5P.Dialogcards params (content.json payload)."""
     cards = data.get("cards", [])
     dialogs = []
 
@@ -32,7 +19,7 @@ def build_dialogcards_h5p(data: Dict[str, Any], output_path: str) -> str:
             "answer": f"<p>{card.get('back', 'Rückseite')}</p>"
         })
 
-    content_json = {
+    return {
         "dialogs": dialogs,
         "behaviour": {
             "enableRetry": True,
@@ -74,6 +61,24 @@ def build_dialogcards_h5p(data: Dict[str, Any], output_path: str) -> str:
             "confirmLabel": "Von vorne"
         }
     }
+
+
+def build_dialogcards_h5p(data: Dict[str, Any], output_path: str) -> str:
+    """
+    Build H5P.Dialogcards package (Flashcards).
+
+    Args:
+        data: Dict with keys:
+            - title: Activity title
+            - cards: List of {front, back} dicts
+                - front: Front side text (term/question)
+                - back: Back side text (definition/answer)
+        output_path: Path for the .h5p file
+
+    Returns:
+        Path to created H5P package
+    """
+    content_json = build_dialogcards_params(data)
 
     h5p_json = {
         "title": data.get("title", "Karteikarten"),
