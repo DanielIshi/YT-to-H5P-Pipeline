@@ -9,7 +9,7 @@ import logging
 import json
 import re
 from pathlib import Path
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, DefaultDict
 from dataclasses import dataclass, field
 from datetime import datetime
 
@@ -217,39 +217,84 @@ class MindmapExtractor:
             logger.warning(f"Expand nodes: {e}")
 
     async def _extract_svg(self) -> Optional[str]:
-        """Extract raw SVG content from DOM - find the largest SVG (the mindmap)"""
+        """Extract raw SVG content from DOM - find the mindmap SVG"""
         page = self.client.page
         logger.info("Extracting SVG content...")
 
         try:
-            # Find all SVG elements and get the largest one (likely the mindmap)
-            svgs = await page.query_selector_all('svg')
+            # NotebookLM mindmap SVG characteristics:
+            # - Has width="100%" height="100%"
+            # - Contains <g class="node"> elements
+            # - Contains <path class="link"> elements
+            # - Does NOT have class="gb_F" (Google UI icon)
+            # - Does NOT have focusable="false" (toolbar icons)
+
+            # Strategy 1: Find SVG with mindmap-specific content
+            all_svgs = await page.query_selector_all('svg')
+            mindmap_svg = None
+            mindmap_size = 0
+
+            for svg in all_svgs:
+                try:
+                    # Get SVG HTML
+                    html = await svg.evaluate("el => el.outerHTML")
+
+                    # Skip Google UI icons
+                    if 'class="gb_F"' in html or 'focusable="false"' in html:
+                        continue
+
+                    # Check for mindmap-specific markers
+                    has_nodes = 'class="node"' in html
+                    has_links = 'class="link"' in html
+                    has_node_name = 'class="node-name"' in html
+
+                    if has_nodes and (has_links or has_node_name):
+                        # This is likely the mindmap!
+                        if len(html) > mindmap_size:
+                            mindmap_size = len(html)
+                            mindmap_svg = html
+                            logger.info(f"Found mindmap SVG candidate: {len(html)} chars, has nodes: {has_nodes}")
+
+                except Exception as e:
+                    logger.debug(f"SVG evaluation failed: {e}")
+                    continue
+
+            if mindmap_svg:
+                logger.info(f"Selected mindmap SVG: {mindmap_size} chars")
+                return mindmap_svg
+
+            # Strategy 2: Fallback - find largest SVG that's not an icon
+            logger.warning("No mindmap-specific SVG found, falling back to size-based selection")
             largest_svg = None
             largest_size = 0
 
-            for svg in svgs:
+            for svg in all_svgs:
                 try:
                     html = await svg.evaluate("el => el.outerHTML")
+
+                    # Skip small icons and Google UI
+                    if len(html) < 2000:
+                        continue
+                    if 'class="gb_F"' in html or 'focusable="false"' in html:
+                        continue
+
                     if len(html) > largest_size:
                         largest_size = len(html)
                         largest_svg = html
+
                 except Exception:
                     continue
 
-            if largest_svg and largest_size > 1000:
-                logger.info(f"Found mindmap SVG: {largest_size} chars")
+            if largest_svg and largest_size > 5000:
+                logger.info(f"Found large SVG (fallback): {largest_size} chars")
                 return largest_svg
 
-            # Fallback: Try specific selectors
-            svg_element = await page.query_selector(Selectors.MINDMAP_SVG)
-            if svg_element:
-                svg_content = await svg_element.evaluate("el => el.outerHTML")
-                return svg_content
+            logger.error("No suitable mindmap SVG found")
+            return None
 
         except Exception as e:
             logger.error(f"SVG extraction failed: {e}")
-
-        return None
+            return None
 
     def _extract_nodes_from_svg(self, svg_content: Optional[str]) -> List[MindmapNode]:
         """Extract nodes from SVG text elements"""
@@ -259,40 +304,60 @@ class MindmapExtractor:
             return nodes
 
         try:
-            # Parse node-name text elements from SVG using regex
-            # NotebookLM mindmap uses <text class="node-name">Text</text>
-            node_pattern = r'<text class="node-name"[^>]*>([^<]+)</text>'
-            matches = re.findall(node_pattern, svg_content)
+            # NotebookLM mindmap structure (Nov 2025):
+            # <g class="node" transform="translate(x, y)">
+            #   <rect ...>
+            #   <text class="node-name" ...>Node Text</text>
+            #   <circle ...>
+            #   <text class="expand-symbol">< or ></text>
+            # </g>
 
-            # Also try to extract transform positions for hierarchy
-            transform_pattern = r'<g class="node" transform="translate\(([^,]+),\s*([^)]+)\)">'
-            transforms = re.findall(transform_pattern, svg_content)
+            # Pattern to match entire node groups with their transforms
+            # This captures: transform coords AND node-name text
+            node_group_pattern = r'<g class="node" transform="translate\(([^,]+),\s*([^)]+)\)"[^>]*>.*?<text class="node-name"[^>]*>([^<]+)</text>'
 
-            for i, text in enumerate(matches):
+            matches = re.findall(node_group_pattern, svg_content, re.DOTALL)
+
+            for i, (x_str, y_str, text) in enumerate(matches):
                 text = text.strip()
                 # Decode HTML entities
                 text = text.replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>')
+                text = text.replace('&quot;', '"')
 
                 if len(text) < 2:
                     continue
 
-                # Estimate level from x-coordinate (if available)
+                x = float(x_str)
+                y = float(y_str)
+
+                # Estimate level from x-coordinate
+                # Root is typically at x=0, Level 1 at x~460, Level 2 at x~750, etc.
                 level = 0
-                if i < len(transforms):
-                    x = float(transforms[i][0])
-                    # Root is at x=0, children at x~460
-                    level = 0 if x < 100 else 1
+                if x < 100:
+                    level = 0  # Root
+                elif x < 500:
+                    level = 1  # First children
+                elif x < 800:
+                    level = 2  # Second level
+                else:
+                    level = 3  # Deeper levels
 
                 node = MindmapNode(
                     id=f"node_{i}",
                     text=text,
                     level=level,
-                    x=float(transforms[i][0]) if i < len(transforms) else None,
-                    y=float(transforms[i][1]) if i < len(transforms) else None
+                    x=x,
+                    y=y
                 )
                 nodes.append(node)
 
             logger.info(f"Extracted {len(nodes)} nodes from SVG")
+
+            # Log node details for debugging
+            if nodes:
+                logger.debug(f"Root node: {nodes[0].text}")
+                for node in nodes[1:]:
+                    logger.debug(f"  Level {node.level}: {node.text} at ({node.x}, {node.y})")
 
         except Exception as e:
             logger.error(f"Node extraction from SVG failed: {e}")
@@ -385,9 +450,19 @@ class MindmapExtractor:
         """Estimate hierarchy level from x-coordinate"""
         if x is None:
             return 0
-        # Assume root is at center/left, children expand right
-        level = max(0, int(x / base_offset))
-        return level
+        # NotebookLM mindmap layout:
+        # - Root at x=0
+        # - Level 1 at x~460
+        # - Level 2 at x~750+
+        # - etc.
+        if x < 100:
+            return 0  # Root
+        elif x < 500:
+            return 1  # First children
+        elif x < 800:
+            return 2  # Second level
+        else:
+            return 3  # Deeper levels
 
     def _build_hierarchy(
         self,
@@ -398,7 +473,7 @@ class MindmapExtractor:
         if not nodes:
             return None
 
-        # If we have connection data, use it
+        # If we have explicit connection data, use it
         if connections:
             node_map = {n.id: n for n in nodes}
             for conn in connections:
@@ -413,20 +488,61 @@ class MindmapExtractor:
                 if node.parent_id is None:
                     return node
 
-        # Fallback: Use x-coordinate for hierarchy
-        # Sort by x (leftmost = root)
-        sorted_nodes = sorted(nodes, key=lambda n: n.x or 0)
-        if sorted_nodes:
-            root = sorted_nodes[0]
-            root.level = 0
+        # Build hierarchy from coordinates
+        # NotebookLM mindmap layout:
+        # - Root at x=0
+        # - Children at x~460
+        # - Grandchildren at x~750
+        # - Y coordinate determines vertical position within level
 
-            # Simple assignment based on x
-            for node in sorted_nodes[1:]:
-                node.level = self._estimate_level_from_x(node.x or 0)
+        # Sort by x to find root (leftmost)
+        sorted_by_x = sorted(nodes, key=lambda n: n.x or 0)
+        if not sorted_by_x:
+            return None
 
-            return root
+        root = sorted_by_x[0]
+        root.level = 0
+        root.children = []  # Reset children
 
-        return None
+        # Group nodes by level based on x-coordinate
+        level_groups: Dict[int, List[MindmapNode]] = {0: [root]}
+
+        for node in sorted_by_x[1:]:
+            level = self._estimate_level_from_x(node.x or 0)
+            node.level = level
+            node.children = []  # Reset children
+
+            if level not in level_groups:
+                level_groups[level] = []
+            level_groups[level].append(node)
+
+        # Build parent-child relationships
+        # For each level, assign nodes to their nearest parent in the previous level
+        for level in range(1, max(level_groups.keys()) + 1):
+            if level not in level_groups or (level - 1) not in level_groups:
+                continue
+
+            current_level_nodes = sorted(level_groups[level], key=lambda n: n.y or 0)
+            parent_level_nodes = sorted(level_groups[level - 1], key=lambda n: n.y or 0)
+
+            for node in current_level_nodes:
+                # Find the nearest parent by y-coordinate
+                best_parent = None
+                best_distance = float('inf')
+
+                for parent in parent_level_nodes:
+                    if node.y is not None and parent.y is not None:
+                        distance = abs(node.y - parent.y)
+                        if distance < best_distance:
+                            best_distance = distance
+                            best_parent = parent
+
+                if best_parent:
+                    node.parent_id = best_parent.id
+                    best_parent.children.append(node)
+
+        logger.info(f"Built hierarchy: root='{root.text}' with {len(root.children)} direct children")
+        return root
 
     async def save_mindmap(
         self,

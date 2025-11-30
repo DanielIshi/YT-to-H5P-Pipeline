@@ -35,6 +35,7 @@ from src.adapters.notebooklm.content_extractor import ContentExtractor
 from src.adapters.notebooklm.audio_downloader import AudioDownloader
 from src.adapters.notebooklm.video_downloader import VideoDownloader, VideoFormat, VideoStyle
 from src.adapters.notebooklm.mindmap_extractor import MindmapExtractor
+from src.adapters.notebooklm.mindmap_animator import MindmapAnimator, AudioTranscriber
 
 # Setup logging
 logging.basicConfig(
@@ -250,7 +251,8 @@ async def main(args: argparse.Namespace) -> int:
                     logger.warning("Video generation failed")
 
             # Mindmap (SVG + JSON)
-            if args.mindmap or args.all:
+            mindmap = None
+            if args.mindmap or args.animate or args.all:
                 logger.info("Extracting Mindmap...")
                 mindmap = await mindmap_extractor.extract_mindmap(notebook)
                 if mindmap.svg_content:
@@ -267,6 +269,48 @@ async def main(args: argparse.Namespace) -> int:
                     results["outputs"]["mindmap_md"] = str(md_path)
                 else:
                     logger.warning("Mindmap extraction failed")
+
+            # Mindmap Animation
+            if args.animate and mindmap and mindmap.nodes:
+                logger.info("Creating mindmap animation...")
+                animator = MindmapAnimator(client)
+
+                # Create timeline
+                if args.sync_audio and results.get("outputs", {}).get("audio"):
+                    # Sync with audio transcript
+                    logger.info("Transcribing audio for sync...")
+                    try:
+                        transcriber = AudioTranscriber(model_name=args.whisper_model or "base")
+                        audio_path = Path(results["outputs"]["audio"])
+                        segments = transcriber.transcribe(audio_path)
+                        timeline = animator.create_timeline_from_transcript(mindmap, segments)
+                        results["animation_sync"] = "audio"
+                    except Exception as e:
+                        logger.warning(f"Audio sync failed: {e}, using sequential")
+                        timeline = animator.create_sequential_timeline(
+                            mindmap,
+                            pause_per_node=args.node_pause or 3.0
+                        )
+                        results["animation_sync"] = "sequential"
+                else:
+                    # Sequential animation
+                    timeline = animator.create_sequential_timeline(
+                        mindmap,
+                        pause_per_node=args.node_pause or 3.0
+                    )
+                    results["animation_sync"] = "sequential"
+
+                # Execute animation
+                video_path = await animator.animate(
+                    mindmap,
+                    timeline,
+                    record=args.record_video
+                )
+
+                if video_path:
+                    results["outputs"]["animation_video"] = str(video_path)
+                    results["animation_steps"] = len(timeline.steps)
+                    logger.info(f"Animation complete: {timeline.total_duration}s, {len(timeline.steps)} steps")
 
             # Export all as markdown
             if args.export_markdown:
@@ -404,6 +448,21 @@ Examples:
         action="store_true",
         help="Extract Mindmap (SVG + JSON structure)"
     )
+    content_group.add_argument(
+        "--animate",
+        action="store_true",
+        help="Animate mindmap exploration (requires --mindmap)"
+    )
+    content_group.add_argument(
+        "--record-video",
+        action="store_true",
+        help="Record animation as video (requires --animate)"
+    )
+    content_group.add_argument(
+        "--sync-audio",
+        action="store_true",
+        help="Sync animation with audio transcript (requires --animate and --audio)"
+    )
 
     # Video options
     video_group = parser.add_argument_group("Video Options")
@@ -420,6 +479,22 @@ Examples:
         choices=["explainer", "brief"],
         default="explainer",
         help="Video format: explainer (~5-10 min) or brief (~2-3 min)"
+    )
+
+    # Animation options
+    animation_group = parser.add_argument_group("Animation Options")
+    animation_group.add_argument(
+        "--node-pause",
+        type=float,
+        default=3.0,
+        help="Seconds to pause on each node during animation (default: 3.0)"
+    )
+    animation_group.add_argument(
+        "--whisper-model",
+        type=str,
+        choices=["tiny", "base", "small", "medium", "large"],
+        default="base",
+        help="Whisper model size for audio transcription (default: base)"
     )
 
     # Behavior options

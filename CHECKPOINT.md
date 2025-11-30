@@ -1,48 +1,95 @@
-# YouTube to E-Learning Pipeline - Checkpoint 2025-11-29
+# YouTube to E-Learning Pipeline - Checkpoint 2025-11-30
 
 ## Stand
 
-Projekt wurde in eigenes Repository verschoben. Die Pipeline generiert **7 H5P-Aktivitätstypen**. Zwei weitere Content-Types (InteractiveVideo, ImageHotspots) stehen zur Implementierung an.
+**Aktuelles Ziel:** Upgrade auf modulare 3-Stufen-Pipeline mit Milestone-spezifischen Prompts.
 
-## Abgeschlossene Aufgaben
+Die Kernkomponenten der neuen Pipeline sind implementiert (Stage 1-3). Es fehlen noch:
+- builders/ Verzeichnis (Refactor)
+- run_pipeline.py (CLI)
+- Tests und Supabase Schema
 
-1. ✅ **7 H5P Builder-Funktionen implementiert**
-   - Dialogcards (Karteikarten)
-   - Accordion (aufklappbare Erklärungen)
-   - MultiChoice (Quiz)
-   - TrueFalse (Wahr/Falsch)
-   - Blanks (Lückentext)
-   - DragAndDrop (DragText-basiert)
-   - Summary (Zusammenfassung)
+## Neue 3-Stufen-Architektur
 
-2. ✅ **LLM Prompt (LEARNING_PATH_PROMPT)**
-   - Generiert didaktisch strukturierten Lernpfad
-   - 8-12 Aktivitäten in logischer Reihenfolge
-   - Beginnt passiv (Dialogcards, Accordion) → aktiv (Quiz, Blanks) → Summary
+```
+┌─────────────────────────────────────────────────────────────────┐
+│ STUFE 1: TRANSCRIPT AUFBEREITUNG (stage1_summarizer.py)         │
+│ Input:  Rohe YouTube-Untertitel                                │
+│ Output: Strukturiertes Lern-Skript mit Tags                     │
+│         [DEFINITION], [PROZESS], [VERGLEICH], [FAKT], [BEISPIEL]│
+│ Cache:  Supabase structured_scripts Tabelle                     │
+└─────────────────────────────────────────────────────────────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────────┐
+│ STUFE 2: DIDAKTISCHE PLANUNG (stage2_planner.py)                │
+│ Input:  Strukturiertes Skript + Milestone-Config                │
+│ Output: Lernpfad-Plan mit Content-Type Empfehlungen             │
+│ Regeln: 25% passiv → 50% aktiv → 15% reflektiv                  │
+│         Summary muss am Ende, keine gleichen Types nacheinander │
+└─────────────────────────────────────────────────────────────────┘
+                               │
+                               ▼
+┌─────────────────────────────────────────────────────────────────┐
+│ STUFE 3: H5P CONTENT GENERIERUNG (stage3_generator.py)          │
+│ Input:  Lernpfad-Plan + Strukturiertes Skript                   │
+│ Output: H5P-fähige JSON-Strukturen pro Content-Type             │
+│ Builds: builders/*.py → H5P ZIP → Moodle Import                 │
+└─────────────────────────────────────────────────────────────────┘
+```
 
-3. ✅ **CLI mit youtube-url-id Support**
-   - Holt Transcript direkt aus Supabase
-   - Generiert alle Aktivitäten in einem Durchlauf
-   - Importiert automatisch in Moodle
+## Pipeline-Komponenten Status
 
-4. ✅ **Projekt-Verschiebung abgeschlossen**
-   - Eigenes Projekt: `YT_to_Interactive E-Learning`
-   - Dateien in `src/h5p/` strukturiert
+| Komponente | Status | Datei |
+|------------|--------|-------|
+| Milestone Configs | ✅ | `config/milestones.py` |
+| Content-Type Schemas | ✅ | `config/content_types.py` |
+| Stage 1: Summarizer | ✅ | `pipeline/stage1_summarizer.py` |
+| Stage 2: Planner | ✅ | `pipeline/stage2_planner.py` |
+| Stage 3: Generator | ✅ | `pipeline/stage3_generator.py` |
+| builders/ Refactor | ⏳ | `builders/__init__.py` etc. |
+| CLI Entry Point | ⏳ | `run_pipeline.py` |
+| Validierungs-Tests | ⏳ | `tests/test_learning_path_mix.py` |
+| Supabase Schema | ⏳ | SQL Migration |
 
-## Projektstruktur
+## Milestone-Konfigurationen
+
+| Milestone | Content-Types | Besonderheit |
+|-----------|---------------|--------------|
+| MVP 1.0 | 7 (dialogcards, accordion, truefalse, blanks, dragtext, multichoice, summary) | Basis-Pipeline |
+| 1.1 UX | 7 + auto_advance | Weniger Klicks |
+| 1.2 Media | +3 (imagehotspots, interactivevideo, audiosummary) | ElevenLabs Audio |
+| 1.3 Multimodal | +1 (speechinput_quiz) | Web Speech API |
+
+## Projektstruktur (Aktuell + Geplant)
 
 ```
 src/h5p/
-├── learning_path_generator.py   # Hauptgenerator (7 Content-Types)
-├── package_builder.py           # H5P ZIP Builder
-├── content_types.py             # Pydantic Models
-├── course_schema.py             # Schema Definitionen
-├── generator.py                 # Basis-Generator
-├── cli_youtube_to_h5p.py        # CLI v1
-├── cli_youtube_to_h5p_v2.py     # CLI v2
-├── multi_quiz_generator.py      # Legacy: Nur MultiChoice
-├── find_youtube.py              # YouTube Helper
-├── import_h5p.php               # Moodle Import Script
+├── config/                      # ✅ NEU: Milestone-Configs
+│   ├── __init__.py
+│   ├── milestones.py            # MVP, 1.1, 1.2, 1.3 Konfigurationen
+│   └── content_types.py         # Schemas für 9 Content-Types
+├── pipeline/                    # ✅ NEU: 3-Stufen-Pipeline
+│   ├── __init__.py
+│   ├── stage1_summarizer.py     # Transcript → Strukturiertes Skript
+│   ├── stage2_planner.py        # Skript → Lernpfad-Plan
+│   └── stage3_generator.py      # Plan → H5P Content
+├── builders/                    # ⏳ TODO: Refactor aus learning_path_generator
+│   ├── __init__.py
+│   ├── base.py
+│   ├── truefalse.py
+│   ├── blanks.py
+│   └── ... (alle 9 Types)
+├── run_pipeline.py              # ⏳ TODO: CLI Entry Point
+├── learning_path_generator.py   # LEGACY: Monolithischer Generator
+├── package_builder.py
+├── content_types.py
+├── course_schema.py
+├── generator.py
+├── cli_youtube_to_h5p.py
+├── cli_youtube_to_h5p_v2.py
+├── multi_quiz_generator.py
+├── find_youtube.py
 └── __init__.py
 ```
 
@@ -112,9 +159,39 @@ python3 learning_path_generator.py \
 
 ---
 
-## Nächste Schritte
+## Nächste Schritte (Priorisiert)
 
-### Standard-Test-Video (PERSISTIERT)
+### 1. Pipeline fertigstellen - ABGESCHLOSSEN! (2025-11-30)
+
+| Task | Status | Beschreibung |
+|------|--------|--------------|
+| builders/ Refactor | ✅ | 9 Builder-Module in `builders/` |
+| run_pipeline.py | ✅ | CLI Entry Point mit --milestone Support |
+| test_learning_path_mix.py | ✅ | Validierungs-Tests für "richtige Mischung" |
+| Supabase Schema | ✅ | `structured_scripts` Tabelle erstellt |
+| E2E Test | ✅ | 8/8 Aktivitäten erfolgreich importiert |
+
+### E2E Test Ergebnis (2025-11-30)
+
+```
+Pipeline: 3-stage
+Milestone: mvp
+YouTube URL ID: 3420
+Total Activities: 8
+Successful Imports: 8/8
+
+Mix Distribution:
+- Passive: 25.0% (2 activities)
+- Active: 62.5% (5 activities)
+- Reflect: 12.5% (1 activity)
+
+Validation: ALL PASSED
+```
+
+**Test-Kurs:** Pipeline Test (ID: 23)
+**Activities:** cmid 136-143
+
+### 2. Standard-Test-Video (PERSISTIERT)
 
 | Feld | Wert |
 |------|------|
@@ -124,72 +201,67 @@ python3 learning_path_generator.py \
 
 **Dieses Video für ALLE Tests verwenden!**
 
-### Robustness-Test Status
+### 3. Bekannte Issues
 
-**Lokaler Test:** ✅ Alle 9 Content-Types bestanden (2025-11-29)
-
-**E2E-Test:** 9/9 PASS (technisch) - Visuelle Validierung zeigt Rendering-Issues (2025-11-29)
-
-| # | Content-Type | CMID | Erreichbar | Content sichtbar |
-|---|--------------|------|------------|------------------|
-| 1 | ImageHotspots | 92 | ✅ | ⚠️ Prüfung ausstehend |
-| 2 | Dialogcards | 93 | ✅ | ✅ Karteikarten mit Turn-Button |
-| 3 | Accordion | 94 | ✅ | ⚠️ Prüfung ausstehend |
-| 4 | InteractiveVideo | 95 | ✅ | ⚠️ Prüfung ausstehend |
-| 5 | MultiChoice | 96 | ✅ | ✅ Quiz mit Antwortoptionen |
-| 6 | Blanks | 97 | ✅ | ⚠️ Nur Intro-Text sichtbar |
-| 7 | TrueFalse | 98 | ✅ | ⚠️ Nur Intro-Text sichtbar |
-| 8 | DragAndDrop | 99 | ✅ | ⚠️ Nur Intro-Text sichtbar |
-| 9 | Summary | 100 | ✅ | ⚠️ Nur Intro-Text sichtbar |
-
-**Fixes durchgeführt (2025-11-29):**
-1. ✅ **import_h5p.php** - H5P-Deployment via `helper::save_h5p()` statt nur Datei-Upload
-2. ✅ **H5P CSS Mixed-Content** - Hardcodierte HTTP-URLs auf relative Pfade geändert
-3. ✅ **H5P Hub aktiviert** - 268+ Libraries von h5p.org heruntergeladen
-4. ✅ **Moodle-Caches** - Regelmäßig gepurged
-
-**Bekanntes Problem:**
+**H5P Rendering-Problem (2025-11-29):**
 - Einige H5P Content-Types (TrueFalse, Blanks, Summary, DragAndDrop) rendern nur den Intro-Text
 - Dialogcards und MultiChoice funktionieren korrekt
-- H5P-Daten sind in DB korrekt gespeichert (jsoncontent vorhanden)
 - Mögliche Ursache: H5P iframe-Rendering oder JavaScript-Konflikt
 
 **Test-User:** student1 / Student2025! (eingeschrieben in Kurs 2)
 
-**Aktueller Kurs:**
-- **Titel:** NoneKurs_1764274401
-- **URL:** https://moodle.srv947487.hstgr.cloud/course/view.php?id=2
-- **Activities:** 92-100 (neu generiert mit fixiertem Import-Script)
+### 4. UX-Verbesserungen (Milestone 1.1) - ABGESCHLOSSEN! (2025-11-30)
 
-**Screenshots:** `tests/e2e/screenshots/`
+**Auto-Check Feature:** Weniger Klicks für User
 
-### Geplant: Selenium-Adapter für externe Plattformen
+| Content-Type | Parameter | Effekt |
+|--------------|-----------|--------|
+| MultiChoice | `autoCheck: true` | Sofortige Prüfung nach Auswahl |
+| TrueFalse | `autoCheck: true` | Sofortige Prüfung |
+| Blanks | `autoCheck: true` | Auto-Check nach Eingabe |
 
-**Feature:** Integration eines Selenium-Adapters zur automatischen Extraktion von Lerninhalten von externen Plattformen.
+**Aktivierung:** `--milestone 1.1` (oder höher)
 
-**Ziel:** Inhalte von kostenlosen Lernplattformen abziehen und in H5P/Moodle integrieren:
-- Lernvideos
-- Mindmaps
-- Zusammenfassungslisten
-- Andere interaktive Inhalte
+**Test-Aktivitäten:**
+- cmid 144: UX Test: Auto-Check MultiChoice
+- cmid 145: UX Test: Auto-Check TrueFalse
 
-**Architektur-Vorschlag:**
+**Quellen:**
+- [H5P MultiChoice semantics.json](https://github.com/h5p/h5p-multi-choice)
+- [H5P TrueFalse semantics.json](https://github.com/h5p/h5p-true-false)
+
+### 5. NotebookLM Integration (2025-11-30) - IN PROGRESS
+
+**Gesamtplan:** `src/doc/NOTEBOOKLM_PLAN.md`
+
+| Komponente | Status | Tests |
+|------------|--------|-------|
+| Mindmap Node-Extraktion | ✅ Gefixt | 8/8 |
+| MindmapAnimator | ✅ Neu | 14/14 |
+| AudioTranscriber (Whisper) | ✅ Neu | - |
+| CLI (--animate, --sync-audio) | ✅ Erweitert | - |
+
+**Was jetzt funktioniert:**
+- Mindmap SVG + JSON Extraktion mit korrekter Node-Hierarchie
+- Timeline-Generierung (sequentiell oder Audio-synced)
+- Keyword-Matching für Audio-zu-Node Zuordnung
+- CLI mit allen neuen Flags
+
+**CLI-Beispiele:**
+```bash
+# Mindmap mit Animation
+python -m src.adapters.notebooklm.cli --youtube-url-id 3420 --mindmap --animate
+
+# Mit Audio-Sync
+python -m src.adapters.notebooklm.cli --youtube-url-id 3420 --mindmap --animate --audio --sync-audio
 ```
-src/adapters/
-├── __init__.py
-├── base_adapter.py       # Abstract Base Class
-├── selenium_service.py   # WebDriver Management
-└── platforms/
-    └── example_platform.py
-```
 
-**Akzeptanzkriterien:**
-- [ ] Mindestens eine Plattform als Proof-of-Concept
-- [ ] Extrahierte Inhalte in H5P-Pipeline nutzbar
-- [ ] Robuste Fehlerbehandlung
-- [ ] Dokumentation
+**Noch ausstehend:**
+- E2E-Browser-Tests (benötigen manuelles Chrome mit NotebookLM-Login)
+- Video Recording (Playwright/FFmpeg Integration)
+- Content-Selektoren für Nov 2025 UI
 
-### Weitere optionale Schritte
+### 5. Backlog
 
-1. ⏳ **VPS Deployment** - Neue Version deployen
-2. ⏳ **H5P Libraries prüfen** - InteractiveVideo 1.26 und ImageHotspots 1.10 in Moodle
+- **VPS Deployment** - Neue Version deployen
+- **H5P Libraries prüfen** - InteractiveVideo 1.26 und ImageHotspots 1.10
