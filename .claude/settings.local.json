@@ -12,7 +12,8 @@
       "Bash(ls:*)",
       "Bash(gh issue list:*)",
       "WebFetch(domain:h5p.org)",
-      "WebFetch(domain:raw.githubusercontent.com)"
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(powershell:*)"
     ],
     "deny": [],
     "ask": []

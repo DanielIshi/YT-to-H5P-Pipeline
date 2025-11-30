@@ -16,6 +16,7 @@ from .dialogcards import build_dialogcards_h5p
 from .accordion import build_accordion_h5p
 from .interactivevideo import build_interactivevideo_h5p
 from .imagehotspots import build_imagehotspots_h5p
+from .column import build_column_h5p, prepare_activity_for_column
 
 
 # Builder registry - maps content type names to builder functions
@@ -31,6 +32,8 @@ BUILDERS: Dict[str, Callable[[Dict[str, Any], str], str]] = {
     # Media Content Types (Post-MVP 1.2)
     "interactivevideo": build_interactivevideo_h5p,
     "imagehotspots": build_imagehotspots_h5p,
+    # Container Types
+    "column": build_column_h5p,
     # Aliases for legacy compatibility
     "draganddrop": build_dragtext_h5p,  # Legacy name
 }
@@ -87,6 +90,9 @@ __all__ = [
     "build_accordion_h5p",
     "build_interactivevideo_h5p",
     "build_imagehotspots_h5p",
+    # Container builders
+    "build_column_h5p",
+    "prepare_activity_for_column",
     # Utilities
     "create_h5p_package",
     "COMMON_DEPENDENCIES",

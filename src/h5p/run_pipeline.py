@@ -29,7 +29,7 @@ from src.h5p.pipeline.stage1_summarizer import summarize_transcript
 from src.h5p.pipeline.stage2_planner import plan_learning_path, validate_learning_path
 from src.h5p.pipeline.stage3_generator import generate_all_content
 from src.h5p.config.milestones import get_milestone_config, MILESTONE_CONFIGS
-from src.h5p.builders import build_h5p, BUILDERS
+from src.h5p.builders import build_h5p, build_column_h5p, prepare_activity_for_column, BUILDERS
 
 
 def log_info(msg: str):
@@ -205,69 +205,133 @@ async def run_full_pipeline(
     log_progress("Stage 3 complete", generated=len(h5p_contents))
 
     # 6. Build H5P packages and import to Moodle
-    log_info("Building H5P packages and importing to Moodle...")
-    results = []
-
-    # Check if auto_check is enabled for this milestone (1.1+)
     config = get_milestone_config(milestone)
     auto_check = config.get("rules", {}).get("auto_advance_on_correct", False)
     if auto_check:
         log_info("Auto-check enabled (Milestone 1.1+ UX feature)")
 
-    for i, (activity, content) in enumerate(zip(activities, h5p_contents)):
-        content_type = activity.get("content_type")
-        act_title = f"{i+1}. {activity.get('brief', content_type)[:50]}"
+    results = []
 
-        # Skip if content has error
-        if "_error" in content:
-            results.append({
-                "order": i + 1,
-                "type": content_type,
-                "title": act_title,
-                "error": content["_error"]
-            })
-            continue
+    # Check if LLM returned columns structure (new format)
+    columns = learning_path.get("columns", [])
 
-        # Build H5P package
-        h5p_path = os.path.join(output_dir, f"activity_{i+1}_{content_type}.h5p")
+    if columns:
+        # NEW: Column-based import (3-4 Moodle entries instead of 7)
+        log_info(f"Building {len(columns)} Column packages...")
 
-        try:
-            # Merge activity metadata into content for builder
-            build_data = {**content}
-            build_data["title"] = act_title
-            if not build_data.get("video_url") and video_url:
-                build_data["video_url"] = video_url
+        for col_idx, column in enumerate(columns):
+            col_title = column.get("title", f"Teil {col_idx + 1}")
+            col_activities = column.get("activities", [])
 
-            # Pass auto_check flag to builders (for 1.1+ milestones)
-            if auto_check and content_type in ["multichoice", "truefalse", "blanks"]:
-                build_data["auto_check"] = True
+            # Collect content for each activity in this column
+            column_activities = []
+            for activity in col_activities:
+                order = activity.get("order", 0)
+                content_type = activity.get("content_type")
 
-            build_h5p(content_type, build_data, h5p_path)
+                # Find matching content from h5p_contents (by order)
+                content = None
+                for i, act in enumerate(activities):
+                    if act.get("order") == order:
+                        content = h5p_contents[i] if i < len(h5p_contents) else None
+                        break
 
-            # Import to Moodle
-            moodle_result = import_h5p_to_moodle(h5p_path, courseid, act_title)
+                if content and "_error" not in content:
+                    prepared = prepare_activity_for_column(
+                        content_type,
+                        content,
+                        auto_check=auto_check
+                    )
+                    column_activities.append(prepared)
 
-            results.append({
-                "order": i + 1,
-                "type": content_type,
-                "title": act_title,
-                "h5p_path": h5p_path,
-                "moodle": moodle_result
-            })
+            if not column_activities:
+                log_info(f"Skipping empty column: {col_title}")
+                continue
 
-            log_progress(
-                f"Imported {content_type}",
-                order=i + 1,
-                activity_id=moodle_result.get("activity_id")
-            )
+            # Build Column H5P
+            h5p_path = os.path.join(output_dir, f"column_{col_idx + 1}_{col_title[:20]}.h5p")
+            column_data = {
+                "title": col_title,
+                "activities": column_activities
+            }
 
-        except Exception as e:
-            results.append({
-                "order": i + 1,
-                "type": content_type,
-                "title": act_title,
-                "error": str(e)
-            })
+            try:
+                build_column_h5p(column_data, h5p_path)
+                moodle_result = import_h5p_to_moodle(h5p_path, courseid, col_title)
+
+                results.append({
+                    "column": col_idx + 1,
+                    "title": col_title,
+                    "activities_count": len(column_activities),
+                    "h5p_path": h5p_path,
+                    "moodle": moodle_result
+                })
+
+                log_progress(
+                    f"Imported Column '{col_title}'",
+                    column=col_idx + 1,
+                    activities=len(column_activities)
+                )
+
+            except Exception as e:
+                results.append({
+                    "column": col_idx + 1,
+                    "title": col_title,
+                    "error": str(e)
+                })
+                log_error(f"Column build failed: {e}")
+
+    else:
+        # LEGACY: Separate activity import (7 Moodle entries)
+        log_info("Building separate H5P packages (legacy mode)...")
+
+        for i, (activity, content) in enumerate(zip(activities, h5p_contents)):
+            content_type = activity.get("content_type")
+            act_title = f"{i+1}. {activity.get('brief', content_type)[:50]}"
+
+            if "_error" in content:
+                results.append({
+                    "order": i + 1,
+                    "type": content_type,
+                    "title": act_title,
+                    "error": content["_error"]
+                })
+                continue
+
+            h5p_path = os.path.join(output_dir, f"activity_{i+1}_{content_type}.h5p")
+
+            try:
+                build_data = {**content}
+                build_data["title"] = act_title
+                if not build_data.get("video_url") and video_url:
+                    build_data["video_url"] = video_url
+
+                if auto_check and content_type in ["multichoice", "truefalse", "blanks"]:
+                    build_data["auto_check"] = True
+
+                build_h5p(content_type, build_data, h5p_path)
+                moodle_result = import_h5p_to_moodle(h5p_path, courseid, act_title)
+
+                results.append({
+                    "order": i + 1,
+                    "type": content_type,
+                    "title": act_title,
+                    "h5p_path": h5p_path,
+                    "moodle": moodle_result
+                })
+
+                log_progress(
+                    f"Imported {content_type}",
+                    order=i + 1
+                )
+
+            except Exception as e:
+                results.append({
+                    "order": i + 1,
+                    "type": content_type,
+                    "title": act_title,
+                    "error": str(e)
+                })
 
     # 7. Summary
     successful = sum(1 for r in results if "moodle" in r and r["moodle"].get("status") == "success")
