@@ -1,10 +1,10 @@
 """
 Stage 2: Learning Path Planner
 
-Plant die didaktische Reihenfolge und wählt Content-Types basierend auf:
+Plant die didaktische Reihenfolge und whlt Content-Types basierend auf:
 - Strukturiertem Skript aus Stage 1
-- Verfügbaren Content-Types für den Milestone
-- Didaktischen Regeln (Passiv → Aktiv → Reflexion)
+- Verfgbaren Content-Types fr den Milestone
+- Didaktischen Regeln (Passiv  Aktiv  Reflexion)
 """
 
 import json
@@ -21,7 +21,7 @@ from ..config.milestones import (
 
 
 class ActivityPlan(TypedDict):
-    """Geplante Aktivität im Lernpfad"""
+    """Geplante Aktivitt im Lernpfad"""
     order: int
     content_type: str
     concept_refs: list[str]
@@ -30,7 +30,7 @@ class ActivityPlan(TypedDict):
 
 
 class ColumnPlan(TypedDict):
-    """Ein Column-Block mit mehreren Aktivitäten"""
+    """Ein Column-Block mit mehreren Aktivitten"""
     title: str
     phase: str  # "passive", "active", "reflect"
     activities: list[ActivityPlan]
@@ -45,13 +45,13 @@ class LearningPathPlan(TypedDict):
 
 def get_planner_prompt(milestone: str) -> str:
     """
-    Generiere den Prompt für den Learning Path Planner.
+    Generiere den Prompt fr den Learning Path Planner.
 
     Args:
         milestone: Milestone-Bezeichnung (mvp, 1.1, 1.2, 1.3)
 
     Returns:
-        Vollständiger Prompt mit Milestone-spezifischen Content-Types
+        Vollstndiger Prompt mit Milestone-spezifischen Content-Types
     """
     config = get_milestone_config(milestone)
     content_types_formatted = format_content_types_for_prompt(milestone)
@@ -59,76 +59,76 @@ def get_planner_prompt(milestone: str) -> str:
     # Extrahiere Content-Type Matching Regeln
     matching_rules = []
     for concept_type, types in config["content_type_matching"].items():
-        matching_rules.append(f"- [{concept_type}] → {' ODER '.join(types)}")
+        matching_rules.append(f"- [{concept_type}]  {' ODER '.join(types)}")
 
     return f"""
 Du bist ein E-Learning Didaktik-Experte, der Lernpfade plant.
 
-VERFÜGBARE CONTENT-TYPES für Milestone "{config['name']}":
+VERFUEGBARE CONTENT-TYPES fuer Milestone "{config['name']}":
 {content_types_formatted}
 
 AUFGABE:
-Erstelle einen Lernpfad-Plan mit THEMATISCHEN COLUMNS (Blöcken).
-Jeder Column wird in Moodle als EIN Menüpunkt angezeigt.
-Ziel: 3-4 Columns mit je 2-3 Aktivitäten (bildschirmfüllend, kein Scrollen).
+Erstelle einen Lernpfad-Plan mit THEMATISCHEN COLUMNS (Bloecken).
+Jeder Column wird in Moodle als EIN Menuepunkt angezeigt.
+Ziel: 3-4 Columns mit je 2-4 Aktivitaeten (bildschirmfuellend, kein Scrollen).
 
-COLUMN-STRUKTUR:
-1. Column "Einführung" (passive Phase): Dialogcards + Accordion
-2. Column "Wissenstest" (active Phase): TrueFalse + MultiChoice
-3. Column "Anwendung" (active Phase): Blanks + DragText
-4. Column "Abschluss" (reflect Phase): Summary
+COLUMN-STRUKTUR & REIHENFOLGE:
+- Innerhalb eines Columns MUSS die Reihenfolge alternieren: PASSIV -> AKTIV -> PASSIV -> AKTIV (so weit vorhanden).
+- Jede Column startet mit PASSIV, dann AKTIV; Summary nur im letzten Column.
+- Keine zwei gleichen Phasen direkt hintereinander.
+- Optional: Nach jedem Activity-Block einen Trenner einplanen (z.B. Separator-Linie/GIF/Absatz).
 
 DIDAKTISCHE REGELN:
-1. Beginne mit PASSIVEN Elementen (Einführung, Begriffe erklären)
-2. Dann AKTIVE Elemente (Übungen, Quiz, Anwendung)
+1. Beginne mit PASSIVEN Elementen (Einfuehrung, Begriffe erklaeren)
+2. Dann AKTIVE Elemente (Uebungen, Quiz, Anwendung)
 3. Ende mit REFLEXION (Summary - muss in letztem Column sein!)
 4. Keine zwei gleichen Content-Types direkt hintereinander
-5. 7-10 Aktivitäten insgesamt, verteilt auf 3-4 Columns
-6. Pro Column 2-3 Aktivitäten (nicht mehr, damit Bildschirm gefüllt ohne Scroll)
+5. 7-10 Aktivitaeten insgesamt, verteilt auf 3-4 Columns
+6. Pro Column 2-4 Aktivitaeten (nicht mehr, damit Bildschirm gefuellt ohne Scroll)
 
-CONTENT-TYPE MATCHING (wähle basierend auf Konzept-Typ):
+CONTENT-TYPE MATCHING (waehle basierend auf Konzept-Typ):
 {chr(10).join(matching_rules)}
 
 OUTPUT FORMAT (JSON):
 {{
   "columns": [
     {{
-      "title": "Einführung: Grundbegriffe",
+      "title": "Einfuehrung: Grundbegriffe",
       "phase": "passive",
       "activities": [
         {{
           "order": 1,
           "content_type": "dialogcards",
           "concept_refs": ["Begriff1", "Begriff2"],
-          "rationale": "Einführung der Kernbegriffe als Karteikarten",
-          "brief": "Erstelle Karteikarten für: Begriff1 (Definition...), Begriff2 (Definition...)"
+          "rationale": "Einfuehrung der Kernbegriffe als Karteikarten",
+          "brief": "Erstelle Karteikarten fuer: Begriff1 (Definition...), Begriff2 (Definition...)"
         }},
         {{
           "order": 2,
           "content_type": "accordion",
           "concept_refs": ["Prozess1"],
-          "rationale": "Detaillierte Erklärung des Prozesses",
-          "brief": "Erkläre die Schritte von Prozess1 in 3-4 Panels"
+          "rationale": "Detaillierte Erklaerung des Prozesses",
+          "brief": "Erklaere die Schritte von Prozess1 in 3-4 Panels"
         }}
       ]
     }},
     {{
-      "title": "Wissenstest: Fakten prüfen",
+      "title": "Wissenstest: Fakten pruefen",
       "phase": "active",
       "activities": [
         {{
           "order": 3,
           "content_type": "truefalse",
           "concept_refs": ["Fakt1"],
-          "rationale": "Schnelle Faktenprüfung",
-          "brief": "Frage: 'Aussage über Fakt1' - Wahr/Falsch"
+          "rationale": "Schnelle Faktenpruefung",
+          "brief": "Frage: 'Aussage ueber Fakt1' - Wahr/Falsch"
         }},
         {{
           "order": 4,
           "content_type": "multichoice",
           "concept_refs": ["Konzept1"],
-          "rationale": "Verständnisprüfung mit Auswahl",
-          "brief": "Frage: 'Was ist richtig über Konzept1?' mit 4 Optionen"
+          "rationale": "Verstaendnispruefung mit Auswahl",
+          "brief": "Frage: 'Was ist richtig ueber Konzept1?' mit 4 Optionen"
         }}
       ]
     }},
@@ -141,7 +141,7 @@ OUTPUT FORMAT (JSON):
           "content_type": "blanks",
           "concept_refs": ["Begriff1"],
           "rationale": "Aktive Anwendung im Kontext",
-          "brief": "Lückentext wo Begriff1 eingesetzt werden muss"
+          "brief": "Lueckentext wo Begriff1 eingesetzt werden muss"
         }},
         {{
           "order": 6,
@@ -166,7 +166,7 @@ WICHTIG:
 - Der "brief" muss konkret genug sein, dass Stage 3 den Content generieren kann
 - Referenziere nur Konzepte/Begriffe die im Skript vorkommen
 - Summary MUSS im letzten Column sein
-- "learning_path" enthält ALLE activities flach sortiert nach order (für Kompatibilität)
+- "learning_path" enthaelt ALLE activities flach sortiert nach order (fuer Kompatibilitaet)
 
 STRUKTURIERTES SKRIPT:
 """
@@ -174,7 +174,7 @@ STRUKTURIERTES SKRIPT:
 
 async def call_openai(prompt: str, content: str) -> dict:
     """
-    OpenAI API Call für Lernpfad-Planung.
+    OpenAI API Call fuer Lernpfad-Planung.
 
     Args:
         prompt: Der Planner-Prompt
@@ -199,7 +199,7 @@ async def call_openai(prompt: str, content: str) -> dict:
                 "messages": [
                     {
                         "role": "system",
-                        "content": "Du antwortest ausschliesslich mit validem JSON. Keine Markdown-Codeblöcke."
+                        "content": "Du antwortest ausschliesslich mit validem JSON. Keine Markdown-Codeblcke."
                     },
                     {
                         "role": "user",
@@ -240,7 +240,7 @@ def validate_learning_path(
     rules = config["rules"]
     activities = plan.get("learning_path", [])
 
-    # 1. Anzahl Aktivitäten
+    # 1. Anzahl Aktivitten
     if len(activities) < rules.get("min_activities", 8):
         errors.append(f"Too few activities: {len(activities)} < {rules['min_activities']}")
     if len(activities) > rules.get("max_activities", 12):
@@ -290,12 +290,12 @@ async def plan_learning_path(
         milestone: Milestone-Bezeichnung (mvp, 1.1, 1.2, 1.3)
 
     Returns:
-        LearningPathPlan mit geordneten Aktivitäten und Content-Type Zuordnung
+        LearningPathPlan mit geordneten Aktivitten und Content-Type Zuordnung
     """
     config = get_milestone_config(milestone)
     prompt = get_planner_prompt(milestone)
 
-    # Script als JSON für Prompt
+    # Script als JSON fr Prompt
     script_json = json.dumps(structured_script, indent=2, ensure_ascii=False)
 
     print(f"Planning learning path for milestone '{milestone}'...")
@@ -339,14 +339,14 @@ async def plan_learning_path(
     return result
 
 
-# Für direkten Aufruf
+# Fr direkten Aufruf
 if __name__ == "__main__":
     import asyncio
 
     async def main():
         # Test mit Beispiel-Skript
         test_script = {
-            "title": "Einführung in Machine Learning",
+            "title": "Einfhrung in Machine Learning",
             "summary": "Machine Learning ist ein Teilbereich der KI, bei dem Algorithmen aus Daten lernen.",
             "sections": [
                 {
@@ -359,8 +359,8 @@ if __name__ == "__main__":
                         },
                         {
                             "type": "DEFINITION",
-                            "term": "Künstliche Intelligenz",
-                            "explanation": "Oberbegriff für intelligente Maschinen"
+                            "term": "Knstliche Intelligenz",
+                            "explanation": "Oberbegriff fr intelligente Maschinen"
                         }
                     ]
                 },
@@ -394,7 +394,7 @@ if __name__ == "__main__":
                     ]
                 }
             ],
-            "key_terms": ["Machine Learning", "Künstliche Intelligenz", "Training", "Modell"],
+            "key_terms": ["Machine Learning", "Knstliche Intelligenz", "Training", "Modell"],
             "visual_opportunities": ["Der ML-Prozess als Flowchart"]
         }
 

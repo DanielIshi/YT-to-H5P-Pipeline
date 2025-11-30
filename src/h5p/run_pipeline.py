@@ -10,6 +10,7 @@ CLI entry point for the new modular pipeline:
 import asyncio
 import json
 import os
+from datetime import datetime
 import subprocess
 import sys
 from pathlib import Path
@@ -47,6 +48,24 @@ def log_error(msg: str):
     print(json.dumps({"status": "error", "message": msg}), file=sys.stderr)
 
 
+def delete_moodle_course(courseid: int) -> dict:
+    """Delete a Moodle course via CLI (used to clean up previous runs)."""
+    try:
+        cmd = [
+            "docker", "exec", "moodle-app", "php",
+            "/opt/bitnami/moodle/admin/cli/delete_course.php",
+            f"--courseid={courseid}"
+        ]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        return {
+            "status": "success" if result.returncode == 0 else "error",
+            "stdout": result.stdout,
+            "stderr": result.stderr
+        }
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+
 async def fetch_youtube_data(youtube_url_id: int) -> dict:
     """Fetch YouTube data from Supabase by ID."""
     supabase_url = os.environ.get("SUPABASE_URL", "http://148.230.71.150:8000")
@@ -69,7 +88,15 @@ async def fetch_youtube_data(youtube_url_id: int) -> dict:
     return data[0]
 
 
-def import_h5p_to_moodle(h5p_path: str, courseid: int, title: str) -> dict:
+def import_h5p_to_moodle(
+    h5p_path: str,
+    courseid: Optional[int],
+    title: str,
+    *,
+    create_course: bool = False,
+    course_name: Optional[str] = None,
+    section: int = 0
+) -> dict:
     """Import H5P to Moodle via PHP script."""
     try:
         # Copy file to container
@@ -84,8 +111,15 @@ def import_h5p_to_moodle(h5p_path: str, courseid: int, title: str) -> dict:
             "/opt/bitnami/moodle/local/import_h5p.php",
             f"--file=/tmp/generated.h5p",
             f"--title={title}",
-            f"--courseid={courseid}"
+            f"--section={section}"
         ]
+        if create_course:
+            cmd.append("--createcourse")
+            if course_name:
+                cmd.append(f"--coursename={course_name}")
+        else:
+            cmd.append(f"--courseid={courseid}")
+
         result = subprocess.run(cmd, capture_output=True, text=True)
 
         # Parse JSON result
@@ -136,7 +170,11 @@ def validate_mix(learning_path: dict, milestone: str) -> dict:
 async def run_full_pipeline(
     youtube_url_id: int,
     milestone: str,
-    courseid: int,
+    courseid: Optional[int],
+    create_course: bool = True,
+    course_name: Optional[str] = None,
+    delete_old_courseid: Optional[int] = None,
+    target_section: int = 0,
     skip_cache: bool = False,
     output_dir: str = "/tmp/h5p_pipeline"
 ) -> dict:
@@ -146,7 +184,11 @@ async def run_full_pipeline(
     Args:
         youtube_url_id: Supabase ID of the YouTube URL
         milestone: Milestone config to use (mvp, 1.1, 1.2, 1.3)
-        courseid: Moodle course ID for import
+        courseid: Moodle course ID for import (ignored if create_course is True)
+        create_course: If True, create a fresh Moodle course for this run
+        course_name: Optional course name (defaults to video title + timestamp)
+        delete_old_courseid: Optional course ID to delete after successful import
+        target_section: Moodle section number to place activities (0 = General)
         skip_cache: If True, ignore cached structured script
         output_dir: Directory for H5P files
 
@@ -210,6 +252,13 @@ async def run_full_pipeline(
     if auto_check:
         log_info("Auto-check enabled (default)")
 
+    # Determine course handling
+    current_courseid = courseid if (courseid and not create_course) else None
+    course_title = course_name or f"{title or 'Lernmodul'} {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')}"
+
+    if not create_course and current_courseid is None:
+        return {"status": "error", "message": "Provide --courseid or enable --create-course"}
+
     results = []
 
     # Map generated content by activity order for quick lookup
@@ -266,7 +315,20 @@ async def run_full_pipeline(
 
             try:
                 build_column_h5p(column_data, h5p_path)
-                moodle_result = import_h5p_to_moodle(h5p_path, courseid, col_title)
+                moodle_result = import_h5p_to_moodle(
+                    h5p_path,
+                    current_courseid,
+                    col_title,
+                    create_course=create_course and current_courseid is None,
+                    course_name=course_title,
+                    section=target_section
+                )
+
+                if moodle_result.get("courseid") and current_courseid is None:
+                    current_courseid = moodle_result.get("courseid")
+
+                    if delete_old_courseid:
+                        delete_moodle_course(delete_old_courseid)
 
                 results.append({
                     "column": col_idx + 1,
@@ -319,7 +381,20 @@ async def run_full_pipeline(
                     build_data["auto_check"] = True
 
                 build_h5p(content_type, build_data, h5p_path)
-                moodle_result = import_h5p_to_moodle(h5p_path, courseid, act_title)
+                moodle_result = import_h5p_to_moodle(
+                    h5p_path,
+                    current_courseid,
+                    act_title,
+                    create_course=create_course and current_courseid is None,
+                    course_name=course_title,
+                    section=target_section
+                )
+
+                if moodle_result.get("courseid") and current_courseid is None:
+                    current_courseid = moodle_result.get("courseid")
+
+                    if delete_old_courseid:
+                        delete_moodle_course(delete_old_courseid)
 
                 results.append({
                     "order": i + 1,
@@ -366,14 +441,22 @@ async def run_full_pipeline(
     default="mvp",
     help="Milestone configuration to use"
 )
-@click.option("--courseid", type=int, default=2, help="Moodle course ID")
+@click.option("--courseid", type=int, default=None, help="Moodle course ID (ignored if --create-course)")
+@click.option("--create-course/--no-create-course", default=True, help="Create a fresh Moodle course for this run")
+@click.option("--course-name", default=None, help="Name for newly created course")
+@click.option("--delete-old-courseid", type=int, default=None, help="Optional course ID to delete after successful import")
+@click.option("--target-section", type=int, default=0, help="Moodle section number to place activities (0 = General)")
 @click.option("--skip-cache", is_flag=True, help="Ignore cached structured script")
 @click.option("--output-dir", default="/tmp/h5p_pipeline", help="Output directory for H5P files")
 @click.option("--dry-run", is_flag=True, help="Generate content but don't import to Moodle")
 def main(
     youtube_url_id: int,
     milestone: str,
-    courseid: int,
+    courseid: Optional[int],
+    create_course: bool,
+    course_name: Optional[str],
+    delete_old_courseid: Optional[int],
+    target_section: int,
     skip_cache: bool,
     output_dir: str,
     dry_run: bool
@@ -396,6 +479,10 @@ def main(
             youtube_url_id=youtube_url_id,
             milestone=milestone,
             courseid=courseid,
+            create_course=create_course,
+            course_name=course_name,
+            delete_old_courseid=delete_old_courseid,
+            target_section=target_section,
             skip_cache=skip_cache,
             output_dir=output_dir
         )

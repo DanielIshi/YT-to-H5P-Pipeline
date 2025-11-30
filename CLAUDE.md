@@ -209,6 +209,31 @@ if ($enrol) {
 
 Oder manuell: Kurs → Teilnehmer → Einschreibemethoden → "Selbsteinschreibung" aktivieren
 
+## NotebookLM Browser Automation
+
+**WICHTIG: Chrome mit persistentem Profil starten!**
+
+Für NotebookLM-Tests (Audio, Video, MindMap) IMMER dieses Script nutzen:
+
+```bash
+# Windows PowerShell:
+& 'start chrome agent.bat'
+
+# Oder direkt:
+"C:\Program Files\Google\Chrome\Application\chrome.exe" --remote-debugging-port=9222 --user-data-dir="C:\demo_profiles\youtube_demos" --remote-allow-origins=*
+```
+
+**Warum?**
+- Profil `C:\demo_profiles\youtube_demos` hat bereits Google-Login
+- CDP Port 9222 für Playwright-Verbindung
+- Keine manuelle Authentifizierung nötig
+
+**Tests ausführen:**
+```bash
+pytest tests/e2e/test_notebooklm_audio.py -v -s
+pytest tests/e2e/test_notebooklm_video.py -v -s
+```
+
 ## Content-Type Strategie (Schlüsseldokument!)
 
 **→ `src/doc/CONTENT_TYPE_MATRIX.md`**

@@ -140,3 +140,25 @@ class Selectors:
     GENERATE_VIDEO_BUTTON = 'button:has-text("Generate"), button:has-text("Generieren"), button:has-text("Erstellen")'
     VIDEO_PLAYER = 'video'
     DOWNLOAD_VIDEO_BUTTON = 'button[aria-label*="Download"], button[aria-label*="Herunterladen"]'
+
+    # ============================================================
+    # Studio Panel - Artifact Creation Buttons (Nov 2025 UI)
+    # These are the colored buttons in the Studio panel (right side)
+    # ============================================================
+
+    # Row 1
+    STUDIO_AUDIO = 'basic-create-artifact-button:nth-child(1) > div'
+    STUDIO_VIDEO = 'basic-create-artifact-button:nth-child(2) > div'
+    STUDIO_MINDMAP = 'basic-create-artifact-button:nth-child(3) > div'
+    STUDIO_BERICHTE = 'basic-create-artifact-button:nth-child(4) > div'
+
+    # Row 2
+    STUDIO_KARTEIKARTEN = 'basic-create-artifact-button:nth-child(5) > div'
+    STUDIO_QUIZ = 'basic-create-artifact-button:nth-child(6) > div'
+    STUDIO_INFOGRAFIK = 'basic-create-artifact-button:nth-child(7) > div'
+    STUDIO_PRAESENTATION = 'basic-create-artifact-button:nth-child(8) > div'
+
+    # Artifact Library (generated items list)
+    ARTIFACT_ITEM = 'artifact-library-item'
+    ARTIFACT_3DOTS_MENU = 'artifact-library-item:nth-child({index}) > div > button > span.mdc-button__label > button'
+    ARTIFACT_DOWNLOAD = 'button:has-text("Herunterladen")'

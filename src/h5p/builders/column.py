@@ -91,6 +91,62 @@ CONTENT_PARAM_BUILDERS = {
     "summary": lambda content, auto: build_summary_params(content),
 }
 
+# Phase mapping to enforce alternation inside a Column
+PHASE_BY_TYPE = {
+    "dialogcards": "passive",
+    "accordion": "passive",
+    "multichoice": "active",
+    "truefalse": "active",
+    "blanks": "active",
+    "dragtext": "active",
+    "summary": "reflect",
+}
+
+SEPARATOR_HTML = '<hr style="margin:16px 0;border:0;border-top:2px solid #222;">'
+
+
+def order_column_activities(activities: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """
+    Alterniert Aktivitäten innerhalb einer Column: passiv -> aktiv -> passiv -> aktiv.
+    Reflektions-Elemente (summary) werden ans Ende gestellt.
+    Reihenfolge innerhalb jeder Gruppe bleibt stabil.
+    """
+    passive = [a for a in activities if PHASE_BY_TYPE.get(a.get("content_type", "").lower()) == "passive"]
+    active = [a for a in activities if PHASE_BY_TYPE.get(a.get("content_type", "").lower()) == "active"]
+    reflect = [a for a in activities if PHASE_BY_TYPE.get(a.get("content_type", "").lower()) == "reflect"]
+    neutral = [a for a in activities if PHASE_BY_TYPE.get(a.get("content_type", "").lower()) is None]
+
+    ordered: List[Dict[str, Any]] = []
+    while passive or active:
+        if passive:
+            ordered.append(passive.pop(0))
+        if active:
+            ordered.append(active.pop(0))
+
+    ordered.extend(passive)
+    ordered.extend(active)
+    ordered.extend(neutral)
+    ordered.extend(reflect)
+
+    return ordered
+
+
+def build_separator_item(index: int, html: str = SEPARATOR_HTML) -> Dict[str, Any]:
+    """Create a visual separator block using AdvancedText."""
+    return {
+        "content": {
+            "library": "H5P.AdvancedText 1.1",
+            "params": {"text": html},
+            "subContentId": f"separator-{index}",
+            "metadata": {
+                "contentType": "H5P.AdvancedText",
+                "license": "U",
+                "title": f"Separator {index + 1}"
+            }
+        },
+        "useSeparator": "auto"
+    }
+
 
 def build_column_h5p(data: Dict[str, Any], output_path: str) -> str:
     """
@@ -107,7 +163,7 @@ def build_column_h5p(data: Dict[str, Any], output_path: str) -> str:
     Returns:
         Path to created H5P package
     """
-    activities = data.get("activities", [])
+    activities = order_column_activities(data.get("activities", []))
     if not activities:
         raise ValueError("Column requires at least one activity")
 
@@ -149,6 +205,13 @@ def build_column_h5p(data: Dict[str, Any], output_path: str) -> str:
             },
             "useSeparator": "auto"
         })
+
+        # Optional visual separator between activities
+        if i < len(activities) - 1:
+            column_content.append(build_separator_item(i))
+            all_dependencies.add((COMMON_DEPENDENCIES["advancedtext"]["machineName"],
+                                  COMMON_DEPENDENCIES["advancedtext"]["majorVersion"],
+                                  COMMON_DEPENDENCIES["advancedtext"]["minorVersion"]))
 
     # Build content.json for Column
     content_json = {
