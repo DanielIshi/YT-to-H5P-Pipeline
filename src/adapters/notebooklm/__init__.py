@@ -27,6 +27,14 @@ from .client import NotebookLMClient
 from .config import NotebookLMConfig, Selectors
 from .notebook_trigger import NotebookTrigger, TriggerResult
 from .notebook_harvester import NotebookHarvester, HarvestResult
+from .mindmap_extractor import MindmapExtractor, MindmapData, MindmapNode
+from .mindmap_animator import (
+    MindmapAnimator,
+    AudioTranscriber,
+    AnimationTimeline,
+    AnimationStep,
+    AudioSegment,
+)
 
 __all__ = [
     "NotebookLMClient",
@@ -36,4 +44,12 @@ __all__ = [
     "TriggerResult",
     "NotebookHarvester",
     "HarvestResult",
+    "MindmapExtractor",
+    "MindmapData",
+    "MindmapNode",
+    "MindmapAnimator",
+    "AudioTranscriber",
+    "AnimationTimeline",
+    "AnimationStep",
+    "AudioSegment",
 ]

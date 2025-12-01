@@ -18,7 +18,7 @@ import re
 import sys
 from pathlib import Path
 from dataclasses import dataclass, asdict, field
-from typing import Optional, Dict
+from typing import Optional, Dict, Tuple
 from datetime import datetime
 
 from .client import NotebookLMClient
@@ -47,10 +47,29 @@ class HarvestResult:
 class NotebookHarvester:
     """
     Checks and downloads ready content from NotebookLM notebook.
+
+    NotebookLM Studio Panel Structure (Dec 2025):
+    - Each artifact is an <artifact-library-item>
+    - Icon in <mat-icon class="artifact-icon"> determines type:
+      - audio_magic_era = Audio
+      - subscriptions = Video
+      - flowchart = Mindmap
+      - tablet = Briefing Doc
+      - quiz = Quiz
+      - stacked_bar_chart = Infografik
+      - cards_star = Lernkarten
+    - Ready items have "Vor X Min/Std" in .artifact-details
+    - Audio/Video have play button with aria-label="Wiedergeben"
+    - Download via 3-dot menu (more_vert) -> "Herunterladen"
     """
 
+    # Icon names for content types
+    AUDIO_ICON = "audio_magic_era"
+    VIDEO_ICON = "subscriptions"
+    MINDMAP_ICON = "flowchart"
+
     # Ready indicator: "X Quelle · Vor X Min."
-    READY_INDICATOR = " · Vor "
+    READY_INDICATOR = "Vor "
 
     # Generating indicators
     GENERATING_INDICATORS = [
@@ -59,11 +78,6 @@ class NotebookHarvester:
         "wird erstellt",
         "Generating"
     ]
-
-    # Buttons in Studio Panel (rechts)
-    AUDIO_CARD = 'button:has-text("Audio-Zusammenfassung"), button:has-text("Audio Overview")'
-    VIDEO_CARD = 'button:has-text("Video-Zusammenfassung"), button:has-text("Video Overview")'
-    MINDMAP_CARD = 'button:has-text("Mindmap"), button:has-text("Mind map")'
 
     def __init__(self, client: NotebookLMClient, output_dir: Path):
         self.client = client
@@ -105,50 +119,6 @@ class NotebookHarvester:
 
         return result
 
-    async def _check_card_status(self, selector: str, click_to_check: bool = True) -> str:
-        """
-        Check if a card shows ready or generating status.
-
-        Args:
-            selector: Button selector
-            click_to_check: If True, click the card and check page content for status
-        """
-        page = self.client.page
-
-        try:
-            card = await page.query_selector(selector)
-            if not card:
-                return "not_started"
-
-            # First check button text itself
-            text = await card.text_content() or ""
-
-            if self.READY_INDICATOR in text:
-                return "ready"
-
-            if any(ind in text for ind in self.GENERATING_INDICATORS):
-                return "generating"
-
-            # If click_to_check, click and check the panel content
-            if click_to_check:
-                await card.click()
-                await asyncio.sleep(2)
-
-                # Check page body for status indicators
-                body = await page.inner_text('body')
-
-                if self.READY_INDICATOR in body:
-                    return "ready"
-
-                if any(ind in body for ind in self.GENERATING_INDICATORS):
-                    return "generating"
-
-            return "not_started"
-
-        except Exception as e:
-            logger.error(f"Card status check failed: {e}")
-            return "error"
-
     async def _close_panel(self):
         """Close any open panel by pressing Escape or clicking outside"""
         page = self.client.page
@@ -158,111 +128,212 @@ class NotebookHarvester:
         except:
             pass
 
+    async def _find_artifact_by_icon(self, icon_name: str) -> Optional[tuple]:
+        """
+        Find artifact-library-item by its icon name.
+
+        Args:
+            icon_name: Icon text like "audio_magic_era", "subscriptions", "flowchart"
+
+        Returns:
+            Tuple of (item_element, title, is_ready) or None if not found
+        """
+        page = self.client.page
+        items = await page.query_selector_all('artifact-library-item')
+
+        for item in items:
+            # Get icon text
+            icon_el = await item.query_selector('mat-icon.artifact-icon')
+            if not icon_el:
+                continue
+
+            icon_text = (await icon_el.text_content() or "").strip()
+            if icon_name not in icon_text:
+                continue
+
+            # Found matching item - get title and check if ready
+            title_el = await item.query_selector('.artifact-title')
+            title = (await title_el.text_content() or "").strip() if title_el else "Unknown"
+
+            details_el = await item.query_selector('.artifact-details')
+            details = (await details_el.text_content() or "") if details_el else ""
+
+            is_ready = self.READY_INDICATOR in details
+            is_generating = any(ind in details for ind in self.GENERATING_INDICATORS)
+
+            logger.info(f"Found {icon_name}: '{title}' - ready={is_ready}, generating={is_generating}")
+
+            if is_generating:
+                return (item, title, False)
+
+            return (item, title, is_ready)
+
+        return None
+
     async def _harvest_audio(self) -> ContentStatus:
         """Check and download audio if ready from Studio panel"""
         page = self.client.page
 
         try:
-            # Find ready audio items in artifact-library (Studio panel)
-            # Ready items have "Vor X Min." in their text
-            items = await page.query_selector_all('artifact-library-item')
-            logger.info(f"Found {len(items)} artifact items")
+            # Find audio artifact by icon
+            result = await self._find_artifact_by_icon(self.AUDIO_ICON)
 
-            ready_audio_index = None
-            for i, item in enumerate(items):
-                text = await item.text_content() or ""
-                # Check if it's audio and ready (has "Vor" = finished)
-                if "Vor" in text and "Min" in text:
-                    logger.info(f"Found ready item {i}: {text[:50]}...")
-                    ready_audio_index = i + 1  # CSS nth-child is 1-indexed
-                    break
-
-            if ready_audio_index is None:
-                # Check if any are still generating
-                body = await page.inner_text('body')
-                if any(ind in body for ind in self.GENERATING_INDICATORS):
-                    return ContentStatus(status="generating")
+            if result is None:
+                logger.info("No audio artifact found")
                 return ContentStatus(status="not_started")
 
-            # Click 3-dots menu on the ready item
-            three_dots = f'artifact-library-item:nth-child({ready_audio_index}) > div > button > span.mdc-button__label > button'
-            await page.click(three_dots, timeout=10000)
+            item, title, is_ready = result
+
+            if not is_ready:
+                logger.info(f"Audio '{title}' is still generating")
+                return ContentStatus(status="generating")
+
+            logger.info(f"Audio '{title}' is ready, downloading...")
+
+            # Click the 3-dot menu button (more_vert)
+            more_btn = await item.query_selector('button[aria-label="Mehr"]')
+            if not more_btn:
+                logger.error("Could not find 'Mehr' button on audio item")
+                return ContentStatus(status="error")
+
+            await more_btn.click()
             await asyncio.sleep(1)
 
-            # Click Herunterladen
+            # Click "Herunterladen" in the menu
             output_path = self.output_dir / "audio" / f"audio_{datetime.now():%Y%m%d_%H%M%S}.mp3"
             output_path.parent.mkdir(parents=True, exist_ok=True)
 
-            async with page.expect_download() as download_info:
-                await page.click('button:has-text("Herunterladen")', timeout=5000)
+            try:
+                async with page.expect_download(timeout=30000) as download_info:
+                    # Try different selectors for download button
+                    download_clicked = False
+                    for selector in [
+                        'button:has-text("Herunterladen")',
+                        'button:has-text("Download")',
+                        '[role="menuitem"]:has-text("Herunterladen")',
+                        '[role="menuitem"]:has-text("Download")',
+                    ]:
+                        try:
+                            await page.click(selector, timeout=3000)
+                            download_clicked = True
+                            break
+                        except:
+                            continue
 
-            download = await download_info.value
-            await download.save_as(str(output_path))
-            logger.info(f"Audio downloaded: {output_path}")
-            return ContentStatus(status="ready", file=str(output_path))
+                    if not download_clicked:
+                        raise Exception("Could not click download button")
+
+                download = await download_info.value
+                await download.save_as(str(output_path))
+                logger.info(f"Audio downloaded: {output_path}")
+                return ContentStatus(status="ready", file=str(output_path))
+
+            except Exception as e:
+                logger.error(f"Download failed: {e}")
+                # Close menu
+                await page.keyboard.press("Escape")
+                return ContentStatus(status="error")
 
         except Exception as e:
             logger.error(f"Audio harvest failed: {e}")
             return ContentStatus(status="error")
 
     async def _harvest_video(self) -> ContentStatus:
-        """Check and download video if ready"""
+        """Check and download video if ready from Studio panel"""
         page = self.client.page
-        # click_to_check=True will click the card, so panel is already open
-        status = await self._check_card_status(self.VIDEO_CARD, click_to_check=True)
-        logger.info(f"Video status: {status}")
-
-        if status != "ready":
-            return ContentStatus(status=status)
 
         try:
-            # Panel is already open from status check
+            # Find video artifact by icon
+            result = await self._find_artifact_by_icon(self.VIDEO_ICON)
+
+            if result is None:
+                logger.info("No video artifact found")
+                return ContentStatus(status="not_started")
+
+            item, title, is_ready = result
+
+            if not is_ready:
+                logger.info(f"Video '{title}' is still generating")
+                return ContentStatus(status="generating")
+
+            logger.info(f"Video '{title}' is ready, downloading...")
+
+            # Click the 3-dot menu button (more_vert)
+            more_btn = await item.query_selector('button[aria-label="Mehr"]')
+            if not more_btn:
+                logger.error("Could not find 'Mehr' button on video item")
+                return ContentStatus(status="error")
+
+            await more_btn.click()
             await asyncio.sleep(1)
 
+            # Click "Herunterladen" in the menu
             output_path = self.output_dir / "video" / f"video_{datetime.now():%Y%m%d_%H%M%S}.mp4"
             output_path.parent.mkdir(parents=True, exist_ok=True)
 
-            # Try download button
-            download_btn = await page.query_selector('button[aria-label*="Download"], button[aria-label*="Herunterladen"]')
-            if download_btn and await download_btn.is_visible():
-                async with page.expect_download() as download_info:
-                    await download_btn.click()
+            try:
+                async with page.expect_download(timeout=60000) as download_info:
+                    download_clicked = False
+                    for selector in [
+                        'button:has-text("Herunterladen")',
+                        'button:has-text("Download")',
+                        '[role="menuitem"]:has-text("Herunterladen")',
+                        '[role="menuitem"]:has-text("Download")',
+                    ]:
+                        try:
+                            await page.click(selector, timeout=3000)
+                            download_clicked = True
+                            break
+                        except:
+                            continue
+
+                    if not download_clicked:
+                        raise Exception("Could not click download button")
+
                 download = await download_info.value
                 await download.save_as(str(output_path))
                 logger.info(f"Video downloaded: {output_path}")
                 return ContentStatus(status="ready", file=str(output_path))
 
-            # Fallback: Get video src
-            video_elem = await page.query_selector('video[src]')
-            if video_elem:
-                src = await video_elem.get_attribute("src")
-                if src:
-                    response = await page.request.get(src)
-                    if response.ok:
-                        output_path.write_bytes(await response.body())
-                        logger.info(f"Video downloaded: {output_path}")
-                        return ContentStatus(status="ready", file=str(output_path))
-
-            return ContentStatus(status="error")
+            except Exception as e:
+                logger.error(f"Download failed: {e}")
+                await page.keyboard.press("Escape")
+                return ContentStatus(status="error")
 
         except Exception as e:
             logger.error(f"Video harvest failed: {e}")
             return ContentStatus(status="error")
 
     async def _harvest_mindmap(self) -> ContentStatus:
-        """Check and extract mindmap if ready"""
+        """Check and extract mindmap if ready from Studio panel"""
         page = self.client.page
 
         try:
-            # Click mindmap card
-            mindmap_card = await page.query_selector(self.MINDMAP_CARD)
-            if not mindmap_card:
+            # Find mindmap artifact by icon
+            result = await self._find_artifact_by_icon(self.MINDMAP_ICON)
+
+            if result is None:
+                logger.info("No mindmap artifact found")
                 return ContentStatus(status="not_started")
 
-            await mindmap_card.click()
+            item, title, is_ready = result
+
+            if not is_ready:
+                logger.info(f"Mindmap '{title}' is still generating")
+                return ContentStatus(status="generating")
+
+            logger.info(f"Mindmap '{title}' is ready, opening to extract SVG...")
+
+            # Click the mindmap card to open it (not the menu)
+            card_btn = await item.query_selector('button.artifact-button-content')
+            if card_btn:
+                await card_btn.click()
+            else:
+                await item.click()
+
             await asyncio.sleep(3)
 
-            # Find SVG with mindmap
+            # Find SVG with mindmap content
             svgs = await page.query_selector_all('svg')
             mindmap_svg = None
             max_size = 0
@@ -270,7 +341,7 @@ class NotebookHarvester:
             for svg in svgs:
                 try:
                     html = await svg.evaluate("el => el.outerHTML")
-                    # Skip icons
+                    # Skip icons (Google UI)
                     if 'class="gb_' in html or 'focusable="false"' in html:
                         continue
                     # Look for mindmap markers
@@ -287,7 +358,8 @@ class NotebookHarvester:
                 logger.info(f"Mindmap saved: {output_path}")
                 return ContentStatus(status="ready", file=str(output_path))
 
-            return ContentStatus(status="generating")
+            logger.warning("Could not find mindmap SVG content")
+            return ContentStatus(status="error")
 
         except Exception as e:
             logger.error(f"Mindmap harvest failed: {e}")
