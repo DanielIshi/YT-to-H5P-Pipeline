@@ -308,7 +308,7 @@ class H5PPackageBuilder:
                 "showSolutionsRequiresInput": True,
                 "confirmCheckDialog": False,
                 "confirmRetryDialog": False,
-                "autoCheck": False,
+                "autoCheck": True,
                 "passPercentage": 100
             },
             "UI": {
@@ -356,7 +356,7 @@ class H5PPackageBuilder:
                 "enableRetry": True,
                 "enableSolutionsButton": True,
                 "caseSensitive": elem.case_sensitive,
-                "autoCheck": False
+                "autoCheck": True
             }
         }
 

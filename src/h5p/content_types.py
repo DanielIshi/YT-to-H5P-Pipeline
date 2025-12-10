@@ -53,7 +53,7 @@ class MultiChoiceContent:
                 "singlePoint": self.single_point,
                 "randomAnswers": self.randomize,
                 "showSolutionsRequiresInput": True,
-                "autoCheck": False,
+                "autoCheck": True,
                 "passPercentage": self.pass_percentage,
                 "showScorePoints": True
             },

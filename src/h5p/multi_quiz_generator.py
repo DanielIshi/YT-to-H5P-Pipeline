@@ -123,7 +123,7 @@ def build_single_multichoice_h5p(question_data: Dict[str, Any], output_path: str
                 "randomAnswers": True,
                 "showSolutionsRequiresInput": True,
                 "confirmCheckDialog": False,
-                "autoCheck": False,
+                "autoCheck": True,
                 "passPercentage": 100,
                 "showScorePoints": True
             },
