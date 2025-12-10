@@ -1,0 +1,20 @@
+[
+  {
+    "time": 4.06,
+    "action": "expand",
+    "node": "Ausstellerinformationen jobmesse Leipzig",
+    "trigger_text": "Die Ausstelle Informationen für die Jobmesse leibt"
+  },
+  {
+    "time": 335.86,
+    "action": "expand",
+    "node": "Zeitplan (Messe 22.-23.11.2025)",
+    "trigger_text": "Der ganze Zeitplan bricht zusammen."
+  },
+  {
+    "time": 558.14,
+    "action": "expand",
+    "node": "Technik & Versorgung",
+    "trigger_text": "Technik und die versteckten Kosten."
+  }
+]

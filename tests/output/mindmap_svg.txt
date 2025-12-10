@@ -1,0 +1,28 @@
+<svg width="100%" height="100%" style="overflow: scroll;"><g transform="translate(-97.8109375,346.25) scale(0.9)"><path class="link" d="M 413.46875 0
+          C 449.46875 0,
+            449.46875 -320,
+            485.46875 -320" style="fill: none; stroke: rgb(195, 202, 255); stroke-width: 2px;"></path><path class="link" d="M 413.46875 0
+          C 449.46875 0,
+            449.46875 -240,
+            485.46875 -240" style="fill: none; stroke: rgb(195, 202, 255); stroke-width: 2px;"></path><path class="link" d="M 413.46875 0
+          C 449.46875 0,
+            449.46875 -160,
+            485.46875 -160" style="fill: none; stroke: rgb(195, 202, 255); stroke-width: 2px;"></path><path class="link" d="M 413.46875 0
+          C 449.46875 0,
+            449.46875 -80.00000000000001,
+            485.46875 -80.00000000000001" style="fill: none; stroke: rgb(195, 202, 255); stroke-width: 2px;"></path><path class="link" d="M 413.46875 0
+          C 449.46875 0,
+            449.46875 0,
+            485.46875 0" style="fill: none; stroke: rgb(195, 202, 255); stroke-width: 2px;"></path><path class="link" d="M 413.46875 0
+          C 449.46875 0,
+            449.46875 80,
+            485.46875 80" style="fill: none; stroke: rgb(195, 202, 255); stroke-width: 2px;"></path><path class="link" d="M 413.46875 0
+          C 449.46875 0,
+            449.46875 160,
+            485.46875 160" style="fill: none; stroke: rgb(195, 202, 255); stroke-width: 2px;"></path><path class="link" d="M 413.46875 0
+          C 449.46875 0,
+            449.46875 240,
+            485.46875 240" style="fill: none; stroke: rgb(195, 202, 255); stroke-width: 2px;"></path><path class="link" d="M 413.46875 0
+          C 449.46875 0,
+            449.46875 320,
+            485.46875 320" style="fill: none; stroke: rgb(195, 202, 255); stroke-width: 2px;"></path><g class="node" transform="translate(0, 0)"><rect rx="8" ry="8" style="fill: rgb(195, 202, 255); cursor: pointer;" x="-18" y="-27.5" width="409.46875" height="55"></rect><text class="node-name" style="text-anchor: start; font-size: 20px; font-family: &quot;Google Sans&quot;; dominant-baseline: middle; fill: rgb(0, 0, 0); pointer-events: none;">jobmesse leipzig: Ausstellerinformationen</text><circle r="12" fill-opacity="1" transform="translate(413.46875, 0)" style="fill: rgb(195, 202, 255); cursor: pointer;"></circle><text class="expand-symbol" transform="translate(413.46875, 0)" style="font-size: 20px; text-anchor: middle; font-family: &quot;Google Sans&quot;; fill: rgb(0, 0, 0); pointer-events: none; dominant-baseline: middle;">&lt;</text></g><g class="node" transform="translate(503.46875, -320)"><rect rx="8" ry="8" style="fill: rgb(186, 211, 238); cursor: pointer;" x="-18" y="-27.5" width="350.390625" height="55"></rect><text class="node-name" style="text-anchor: start; font-size: 20px; font-family: &quot;Google Sans&quot;; dominant-baseline: middle; fill: rgb(0, 0, 0); pointer-events: none;">1. Zeitplan (21.-23. November 2025)</text><circle r="12" fill-opacity="1" transform="translate(354.390625, 0)" style="fill: rgb(186, 211, 238); cursor: pointer;"></circle><text class="expand-symbol" transform="translate(354.390625, 0)" style="font-size: 20px; text-anchor: middle; font-family: &quot;Google Sans&quot;; fill: rgb(0, 0, 0); pointer-events: none; dominant-baseline: middle;">&gt;</text></g><g class="node" transform="translate(503.46875, -240)"><rect rx="8" ry="8" style="fill: rgb(186, 211, 238); cursor: pointer;" x="-18" y="-27.5" width="117.125" height="55"></rect><text class="node-name" style="text-anchor: start; font-size: 20px; font-family: &quot;Google Sans&quot;; dominant-baseline: middle; fill: rgb(0, 0, 0); pointer-events: none;">2. Parken</text><circle r="12" fill-opacity="1" transform="translate(121.125, 0)" style="fill: rgb(186, 211, 238); cursor: pointer;"></circle><text class="expand-symbol" transform="translate(121.125, 0)" style="font-size: 20px; text-anchor: middle; font-family: &quot;Google Sans&quot;; fill: rgb(0, 0, 0); pointer-events: none; dominant-baseline: middle;">&gt;</text></g><g class="node" transform="translate(503.46875, -160)"><rect rx="8" ry="8" style="fill: rgb(186, 211, 238); cursor: pointer;" x="-18" y="-27.5" width="272.84375" height="55"></rect><text class="node-name" style="text-anchor: start; font-size: 20px; font-family: &quot;Google Sans&quot;; dominant-baseline: middle; fill: rgb(0, 0, 0); pointer-events: none;">3. Auf- &amp; Abbau Richtlinien</text><circle r="12" fill-opacity="1" transform="translate(276.84375, 0)" style="fill: rgb(186, 211, 238); cursor: pointer;"></circle><text class="expand-symbol" transform="translate(276.84375, 0)" style="font-size: 20px; text-anchor: middle; font-family: &quot;Google Sans&quot;; fill: rgb(0, 0, 0); pointer-events: none; dominant-baseline: middle;">&gt;</text></g><g class="node" transform="translate(503.46875, -80)"><rect rx="8" ry="8" style="fill: rgb(186, 211, 238); cursor: pointer;" x="-18" y="-27.5" width="169.890

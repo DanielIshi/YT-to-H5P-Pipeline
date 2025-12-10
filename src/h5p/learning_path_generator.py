@@ -10,9 +10,106 @@ import sys
 import subprocess
 import tempfile
 import zipfile
+import base64
+import re
 from pathlib import Path
 from typing import Dict, Any, Optional
 import httpx
+
+
+# ============================================================================
+# AI IMAGE GENERATION FOR IMAGEHOTSPOTS
+# ============================================================================
+
+def generate_infographic_image(transcript: str, hotspots: list, title: str = "") -> Optional[str]:
+    """
+    Generate a thematic infographic image using DALL-E based on transcript content.
+
+    Returns: URL of the generated image, or None if generation fails
+    """
+    api_key = os.environ.get("OPENAI_API_KEY", "")
+    if not api_key:
+        print('{"status": "warning", "message": "No OPENAI_API_KEY for image generation"}')
+        return None
+
+    # Extract key topics from hotspots for the image prompt
+    topics = [hs.get("header", "") for hs in hotspots if hs.get("header")]
+    topics_text = ", ".join(topics[:5]) if topics else "key concepts"
+
+    # Create a focused prompt for infographic-style image
+    # Truncate transcript to first 500 chars for context
+    context = transcript[:500] if transcript else ""
+
+    image_prompt = f"""Create a clean, professional infographic-style illustration for an e-learning module.
+
+Topic: {title or 'Educational Content'}
+Key concepts to visualize: {topics_text}
+
+Style requirements:
+- Clean, flat design with a modern look
+- Use a cohesive color palette (blues, teals, or professional colors)
+- Include visual icons or simple graphics representing the key concepts
+- Leave space for text overlays (hotspots will be added)
+- No text or labels in the image itself
+- Abstract/conceptual representation, not photorealistic
+- Suitable as a background for interactive hotspots
+- Resolution: 1280x720 (landscape)
+
+The image should feel educational, professional, and inviting for learning."""
+
+    try:
+        response = httpx.post(
+            "https://api.openai.com/v1/images/generations",
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "model": "dall-e-3",
+                "prompt": image_prompt,
+                "n": 1,
+                "size": "1792x1024",  # Closest to 16:9 available
+                "quality": "standard",
+                "response_format": "url"
+            },
+            timeout=60.0
+        )
+        response.raise_for_status()
+
+        image_url = response.json()["data"][0]["url"]
+        print(f'{{"status": "info", "message": "Generated infographic image via DALL-E"}}')
+        return image_url
+
+    except Exception as e:
+        print(f'{{"status": "warning", "message": "Image generation failed: {str(e)}"}}')
+        return None
+
+
+def download_and_encode_image(image_url: str) -> Optional[tuple]:
+    """
+    Download image and return base64-encoded data with mime type.
+    H5P can embed images directly in the package.
+
+    Returns: (base64_data, mime_type) or None
+    """
+    try:
+        response = httpx.get(image_url, timeout=30.0, follow_redirects=True)
+        response.raise_for_status()
+
+        content_type = response.headers.get("content-type", "image/png")
+        if "jpeg" in content_type or "jpg" in content_type:
+            mime = "image/jpeg"
+            ext = "jpg"
+        else:
+            mime = "image/png"
+            ext = "png"
+
+        image_data = base64.b64encode(response.content).decode("utf-8")
+        return (image_data, mime, ext, response.content)
+
+    except Exception as e:
+        print(f'{{"status": "warning", "message": "Image download failed: {str(e)}"}}')
+        return None
 
 # ============================================================================
 # LLM PROMPT - Generates complete learning path with all content types
@@ -258,15 +355,122 @@ def call_openai_learning_path(transcript: str, title: str = "Lernmodul", video_u
 # H5P BUILDER FUNCTIONS - One for each content type
 # ============================================================================
 
+# Dark Theme CSS embedded in every H5P package for Moodle dark theme compatibility
+H5P_DARK_THEME_CSS = """
+/* H5P Dark Theme - Embedded in Package */
+/* Issue #13: CSS must be in package since iframe doesn't inherit theme */
+
+/* DIALOGCARDS - Dark cards with white text */
+.h5p-dialogcards-card-content,
+.h5p-dialogcards .h5p-dialogcards-card,
+.h5p-dialogcards-card-side,
+.h5p-dialogcards-card-text-wrapper,
+.h5p-dialogcards-card-text-area,
+.h5p-dialogcards-card-text-inner,
+.h5p-dialogcards-card-text {
+    background-color: #252538 !important;
+    color: #ffffff !important;
+}
+
+/* TRUE/FALSE - Both buttons visible */
+.h5p-true-false .h5p-question-content {
+    background-color: #1a1a2e !important;
+}
+.h5p-true-false .h5p-question-introduction,
+.h5p-true-false .h5p-question-introduction p {
+    color: #ffffff !important;
+}
+.h5p-true-false-answer,
+.h5p-answer {
+    background-color: #252538 !important;
+    color: #ffffff !important;
+    border: 1px solid #555 !important;
+    display: inline-block !important;
+    min-width: 80px !important;
+}
+
+/* MULTICHOICE */
+.h5p-question-content, .h5p-multichoice {
+    background-color: #1a1a2e !important;
+}
+.h5p-question-introduction p, .h5p-question h2, .h5p-question h3 {
+    color: #ffffff !important;
+}
+.h5p-alternative-container .h5p-answer {
+    background-color: #252538 !important;
+    color: #e8e8e8 !important;
+}
+.h5p-alternative-inner { color: #e8e8e8 !important; }
+
+/* ACCORDION */
+.h5p-accordion { background-color: #1a1a2e !important; }
+.h5p-panel-title {
+    background-color: #353550 !important;
+    color: #ffffff !important;
+}
+.h5p-panel-content {
+    background-color: #252538 !important;
+    color: #e0e0e0 !important;
+}
+
+/* BLANKS */
+.h5p-blanks { background-color: #1a1a2e !important; color: #e8e8e8 !important; }
+.h5p-text-input {
+    background-color: #333 !important;
+    color: #fff !important;
+    border: 1px solid #666 !important;
+}
+
+/* SUMMARY */
+.h5p-summary { background-color: #1a1a2e !important; }
+.h5p-summary-statement {
+    background-color: #252538 !important;
+    color: #e8e8e8 !important;
+}
+
+/* DRAG AND DROP */
+.h5p-drag-text { background-color: #1a1a2e !important; color: #e8e8e8 !important; }
+
+/* IMAGE HOTSPOTS */
+.h5p-image-hotspot-popup {
+    background-color: rgba(30, 30, 45, 0.97) !important;
+    color: #ffffff !important;
+}
+.h5p-image-hotspot-popup-header { color: #ffffff !important; }
+.h5p-image-hotspot-popup-body p { color: #e0e0e0 !important; }
+
+/* BUTTONS */
+.h5p-joubelui-button, .h5p-question-check-answer,
+.h5p-question-show-solution, .h5p-question-try-again {
+    background-color: #5a4a8a !important;
+    color: #ffffff !important;
+}
+
+/* Global text visibility */
+body, .h5p-content { color: #e8e8e8; }
+"""
+
+
 def _create_h5p_package(content_json: Dict, h5p_json: Dict, output_path: str) -> str:
-    """Helper to create H5P zip package"""
+    """Helper to create H5P zip package with embedded dark theme CSS"""
     with tempfile.TemporaryDirectory() as tmpdir:
         tmppath = Path(tmpdir)
         content_dir = tmppath / "content"
         content_dir.mkdir()
 
+        # Create CSS directory and add dark theme
+        css_dir = content_dir / "css"
+        css_dir.mkdir()
+        with open(css_dir / "dark-theme.css", "w", encoding="utf-8") as f:
+            f.write(H5P_DARK_THEME_CSS)
+
         with open(content_dir / "content.json", "w", encoding="utf-8") as f:
             json.dump(content_json, f, ensure_ascii=False, indent=2)
+
+        # Add preloadedCss to h5p.json for dark theme
+        if "preloadedCss" not in h5p_json:
+            h5p_json["preloadedCss"] = []
+        h5p_json["preloadedCss"].append({"path": "content/css/dark-theme.css"})
 
         with open(tmppath / "h5p.json", "w", encoding="utf-8") as f:
             json.dump(h5p_json, f, ensure_ascii=False, indent=2)
@@ -274,6 +478,7 @@ def _create_h5p_package(content_json: Dict, h5p_json: Dict, output_path: str) ->
         with zipfile.ZipFile(output_path, "w", zipfile.ZIP_DEFLATED) as zf:
             zf.write(tmppath / "h5p.json", "h5p.json")
             zf.write(content_dir / "content.json", "content/content.json")
+            zf.write(css_dir / "dark-theme.css", "content/css/dark-theme.css")
 
     return output_path
 
@@ -345,7 +550,7 @@ def build_truefalse_h5p(data: Dict[str, Any], output_path: str) -> str:
             "enableCheckButton": True,
             "confirmCheckDialog": False,
             "confirmRetryDialog": False,
-            "autoCheck": False
+            "autoCheck": True
         },
         "l10n": {
             "trueText": "Wahr",
@@ -435,7 +640,7 @@ def build_blanks_h5p(data: Dict[str, Any], output_path: str) -> str:
             "enableRetry": True,
             "enableSolutionsButton": True,
             "enableCheckButton": True,
-            "autoCheck": False,
+            "autoCheck": True,
             "caseSensitive": False,
             "showSolutionsRequiresInput": True,
             "separateLines": False,
@@ -1017,38 +1222,51 @@ def build_interactive_video_h5p(data: Dict[str, Any], output_path: str) -> str:
 # IMAGE HOTSPOTS BUILDER
 # ============================================================================
 
-def build_image_hotspots_h5p(data: Dict[str, Any], output_path: str) -> str:
+def build_image_hotspots_h5p(data: Dict[str, Any], output_path: str, transcript: str = "") -> str:
     """
-    Build H5P.ImageHotspots package
+    Build H5P.ImageHotspots package with AI-generated or provided image.
+
+    If no image_url is provided (or it's a YouTube thumbnail), generates a
+    contextual infographic via DALL-E based on the transcript content.
 
     Expected data format:
     {
         "type": "imagehotspots",
         "title": "Themen-Übersicht",
-        "image_url": "https://img.youtube.com/vi/{VIDEO_ID}/maxresdefault.jpg",
+        "image_url": "https://...",  # Optional - will generate if missing
         "hotspots": [
             {
                 "x": 25,  # percentage from left
                 "y": 40,  # percentage from top
                 "header": "Thema A",
                 "content": "Erklärung zu Thema A..."
-            },
-            {
-                "x": 70,
-                "y": 60,
-                "header": "Thema B",
-                "content": "Erklärung zu Thema B..."
             }
         ]
     }
     """
-    image_url = data.get("image_url", "")
-    if not image_url:
-        raise ValueError("ImageHotspots requires image_url")
-
     hotspots = data.get("hotspots", [])
-    h5p_hotspots = []
+    title = data.get("title", "Themenübersicht")
+    image_url = data.get("image_url", "")
 
+    # Check if we should generate an AI image
+    # Generate if: no URL, or URL is a YouTube thumbnail (which isn't content-specific)
+    should_generate = not image_url or "img.youtube.com" in image_url
+
+    if should_generate and hotspots:
+        print('{"status": "info", "message": "Generating AI infographic for ImageHotspots..."}')
+        generated_url = generate_infographic_image(
+            transcript=transcript,
+            hotspots=hotspots,
+            title=title
+        )
+        if generated_url:
+            image_url = generated_url
+
+    if not image_url:
+        raise ValueError("ImageHotspots requires image_url (generation failed)")
+
+    # Build hotspots structure
+    h5p_hotspots = []
     for i, hs in enumerate(hotspots):
         h5p_hotspots.append({
             "position": {
@@ -1070,36 +1288,119 @@ def build_image_hotspots_h5p(data: Dict[str, Any], output_path: str) -> str:
             "icon": "plus"
         })
 
-    content_json = {
-        "image": {
-            "path": image_url,
-            "mime": "image/jpeg",
-            "copyright": {"license": "U"},
-            "width": 1280,
-            "height": 720
-        },
-        "hotspots": h5p_hotspots,
-        "hotspotNumberLabel": "Hotspot #num",
-        "closeButtonLabel": "Schließen",
-        "iconType": "icon",
-        "icon": "plus",
-        "color": "#981d99"
-    }
+    # Try to download and embed image in package for better performance
+    image_data = download_and_encode_image(image_url)
 
-    h5p_json = {
-        "title": data.get("title", "Interaktives Bild"),
-        "language": "de",
-        "mainLibrary": "H5P.ImageHotspots",
-        "embedTypes": ["div"],
-        "license": "U",
-        "preloadedDependencies": [
-            {"machineName": "H5P.ImageHotspots", "majorVersion": 1, "minorVersion": 10},
-            {"machineName": "H5P.Text", "majorVersion": 1, "minorVersion": 1},
-            {"machineName": "FontAwesome", "majorVersion": 4, "minorVersion": 5}
-        ]
-    }
+    if image_data:
+        # Embed image in package - better for offline/performance
+        b64_data, mime, ext, raw_bytes = image_data
+        image_filename = f"images/infographic.{ext}"
 
-    return _create_h5p_package(content_json, h5p_json, output_path)
+        content_json = {
+            "image": {
+                "path": image_filename,
+                "mime": mime,
+                "copyright": {"license": "U"},
+                "width": 1792,
+                "height": 1024
+            },
+            "hotspots": h5p_hotspots,
+            "hotspotNumberLabel": "Hotspot #num",
+            "closeButtonLabel": "Schließen",
+            "iconType": "icon",
+            "icon": "plus",
+            "color": "#981d99"
+        }
+
+        h5p_json = {
+            "title": title,
+            "language": "de",
+            "mainLibrary": "H5P.ImageHotspots",
+            "embedTypes": ["div"],
+            "license": "U",
+            "preloadedDependencies": [
+                {"machineName": "H5P.ImageHotspots", "majorVersion": 1, "minorVersion": 10},
+                {"machineName": "H5P.Text", "majorVersion": 1, "minorVersion": 1},
+                {"machineName": "FontAwesome", "majorVersion": 4, "minorVersion": 5}
+            ]
+        }
+
+        # Create package with embedded image
+        return _create_h5p_package_with_image(content_json, h5p_json, output_path, image_filename, raw_bytes)
+
+    else:
+        # Fallback: use URL directly (external image)
+        content_json = {
+            "image": {
+                "path": image_url,
+                "mime": "image/jpeg",
+                "copyright": {"license": "U"},
+                "width": 1280,
+                "height": 720
+            },
+            "hotspots": h5p_hotspots,
+            "hotspotNumberLabel": "Hotspot #num",
+            "closeButtonLabel": "Schließen",
+            "iconType": "icon",
+            "icon": "plus",
+            "color": "#981d99"
+        }
+
+        h5p_json = {
+            "title": title,
+            "language": "de",
+            "mainLibrary": "H5P.ImageHotspots",
+            "embedTypes": ["div"],
+            "license": "U",
+            "preloadedDependencies": [
+                {"machineName": "H5P.ImageHotspots", "majorVersion": 1, "minorVersion": 10},
+                {"machineName": "H5P.Text", "majorVersion": 1, "minorVersion": 1},
+                {"machineName": "FontAwesome", "majorVersion": 4, "minorVersion": 5}
+            ]
+        }
+
+        return _create_h5p_package(content_json, h5p_json, output_path)
+
+
+def _create_h5p_package_with_image(content_json: Dict, h5p_json: Dict, output_path: str,
+                                    image_path: str, image_bytes: bytes) -> str:
+    """Create H5P package with embedded image file and dark theme CSS."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmppath = Path(tmpdir)
+        content_dir = tmppath / "content"
+        content_dir.mkdir()
+
+        # Create images subdirectory and save image
+        images_dir = content_dir / "images"
+        images_dir.mkdir()
+        image_filename = Path(image_path).name
+        with open(images_dir / image_filename, "wb") as f:
+            f.write(image_bytes)
+
+        # Create CSS directory and add dark theme
+        css_dir = content_dir / "css"
+        css_dir.mkdir()
+        with open(css_dir / "dark-theme.css", "w", encoding="utf-8") as f:
+            f.write(H5P_DARK_THEME_CSS)
+
+        with open(content_dir / "content.json", "w", encoding="utf-8") as f:
+            json.dump(content_json, f, ensure_ascii=False, indent=2)
+
+        # Add preloadedCss to h5p.json for dark theme
+        if "preloadedCss" not in h5p_json:
+            h5p_json["preloadedCss"] = []
+        h5p_json["preloadedCss"].append({"path": "content/css/dark-theme.css"})
+
+        with open(tmppath / "h5p.json", "w", encoding="utf-8") as f:
+            json.dump(h5p_json, f, ensure_ascii=False, indent=2)
+
+        with zipfile.ZipFile(output_path, "w", zipfile.ZIP_DEFLATED) as zf:
+            zf.write(tmppath / "h5p.json", "h5p.json")
+            zf.write(content_dir / "content.json", "content/content.json")
+            zf.write(images_dir / image_filename, f"content/images/{image_filename}")
+            zf.write(css_dir / "dark-theme.css", "content/css/dark-theme.css")
+
+        return output_path
 
 
 # ============================================================================
@@ -1181,7 +1482,11 @@ def generate_learning_path(
                 continue
 
             # Build H5P package
-            builder(activity, h5p_path)
+            # ImageHotspots needs transcript for AI image generation
+            if act_type == "imagehotspots":
+                builder(activity, h5p_path, transcript=transcript)
+            else:
+                builder(activity, h5p_path)
 
             # Import to Moodle
             moodle_result = import_h5p_to_moodle(h5p_path, courseid, act_title)

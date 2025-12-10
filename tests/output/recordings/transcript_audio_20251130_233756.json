@@ -1,0 +1,2272 @@
+[
+  {
+    "start": 0.0,
+    "end": 3.0,
+    "text": "Hallo und willkommen zu unserer gemeinsamen Analyse."
+  },
+  {
+    "start": 3.44,
+    "end": 8.52,
+    "text": "Heute schauen wir mal in den Maschinenraum der künstlichen Intelligenz."
+  },
+  {
+    "start": 8.52,
+    "end": 11.48,
+    "text": "Wir nehmen uns Klassifikationsverfahren vor."
+  },
+  {
+    "start": 12.08,
+    "end": 14.18,
+    "text": "Du hast uns einen wissenschaftlichen Text geschickt,"
+  },
+  {
+    "start": 14.68,
+    "end": 16.54,
+    "text": "der uns hinter die Kulissen blicken lässt,"
+  },
+  {
+    "start": 17.18,
+    "end": 22.12,
+    "text": "also wie Maschinen lernen, Daken zu sortieren und Entscheidungen zu treffen."
+  },
+  {
+    "start": 22.78,
+    "end": 25.18,
+    "text": "Unsere Mission heute ist, glaube ich, ganz klar,"
+  },
+  {
+    "start": 25.54,
+    "end": 27.98,
+    "text": "wir wollen gemeinsam diesen Bauplan verstehen."
+  },
+  {
+    "start": 27.98,
+    "end": 30.92,
+    "text": "Den Bauplan, mit dem ein Computer lernt,"
+  },
+  {
+    "start": 31.34,
+    "end": 32.52,
+    "text": "eine Spamme zu erkennen,"
+  },
+  {
+    "start": 32.92,
+    "end": 36.42,
+    "text": "oder vielleicht eine verdächtige Kreditkarten-Transaktion zu blockieren."
+  },
+  {
+    "start": 36.88,
+    "end": 39.92,
+    "text": "Absolut. Und das ist ja ein fundamentaler Baustein,"
+  },
+  {
+    "start": 40.04,
+    "end": 41.18,
+    "text": "das Maschinenlearns."
+  },
+  {
+    "start": 41.7,
+    "end": 44.28,
+    "text": "Das begegnet uns im Alltag eigentlich ständig,"
+  },
+  {
+    "start": 44.72,
+    "end": 46.16,
+    "text": "oft ohne das für überhaupt merken."
+  },
+  {
+    "start": 46.8,
+    "end": 49.4,
+    "text": "Also, wenn dein Email-Programm-Spam filtert,"
+  },
+  {
+    "start": 49.56,
+    "end": 52.82,
+    "text": "wenn deine Bank eine Transaktion markiert,"
+  },
+  {
+    "start": 53.12,
+    "end": 55.56,
+    "text": "oder wenn eine Streaming-Plattform, die einen Film vorschlägt."
+  },
+  {
+    "start": 55.56,
+    "end": 58.64,
+    "text": "Dahinter stecken fast immer Klassifikationsalgoritmen."
+  },
+  {
+    "start": 59.28,
+    "end": 62.26,
+    "text": "Unser Ziel ist es, die Kernideen hinter diesen,"
+  },
+  {
+    "start": 62.82,
+    "end": 65.9,
+    "text": "ja, doch oft komplexen Fachbegriffen zu entschlüsseln."
+  },
+  {
+    "start": 66.82,
+    "end": 68.28,
+    "text": "Greifbar zu machen, quasi."
+  },
+  {
+    "start": 69.04,
+    "end": 71.94,
+    "text": "Genau. Es geht darum, Ordnungen starten Chaos zu bringen."
+  },
+  {
+    "start": 72.4,
+    "end": 74.26,
+    "text": "Um das Ganze vielleicht faszbarer zu machen,"
+  },
+  {
+    "start": 74.78,
+    "end": 77.46,
+    "text": "könnten wir uns ein konkretes Ziel vorstellen."
+  },
+  {
+    "start": 78.02,
+    "end": 81.24,
+    "text": "Wir wollen ein System bauen, das Kreditkartenbetrug erkennt."
+  },
+  {
+    "start": 81.48,
+    "end": 84.08,
+    "text": "Oh, das ist eine super Idee. Das macht es sofort viel Greifbarer."
+  },
+  {
+    "start": 84.08,
+    "end": 85.72,
+    "text": "Okay, packen wir das mal aus."
+  },
+  {
+    "start": 86.1,
+    "end": 89.44,
+    "text": "Bevor unser Betrugserkennungssystem überhaupt etwas entscheiden kann,"
+  },
+  {
+    "start": 89.94,
+    "end": 91.1,
+    "text": "muss es ja trainiert werden."
+  },
+  {
+    "start": 91.7,
+    "end": 94.74,
+    "text": "Deine Unterlagen sprechen hier von einer Lern- und einer Testphase."
+  },
+  {
+    "start": 95.72,
+    "end": 97.84,
+    "text": "Das klingt fast wie in der Schule."
+  },
+  {
+    "start": 98.22,
+    "end": 100.04,
+    "text": "Erst lernen, dann die Prüfung schreiben."
+  },
+  {
+    "start": 100.54,
+    "end": 102.82,
+    "text": "Das ist eine exzellente Analogie, die trifft den Kern."
+  },
+  {
+    "start": 103.0,
+    "end": 104.2,
+    "text": "Genauso funktioniert es."
+  },
+  {
+    "start": 105.04,
+    "end": 106.94,
+    "text": "In der ersten Phase, also der Lernphase,"
+  },
+  {
+    "start": 107.26,
+    "end": 110.16,
+    "text": "füttern wir den Algorithmus mit einer riesigen Menge"
+  },
+  {
+    "start": 110.16,
+    "end": 111.94,
+    "text": "an historischen Transaktionsdaten."
+  },
+  {
+    "start": 111.94,
+    "end": 115.06,
+    "text": "Okay, und das Entscheidende dabei ist."
+  },
+  {
+    "start": 115.9,
+    "end": 118.12,
+    "text": "Bei diesen Daten kennen wir die richtige Antwort schon."
+  },
+  {
+    "start": 118.66,
+    "end": 121.58,
+    "text": "Wir zeigen ihm 100.000 Transaktionen und sagen,"
+  },
+  {
+    "start": 121.74,
+    "end": 126.6,
+    "text": "bei jeder einzelnen, das hier war Betrug und das hier war eine legitime Zahlung."
+  },
+  {
+    "start": 126.88,
+    "end": 130.26,
+    "text": "Ah, okay. Er hat also die Lösungsschablone direkt dabei."
+  },
+  {
+    "start": 130.8,
+    "end": 134.18,
+    "text": "So zu sagen, der Algorithmus analysiert diese Beispiele,"
+  },
+  {
+    "start": 134.62,
+    "end": 135.7,
+    "text": "er sucht nach Mustern."
+  },
+  {
+    "start": 136.28,
+    "end": 139.6,
+    "text": "Vielleicht Transaktionen aus ungewöhnlichen Ländern,"
+  },
+  {
+    "start": 139.6,
+    "end": 143.18,
+    "text": "zu komischen Urzeiten oder in untypischer Höhe"
+  },
+  {
+    "start": 143.18,
+    "end": 146.82,
+    "text": "und baut daraus sein eigenes, internes Entscheidungsmodell."
+  },
+  {
+    "start": 147.26,
+    "end": 149.06,
+    "text": "Er lernt also quasi am Beispiel."
+  },
+  {
+    "start": 149.54,
+    "end": 152.08,
+    "text": "Wie ein Betrugsermittler der alte Akten studiert."
+  },
+  {
+    "start": 152.72,
+    "end": 154.2,
+    "text": "Was passiert dann in der Testphase,"
+  },
+  {
+    "start": 154.74,
+    "end": 156.16,
+    "text": "in der Klausur, um bei dem Bild zu bleiben?"
+  },
+  {
+    "start": 157.04,
+    "end": 160.18,
+    "text": "In der Testphase bekommt das trainierte Modell"
+  },
+  {
+    "start": 160.18,
+    "end": 162.86,
+    "text": "dann neue, unbekannte Transaktionen vorgesetzt."
+  },
+  {
+    "start": 163.3,
+    "end": 165.42,
+    "text": "Also solche, die es noch nie zuvor gesehen hat."
+  },
+  {
+    "start": 166.08,
+    "end": 167.88,
+    "text": "Und jetzt muss es selbstständig entscheiden."
+  },
+  {
+    "start": 168.22,
+    "end": 169.32,
+    "text": "Betrug oder nicht?"
+  },
+  {
+    "start": 169.6,
+    "end": 171.76,
+    "text": "Anhand der Trefferquote messen wir dann,"
+  },
+  {
+    "start": 171.98,
+    "end": 173.44,
+    "text": "wie gut es wirklich gelernt hat."
+  },
+  {
+    "start": 173.92,
+    "end": 174.1,
+    "text": "Mhm."
+  },
+  {
+    "start": 174.9,
+    "end": 176.62,
+    "text": "Und hier kommt einen entscheidender Punkt,"
+  },
+  {
+    "start": 176.62,
+    "end": 178.12,
+    "text": "der auch in deinen Quellen betont wird."
+  },
+  {
+    "start": 178.5,
+    "end": 181.78,
+    "text": "Es geht nicht darum, dass es die Trainingsdaten auswendig lernt."
+  },
+  {
+    "start": 182.04,
+    "end": 182.94,
+    "text": "Das wäre sogar schlecht."
+  },
+  {
+    "start": 183.6,
+    "end": 185.12,
+    "text": "Was so? Warum das?"
+  },
+  {
+    "start": 185.48,
+    "end": 189.0,
+    "text": "Ein Modell, das nur die alten Fälle kennt, wäre ja nutzlos."
+  },
+  {
+    "start": 189.34,
+    "end": 192.4,
+    "text": "Es muss die zugrunde liegenden Muster so gut verstanden haben,"
+  },
+  {
+    "start": 192.76,
+    "end": 195.3,
+    "text": "dass es sie auf völlig neue Situationen anwenden kann."
+  },
+  {
+    "start": 195.64,
+    "end": 198.06,
+    "text": "Man nennt das die Fähigkeit zur Generalisierung."
+  },
+  {
+    "start": 198.06,
+    "end": 199.92,
+    "text": "Das ist das eigentliche Ziel."
+  },
+  {
+    "start": 200.38,
+    "end": 201.76,
+    "text": "Verstehe, verstehe."
+  },
+  {
+    "start": 202.3,
+    "end": 205.34,
+    "text": "Es ist also ein Züchlos aus Lernen und Überprüfen,"
+  },
+  {
+    "start": 205.68,
+    "end": 208.06,
+    "text": "um sicherzustellen, dass das Modell,"
+  },
+  {
+    "start": 208.32,
+    "end": 211.08,
+    "text": "ja, dass es wirklich generalisieren kann"
+  },
+  {
+    "start": 211.08,
+    "end": 213.46,
+    "text": "und nicht nur Stupide auswendig gelernt hat."
+  },
+  {
+    "start": 214.32,
+    "end": 215.56,
+    "text": "Jetzt wird's richtig interessant."
+  },
+  {
+    "start": 215.96,
+    "end": 217.58,
+    "text": "Denn deine Quellen stellen uns ja"
+  },
+  {
+    "start": 217.58,
+    "end": 220.72,
+    "text": "einen ganzen Werkzeugkasten an Algorithmen vor."
+  },
+  {
+    "start": 221.36,
+    "end": 224.04,
+    "text": "Fangen wir doch mit dem an, der am bildlichsten klingt."
+  },
+  {
+    "start": 224.66,
+    "end": 225.48,
+    "text": "Dem Entscheidungsbaum."
+  },
+  {
+    "start": 226.0,
+    "end": 228.74,
+    "text": "Der Entscheidungsbaum ist tatsächlich sehr intuitiv."
+  },
+  {
+    "start": 229.08,
+    "end": 233.1,
+    "text": "Man kann ihn sich wirklich wie ein Fluss-Diagramm vorstellen,"
+  },
+  {
+    "start": 233.56,
+    "end": 235.8,
+    "text": "dass eine Reihe von Ja Nein Fragen stellt."
+  },
+  {
+    "start": 236.24,
+    "end": 236.46,
+    "text": "Okay."
+  },
+  {
+    "start": 237.20000000000002,
+    "end": 239.9,
+    "text": "So gelangt man schrittweise zu einer Entscheidung."
+  },
+  {
+    "start": 240.68,
+    "end": 242.36,
+    "text": "Für unser Betrugsbeispiel."
+  },
+  {
+    "start": 242.76,
+    "end": 246.4,
+    "text": "Da könnte die erste Frage ganz oben an der Wurzel des Baumes lauten,"
+  },
+  {
+    "start": 247.06,
+    "end": 250.16,
+    "text": "ist der Transaktionsbetrag höher als 1.000 Euro."
+  },
+  {
+    "start": 250.62,
+    "end": 251.78,
+    "text": "Ja, nein. Genau."
+  },
+  {
+    "start": 252.5,
+    "end": 254.92,
+    "text": "Wenn Ja, gehen wir den linken Ast entlang,"
+  },
+  {
+    "start": 254.92,
+    "end": 256.74,
+    "text": "wenn Nein, den rechten."
+  },
+  {
+    "start": 257.54,
+    "end": 260.14,
+    "text": "Und die nächste Frage auf dem linken Ast könnte dann sein,"
+  },
+  {
+    "start": 260.82,
+    "end": 263.06,
+    "text": "findet die Transaktion in einem Land statt,"
+  },
+  {
+    "start": 263.26,
+    "end": 266.88,
+    "text": "indem der Karteninhaber noch nie war und wiederteilt sich der Weg."
+  },
+  {
+    "start": 267.6,
+    "end": 270.0,
+    "text": "Jede dieser Fragen an den Knotenpunkten,"
+  },
+  {
+    "start": 270.32,
+    "end": 271.18,
+    "text": "die es so gewählt,"
+  },
+  {
+    "start": 271.62,
+    "end": 274.96,
+    "text": "dass sie die Daten bestmöglich in Klage-Trenntegruppen aufteilt."
+  },
+  {
+    "start": 275.32,
+    "end": 279.04,
+    "text": "Also die betrügerischen von den legitimen Transaktionen trennt."
+  },
+  {
+    "start": 279.7,
+    "end": 284.16,
+    "text": "Aber woher weiß der Baum, welche Frage die beste ist?"
+  },
+  {
+    "start": 284.16,
+    "end": 286.64,
+    "text": "Er könnt ihr unzählige Fragen stellen."
+  },
+  {
+    "start": 287.2,
+    "end": 289.88,
+    "text": "Nach der Uhrzeit, dem Wochentag, dem Online-Shop."
+  },
+  {
+    "start": 290.32,
+    "end": 294.34,
+    "text": "Was ihr faszinierend ist, dafür gibt es klare matematische Kriterien."
+  },
+  {
+    "start": 294.8,
+    "end": 296.88,
+    "text": "Die werden in deinen Unterlagen erwähnt."
+  },
+  {
+    "start": 297.4,
+    "end": 299.84,
+    "text": "Der Informationsgewin und der Genieindex."
+  },
+  {
+    "start": 300.16,
+    "end": 302.3,
+    "text": "Man muss die Formel nicht im Detail verstehen,"
+  },
+  {
+    "start": 302.58,
+    "end": 303.9,
+    "text": "aber das Prinzip ist elegant."
+  },
+  {
+    "start": 304.72,
+    "end": 307.8,
+    "text": "Beide Maße berechnen, welche Frage an einem bestimmten Punkt,"
+  },
+  {
+    "start": 308.22,
+    "end": 309.74,
+    "text": "die größte Klarheit schafft."
+  },
+  {
+    "start": 310.18,
+    "end": 310.84,
+    "text": "Klarheit."
+  },
+  {
+    "start": 311.35999999999996,
+    "end": 314.52,
+    "text": "Ja, also die Daten am saubersten in die Zielkategorien trennt."
+  },
+  {
+    "start": 315.2,
+    "end": 317.82,
+    "text": "Der Algorithmus testet quasi alle möglichen Fragen"
+  },
+  {
+    "start": 317.82,
+    "end": 320.38,
+    "text": "und wählt an jeder Gabelung diejenige,"
+  },
+  {
+    "start": 320.52,
+    "end": 322.46,
+    "text": "die den höchsten Informationsgewinn verspricht."
+  },
+  {
+    "start": 323.1,
+    "end": 324.66,
+    "text": "Aber darin digt auch eine Gefahr."
+  },
+  {
+    "start": 325.4,
+    "end": 328.0,
+    "text": "Wenn man den Baum unkontrolliert wachsen lässt,"
+  },
+  {
+    "start": 328.48,
+    "end": 329.92,
+    "text": "wird er extrem spezifisch."
+  },
+  {
+    "start": 330.28,
+    "end": 331.06,
+    "text": "Zu spezifisch?"
+  },
+  {
+    "start": 331.34,
+    "end": 334.78,
+    "text": "Genau, er lernt dann jede einzelne Ausnahme auswendig?"
+  },
+  {
+    "start": 335.3,
+    "end": 339.36,
+    "text": "So was wie, wenn es ein Dienstag ist und der Betrag 47 Euro"
+  },
+  {
+    "start": 339.36,
+    "end": 343.74,
+    "text": "und 53 Cent beträgt und der Kauf in diesem einen speziellen Shopstatt"
+  },
+  {
+    "start": 343.74,
+    "end": 345.18,
+    "text": "findet, dann ist es betrug."
+  },
+  {
+    "start": 345.74,
+    "end": 348.5,
+    "text": "Das ist dieses Overfitting von dem Du freuen gesprochen hast."
+  },
+  {
+    "start": 348.88,
+    "end": 350.94,
+    "text": "Er ist dann ein überspezialisierter Schüler,"
+  },
+  {
+    "start": 350.94,
+    "end": 353.78,
+    "text": "der nur exakt das kann, was im Buch stand,"
+  },
+  {
+    "start": 354.34,
+    "end": 355.9,
+    "text": "aber keine Transferleistung erbringt."
+  },
+  {
+    "start": 356.44,
+    "end": 357.34,
+    "text": "Wie verhindert man das denn?"
+  },
+  {
+    "start": 357.94,
+    "end": 360.34,
+    "text": "Dass der Baum zu so einem detailverliebten Duroparten wird?"
+  },
+  {
+    "start": 360.88,
+    "end": 363.36,
+    "text": "Durch ein Prozess, der sich beschneiden nennt."
+  },
+  {
+    "start": 363.98,
+    "end": 364.74,
+    "text": "Oder Bruning."
+  },
+  {
+    "start": 365.4,
+    "end": 367.24,
+    "text": "Man stutzt den Baum also wie eine Hecke."
+  },
+  {
+    "start": 367.82,
+    "end": 368.14,
+    "text": "Okay."
+  },
+  {
+    "start": 368.65999999999997,
+    "end": 371.38,
+    "text": "Nach dem Wachstum geht man zurück und entfernt Äste,"
+  },
+  {
+    "start": 371.42,
+    "end": 375.06,
+    "text": "die sich nur mit sehr wenigen spezifischen Einzelfällen beschäftigen"
+  },
+  {
+    "start": 375.06,
+    "end": 379.0,
+    "text": "und die kaum zur allgemeine Vorhersagekraft beitragen."
+  },
+  {
+    "start": 379.56,
+    "end": 381.5,
+    "text": "Das macht das Modell auf den Trainingsdaten"
+  },
+  {
+    "start": 381.5,
+    "end": 382.7,
+    "text": "vielleicht minimal schlechter,"
+  },
+  {
+    "start": 383.06,
+    "end": 385.36,
+    "text": "weil es eine Ausnahme nun falsch klassifiziert."
+  },
+  {
+    "start": 385.54,
+    "end": 385.84,
+    "text": "Aber?"
+  },
+  {
+    "start": 386.16,
+    "end": 389.7,
+    "text": "Aber dafür wird es deutlich robuster und besser im Ungang"
+  },
+  {
+    "start": 389.7,
+    "end": 391.42,
+    "text": "mit neuen, unbekannten Daten."
+  },
+  {
+    "start": 392.18,
+    "end": 393.88,
+    "text": "Ein etwas weniger perfekter,"
+  },
+  {
+    "start": 394.36,
+    "end": 396.1,
+    "text": "aber dafür flexiblerer Baum"
+  },
+  {
+    "start": 396.1,
+    "end": 398.56,
+    "text": "ist am Ende der bessere Entscheider."
+  },
+  {
+    "start": 399.5,
+    "end": 401.22,
+    "text": "Ein Baum, der Entscheidungen trifft"
+  },
+  {
+    "start": 401.22,
+    "end": 403.64,
+    "text": "und dann gesturzt wird, um flexibler zu denken."
+  },
+  {
+    "start": 404.2,
+    "end": 404.64,
+    "text": "Verständlich?"
+  },
+  {
+    "start": 405.52,
+    "end": 408.36,
+    "text": "Aber der nächste Name in der Liste macht mich neugierig."
+  },
+  {
+    "start": 408.82,
+    "end": 410.66,
+    "text": "Der naive, beias Klassifikator."
+  },
+  {
+    "start": 411.12,
+    "end": 412.58,
+    "text": "Was genau ist daran naiv?"
+  },
+  {
+    "start": 413.16,
+    "end": 416.2,
+    "text": "Heißt das, der Algorithmus ist ein bisschen dumm?"
+  },
+  {
+    "start": 416.78,
+    "end": 418.42,
+    "text": "Versteht er, die zusammenhänge nicht?"
+  },
+  {
+    "start": 418.94,
+    "end": 420.5,
+    "text": "Dumm ist hier das falsche Wort."
+  },
+  {
+    "start": 420.86,
+    "end": 422.96,
+    "text": "Ich würde es eher brutal pragmatisch nennen."
+  },
+  {
+    "start": 423.54,
+    "end": 423.84,
+    "text": "Okay."
+  },
+  {
+    "start": 423.84,
+    "end": 426.28,
+    "text": "Die Naivität ist seine größte Stärke"
+  },
+  {
+    "start": 426.28,
+    "end": 429.02,
+    "text": "und gleichzeitig seine definierende Eigenschaft."
+  },
+  {
+    "start": 429.94,
+    "end": 433.6,
+    "text": "Der naive Beis Klassifikator basiert auf dem Satz von Beiß"
+  },
+  {
+    "start": 433.6,
+    "end": 437.36,
+    "text": "einem fundamentalen Theoremen der Wahrscheinlichkeitstheorie."
+  },
+  {
+    "start": 437.82,
+    "end": 439.84,
+    "text": "Seine Naivität besteht darin,"
+  },
+  {
+    "start": 440.12,
+    "end": 442.62,
+    "text": "dass er eine sehr, sehr starke Vereinfachung annimmt."
+  },
+  {
+    "start": 443.44,
+    "end": 446.5,
+    "text": "Er geht davon aus, dass alle Merkmale eines Datenpunktes"
+  },
+  {
+    "start": 446.5,
+    "end": 448.52,
+    "text": "völlig unabhängig voneinander sind."
+  },
+  {
+    "start": 448.88,
+    "end": 451.24,
+    "text": "Kannst du das an unserem Betrugsbeispiel erklären?"
+  },
+  {
+    "start": 451.36,
+    "end": 452.32,
+    "text": "Was heißt das konkret?"
+  },
+  {
+    "start": 452.32,
+    "end": 453.26,
+    "text": "Gerne."
+  },
+  {
+    "start": 454.06,
+    "end": 458.14,
+    "text": "Also nehmen wir an, eine Transaktion hat drei verdächtige Merkmale."
+  },
+  {
+    "start": 458.84,
+    "end": 461.32,
+    "text": "Hoherbetrag, fremdes Land, Nachtzeit."
+  },
+  {
+    "start": 461.74,
+    "end": 461.86,
+    "text": "Mhm."
+  },
+  {
+    "start": 462.36,
+    "end": 464.78,
+    "text": "In der Realität hängen diese Dinge oft zusammen."
+  },
+  {
+    "start": 465.32,
+    "end": 468.26,
+    "text": "Ein Teurer-Einkauf im Urlaub passiert halt oft abends."
+  },
+  {
+    "start": 468.46,
+    "end": 468.64,
+    "text": "Klar."
+  },
+  {
+    "start": 469.32,
+    "end": 472.58,
+    "text": "Ein naive Beis Klassifikator ignoriert das aber komplett."
+  },
+  {
+    "start": 473.18,
+    "end": 474.44,
+    "text": "Für ihn ist die Wahrscheinlichkeit,"
+  },
+  {
+    "start": 474.44,
+    "end": 476.6,
+    "text": "dass ein hoher Betrag auf Betrug hindeutet,"
+  },
+  {
+    "start": 477.06,
+    "end": 479.12,
+    "text": "völlig unabhängig von der Wahrscheinlichkeit,"
+  },
+  {
+    "start": 479.12,
+    "end": 481.36,
+    "text": "dass die Nachtzeit auf Betrug hindeutet."
+  },
+  {
+    "start": 482.02,
+    "end": 485.38,
+    "text": "Ach so, er schaut sich jedes Indiz einzeln an,"
+  },
+  {
+    "start": 485.82,
+    "end": 488.46,
+    "text": "als ob der Rest der Transaktion gar nicht existiert."
+  },
+  {
+    "start": 489.1,
+    "end": 490.1,
+    "text": "Genau das ist der Kern."
+  },
+  {
+    "start": 490.8,
+    "end": 493.2,
+    "text": "Und dieser Annahme ist in der echten Welt fast nie wahr."
+  },
+  {
+    "start": 493.7,
+    "end": 496.8,
+    "text": "Aber sie vereinfacht die Berechnung dramatisch."
+  },
+  {
+    "start": 497.44,
+    "end": 499.4,
+    "text": "Dadurch ist der Algorithmus extrem schnell"
+  },
+  {
+    "start": 499.4,
+    "end": 501.76,
+    "text": "und braucht erstaunlich wenige Trainingsdaten,"
+  },
+  {
+    "start": 501.88,
+    "end": 503.86,
+    "text": "um oft sehr gute Ergebnisse zu liefern,"
+  },
+  {
+    "start": 504.4,
+    "end": 506.52,
+    "text": "besonders bei der Klassifikation von Texten."
+  },
+  {
+    "start": 506.84,
+    "end": 508.6,
+    "text": "Also zum Beispiel bei Spem-E-Mails."
+  },
+  {
+    "start": 508.6,
+    "end": 509.94,
+    "text": "Das ist ja verrückt,"
+  },
+  {
+    "start": 510.4,
+    "end": 514.16,
+    "text": "obwohl die Grundannahme falsch ist, funktioniert er gut."
+  },
+  {
+    "start": 514.62,
+    "end": 517.04,
+    "text": "Ja, weil sich die kleinen Fehler durch die Schiere"
+  },
+  {
+    "start": 517.04,
+    "end": 520.16,
+    "text": "mänge an Merkmalen oft gegenseitig aufheben oder ausgleichen."
+  },
+  {
+    "start": 520.44,
+    "end": 522.94,
+    "text": "Er ist also ein pragmatischer Schnelldenker,"
+  },
+  {
+    "start": 523.4,
+    "end": 526.06,
+    "text": "einer der auf Perfektion bei den Annahmpe fift,"
+  },
+  {
+    "start": 526.38,
+    "end": 528.72,
+    "text": "um schnell zu brauchbaren Ergebnissen zu kommen."
+  },
+  {
+    "start": 529.26,
+    "end": 529.82,
+    "text": "Sehr interessant."
+  },
+  {
+    "start": 530.66,
+    "end": 532.92,
+    "text": "Als Drittes werden in deinen Quellen"
+  },
+  {
+    "start": 532.92,
+    "end": 534.88,
+    "text": "noch regelbasierte Systeme erwähnt."
+  },
+  {
+    "start": 535.28,
+    "end": 537.18,
+    "text": "Die klingen am Menschlichsten, finde ich."
+  },
+  {
+    "start": 537.18,
+    "end": 538.24,
+    "text": "Das sind sie auch."
+  },
+  {
+    "start": 538.78,
+    "end": 542.1,
+    "text": "Regelbasierte Systeme sind vielleicht die Verständlichsten von all."
+  },
+  {
+    "start": 542.66,
+    "end": 545.58,
+    "text": "Sie arbeiten mit einer Reihe von ganz einfachen,"
+  },
+  {
+    "start": 545.58,
+    "end": 546.88,
+    "text": "wenn dann regeln."
+  },
+  {
+    "start": 547.28,
+    "end": 549.04,
+    "text": "Wie zum Beispiel für unser Beispiel."
+  },
+  {
+    "start": 549.4,
+    "end": 552.34,
+    "text": "Wenn der Betrag größer als 5.000 Euro ist"
+  },
+  {
+    "start": 552.34,
+    "end": 556.84,
+    "text": "und das Land der Transaktion nicht dem Wohnsitz des Kunden entspricht,"
+  },
+  {
+    "start": 557.42,
+    "end": 560.48,
+    "text": "dann ist die Wahrscheinlichkeit für Betrug 95%."
+  },
+  {
+    "start": 560.48,
+    "end": 562.28,
+    "text": "Das ist natürlich super klar."
+  },
+  {
+    "start": 562.82,
+    "end": 565.36,
+    "text": "Ja, diese Regeln haben einen riesigen Vorteil."
+  },
+  {
+    "start": 565.36,
+    "end": 566.82,
+    "text": "Sie sind für uns Menschen,"
+  },
+  {
+    "start": 567.0,
+    "end": 568.74,
+    "text": "direkt lesbar und nachvollziehbar."
+  },
+  {
+    "start": 569.06,
+    "end": 572.84,
+    "text": "Wir können sehen, warum das System eine entscheidung getroffen hat."
+  },
+  {
+    "start": 572.96,
+    "end": 576.18,
+    "text": "Solche Regeln kann man entweder direkt aus den Daten generieren,"
+  },
+  {
+    "start": 576.5,
+    "end": 580.16,
+    "text": "mit Algorithmen oder man kann sie aus einem fertigen Entscheidungsbaum"
+  },
+  {
+    "start": 580.16,
+    "end": 580.74,
+    "text": "ableiten."
+  },
+  {
+    "start": 581.08,
+    "end": 581.56,
+    "text": "Wie das?"
+  },
+  {
+    "start": 581.94,
+    "end": 584.86,
+    "text": "Indem man einfach den Pfad von der Wurzle zu einem Blatt"
+  },
+  {
+    "start": 584.86,
+    "end": 585.88,
+    "text": "als Regel formuliert."
+  },
+  {
+    "start": 586.16,
+    "end": 590.4,
+    "text": "Aber wenn diese Regeln so einfach und verständlich sind,"
+  },
+  {
+    "start": 590.78,
+    "end": 594.18,
+    "text": "warum nutzen wir dann überhaupt noch die komplizierteren Methoden?"
+  },
+  {
+    "start": 594.18,
+    "end": 598.4,
+    "text": "Also diese Entscheidungsbäume oder dieses naive Modell?"
+  },
+  {
+    "start": 599.0,
+    "end": 602.52,
+    "text": "Müßte man nicht immer das nehmen, was man am besten erklären kann?"
+  },
+  {
+    "start": 602.96,
+    "end": 606.68,
+    "text": "Eine exzellente Frage, die ziel direkt ins Herz der Praxis."
+  },
+  {
+    "start": 607.38,
+    "end": 609.3,
+    "text": "Der Nachteil von einfachen Regeln ist,"
+  },
+  {
+    "start": 609.6,
+    "end": 611.7,
+    "text": "dass sie für sehr komplexe Probleme,"
+  },
+  {
+    "start": 611.82,
+    "end": 614.36,
+    "text": "also mit hunderten oder tausenden von Merkmalen"
+  },
+  {
+    "start": 614.36,
+    "end": 616.64,
+    "text": "schwer zu erstellen und zu verwalten sind."
+  },
+  {
+    "start": 617.24,
+    "end": 620.28,
+    "text": "So ein Regelwerk kann schnell sehr unübersichtlich werden"
+  },
+  {
+    "start": 620.28,
+    "end": 622.18,
+    "text": "und ja, brüchig sein."
+  },
+  {
+    "start": 622.18,
+    "end": 624.5,
+    "text": "Eine kleine Änderung in den Datenmustern"
+  },
+  {
+    "start": 625.06,
+    "end": 628.6,
+    "text": "kann erfordern, dass viele Regeln manuell angepasst werden müssen."
+  },
+  {
+    "start": 629.08,
+    "end": 630.32,
+    "text": "Ah, okay."
+  },
+  {
+    "start": 631.0,
+    "end": 632.84,
+    "text": "Ich erinnere mich da ein Einprojekt."
+  },
+  {
+    "start": 633.14,
+    "end": 635.16,
+    "text": "Da hatten wir ein fast perfektes,"
+  },
+  {
+    "start": 635.32,
+    "end": 637.14,
+    "text": "aber extrem komplexes Modell."
+  },
+  {
+    "start": 637.74,
+    "end": 641.62,
+    "text": "Das Problem war nur, die Fachabteilung hat uns nicht geglaubt."
+  },
+  {
+    "start": 641.94,
+    "end": 643.08,
+    "text": "Weil die es nicht erklären konnte."
+  },
+  {
+    "start": 643.52,
+    "end": 646.74,
+    "text": "Wir konnten nicht erklären, warum ein bestimmter Kunde"
+  },
+  {
+    "start": 646.74,
+    "end": 648.44,
+    "text": "als Risiko eingestuft wurde."
+  },
+  {
+    "start": 649.02,
+    "end": 651.26,
+    "text": "Am Ende haben wir ein 5% schlechteres,"
+  },
+  {
+    "start": 651.26,
+    "end": 655.04,
+    "text": "aber voll interpretierbares Regelbasierte System verwendet."
+  },
+  {
+    "start": 655.08,
+    "end": 658.26,
+    "text": "Einfach weil Vertrauen und Nachvollziehbarkeit in dem Fall wichtiger waren"
+  },
+  {
+    "start": 658.26,
+    "end": 660.5,
+    "text": "als das letzte quenchen Vienaueigkeit."
+  },
+  {
+    "start": 660.86,
+    "end": 662.3,
+    "text": "Wow, das ist ein super Einblick."
+  },
+  {
+    "start": 662.94,
+    "end": 664.7,
+    "text": "Es geht also nicht nur um reine Leistung,"
+  },
+  {
+    "start": 664.84,
+    "end": 667.08,
+    "text": "sondern auch um Vertrauen und Anwendbarkeit."
+  },
+  {
+    "start": 667.56,
+    "end": 669.4,
+    "text": "Das bringt mich zu einer gewissen Unsicherheit."
+  },
+  {
+    "start": 669.96,
+    "end": 672.34,
+    "text": "Ich habe jetzt die Wahl zwischen einem logischen Baum,"
+  },
+  {
+    "start": 672.86,
+    "end": 677.14,
+    "text": "einem naiven, aber schnellen Beiesmodell und einem glasklaren Regelwerk."
+  },
+  {
+    "start": 677.52,
+    "end": 679.92,
+    "text": "Da lauf ich ja Gefahr, das falsche Werkzeug zu wählen."
+  },
+  {
+    "start": 679.92,
+    "end": 681.6,
+    "text": "Wie kann ich denn sicher sein,"
+  },
+  {
+    "start": 681.72,
+    "end": 684.58,
+    "text": "dass mein Betrugsdetektor am Ende auch wirklich was taugt?"
+  },
+  {
+    "start": 685.14,
+    "end": 686.7,
+    "text": "Du sprichst den entscheidenden Punkt an."
+  },
+  {
+    "start": 687.06,
+    "end": 688.06,
+    "text": "Die Modelle-Valuation."
+  },
+  {
+    "start": 688.64,
+    "end": 691.0,
+    "text": "Ein Modell zu trainieren ist nur die halbe Miete."
+  },
+  {
+    "start": 691.56,
+    "end": 694.9,
+    "text": "Wenn man seine Güte nicht objektiv messen kann, ist es im Grunde nutzlos."
+  },
+  {
+    "start": 695.74,
+    "end": 698.22,
+    "text": "Deine Quellen stellen hier zwei zentrale Metriken vor,"
+  },
+  {
+    "start": 698.42,
+    "end": 700.18,
+    "text": "die oft im Zusammenspiel betrachtet werden."
+  },
+  {
+    "start": 701.1,
+    "end": 703.0,
+    "text": "Sensitivität und Spezifizität."
+  },
+  {
+    "start": 703.48,
+    "end": 705.04,
+    "text": "Das klingt sehr medizinisch."
+  },
+  {
+    "start": 705.52,
+    "end": 708.9,
+    "text": "Ja, da liegt auch der Ursprung, aber die Anwendung ist universell."
+  },
+  {
+    "start": 708.9,
+    "end": 710.14,
+    "text": "Okay, und ..."
+  },
+  {
+    "start": 710.84,
+    "end": 714.18,
+    "text": "Was bedeuten die beiden jetzt für unseren Betrugsdetektor?"
+  },
+  {
+    "start": 714.56,
+    "end": 718.88,
+    "text": "Die Sensitivität fragt, wie viele der tatsächlichen Betrugsfälle"
+  },
+  {
+    "start": 718.88,
+    "end": 721.8,
+    "text": "werden von meinem Modell korrekt als Betrug erkannt."
+  },
+  {
+    "start": 722.42,
+    "end": 722.62,
+    "text": "Mhm."
+  },
+  {
+    "start": 723.46,
+    "end": 725.3,
+    "text": "Eine hohe Sensitivität bedeutet,"
+  },
+  {
+    "start": 725.54,
+    "end": 728.6,
+    "text": "dass Modell lässt nur wenige Betrüger durchrutschen."
+  },
+  {
+    "start": 729.28,
+    "end": 731.34,
+    "text": "Die Spezifität ist das Gegenstück."
+  },
+  {
+    "start": 731.9,
+    "end": 736.38,
+    "text": "Wie viele der Legitim-Transaktionen werden korrekt als Legitim erkannt."
+  },
+  {
+    "start": 736.38,
+    "end": 739.7,
+    "text": "Das nicht ständig, meine Karte gesperrt wird, wenn ich im Urlaub bin."
+  },
+  {
+    "start": 740.34,
+    "end": 740.52,
+    "text": "Genau."
+  },
+  {
+    "start": 741.2,
+    "end": 742.62,
+    "text": "Eine hohe Spezifität bedeutet,"
+  },
+  {
+    "start": 742.8,
+    "end": 745.52,
+    "text": "dass Modell verdächtigt nur wenige, ehrliche Kunden"
+  },
+  {
+    "start": 746.24,
+    "end": 747.48,
+    "text": "fälschlicherweise des Betrugs."
+  },
+  {
+    "start": 747.84,
+    "end": 750.62,
+    "text": "Ich nehme an, hier gibt es wieder einen schmerzhaften Kompromiss."
+  },
+  {
+    "start": 750.72,
+    "end": 753.0,
+    "text": "Man kann nicht einfach beides auf 100 Prozent drehen."
+  },
+  {
+    "start": 753.14,
+    "end": 754.2,
+    "text": "Exakt, das ist der Punkt."
+  },
+  {
+    "start": 754.88,
+    "end": 756.94,
+    "text": "Wenn du eine extrem sensibles Modell baust,"
+  },
+  {
+    "start": 757.2,
+    "end": 760.64,
+    "text": "dass jede auch nur wage-verdächtige Transaktion als Betrug markiert."
+  },
+  {
+    "start": 761.32,
+    "end": 762.98,
+    "text": "Ja, nichts zu übersehen."
+  },
+  {
+    "start": 762.98,
+    "end": 766.9,
+    "text": "Wirst du zwangsläuflich auch viele normale Einkäufe blockieren."
+  },
+  {
+    "start": 767.06,
+    "end": 768.54,
+    "text": "Deine Spezifität sinkt."
+  },
+  {
+    "start": 768.64,
+    "end": 771.54,
+    "text": "Du hast viele verärgerte Kunden umgekehrt."
+  },
+  {
+    "start": 771.98,
+    "end": 774.12,
+    "text": "Wenn du dein Modell sehr spezifisch machst,"
+  },
+  {
+    "start": 774.36,
+    "end": 776.64,
+    "text": "um ja keinen Kundenfeld schlicht zu belästigen,"
+  },
+  {
+    "start": 777.16,
+    "end": 780.22,
+    "text": "über siehst du vielleicht einige clever getahnte Betrugsfälle."
+  },
+  {
+    "start": 780.58,
+    "end": 782.02,
+    "text": "Die Sensitivität sinkt."
+  },
+  {
+    "start": 782.08,
+    "end": 782.32,
+    "text": "Richtig."
+  },
+  {
+    "start": 782.7,
+    "end": 785.8,
+    "text": "Je nach Geschäftsmodell muss man abwägen, was schlimmer ist."
+  },
+  {
+    "start": 786.0,
+    "end": 789.36,
+    "text": "Ein verärgerter Kunde oder ein finanzieller Verlust durchbetrug."
+  },
+  {
+    "start": 789.62,
+    "end": 790.78,
+    "text": "Ein ständiges Abwägen."
+  },
+  {
+    "start": 791.38,
+    "end": 794.94,
+    "text": "Wie stellt man sicher, dass diese Messung fair und verlässlich ist?"
+  },
+  {
+    "start": 795.4,
+    "end": 800.16,
+    "text": "In den Notizen fallen dann Begriffe wie Kreuzvalidierung und ROC Kurven."
+  },
+  {
+    "start": 800.38,
+    "end": 802.22,
+    "text": "Das sind fortgeschrittene Techniken,"
+  },
+  {
+    "start": 802.36,
+    "end": 804.56,
+    "text": "um die Rervustheit der Evaluation zu gewährleisten."
+  },
+  {
+    "start": 805.7,
+    "end": 808.58,
+    "text": "Die Kreuzvalidierung oder Crossvalidation"
+  },
+  {
+    "start": 808.58,
+    "end": 812.62,
+    "text": "ist eine ziemlich clevere Methode, um den Zufall aus der Bewertung zu nehmen."
+  },
+  {
+    "start": 813.38,
+    "end": 816.1,
+    "text": "Anstatt deine Daten nur ein einziges Mal in ein Training"
+  },
+  {
+    "start": 816.1,
+    "end": 819.46,
+    "text": "und ein Testteil aufzuteilen, wiederholst du diesen Prozess mehrfach."
+  },
+  {
+    "start": 819.94,
+    "end": 820.12,
+    "text": "Ah!"
+  },
+  {
+    "start": 820.78,
+    "end": 823.72,
+    "text": "Man teilt die Daten z.B. in 10 gleich große Blöcke."
+  },
+  {
+    "start": 824.46,
+    "end": 827.9,
+    "text": "Dann trainiert man das Modell auf neuen Blöcken und teste das auf dem 10."
+  },
+  {
+    "start": 828.36,
+    "end": 832.64,
+    "text": "Das wiederholt man 10 mal, so dass jeder Block einmal der Testblock war."
+  },
+  {
+    "start": 832.88,
+    "end": 834.8,
+    "text": "Und am Ende mittelt man die Ergebnisse."
+  },
+  {
+    "start": 834.86,
+    "end": 837.1,
+    "text": "Genau. Die Analogie von vorhin passt wieder."
+  },
+  {
+    "start": 837.7,
+    "end": 841.32,
+    "text": "Anstatt nur eine Klausur zu schreiben, schreibst du 10 verschiedene Varianten."
+  },
+  {
+    "start": 841.76,
+    "end": 843.7,
+    "text": "Das Endergebnis ist dadurch viel stabiler."
+  },
+  {
+    "start": 844.4,
+    "end": 846.58,
+    "text": "Das macht die Messung also deutlich zuverlässiger."
+  },
+  {
+    "start": 847.34,
+    "end": 850.2,
+    "text": "Und was hat es mit diesen ROC Kurven auf sich?"
+  },
+  {
+    "start": 850.78,
+    "end": 852.2,
+    "text": "Sind das die Noten aus den Klausuren?"
+  },
+  {
+    "start": 852.5,
+    "end": 854.14,
+    "text": "Sozusagen der Notenspiegel, ja?"
+  },
+  {
+    "start": 854.8,
+    "end": 859.16,
+    "text": "Die ROC Kurve, das steht für Receiver Operating Charakteristik,"
+  },
+  {
+    "start": 859.44,
+    "end": 862.66,
+    "text": "ist eine grafische Darstellung, die genau diesen Kompromiss zwischen"
+  },
+  {
+    "start": 862.66,
+    "end": 865.58,
+    "text": "Sensitivität und Spezifität visualisiert."
+  },
+  {
+    "start": 866.0,
+    "end": 868.86,
+    "text": "Auf der einen Achse wird die Trefferquote aufgetragen,"
+  },
+  {
+    "start": 869.4,
+    "end": 871.06,
+    "text": "auf der anderen die Fehler-Alarmrate."
+  },
+  {
+    "start": 871.54,
+    "end": 874.76,
+    "text": "Ein perfektes Modell hätte eine Kurve, die sofort steil nach oben"
+  },
+  {
+    "start": 874.76,
+    "end": 876.12,
+    "text": "und dann ganz nach rechts geht."
+  },
+  {
+    "start": 876.48,
+    "end": 877.26,
+    "text": "Und in der Praxis?"
+  },
+  {
+    "start": 877.78,
+    "end": 881.28,
+    "text": "In der Praxis kann man anhand der Form der Kurve auf einen Blick sehen,"
+  },
+  {
+    "start": 881.52,
+    "end": 884.46,
+    "text": "wie gut ein Modell generell zwischen den Klassen trennen kann."
+  },
+  {
+    "start": 884.9,
+    "end": 888.12,
+    "text": "Man kann verschiedene Modelle, den Entscheidungsbaum, naif-base,"
+  },
+  {
+    "start": 888.68,
+    "end": 892.82,
+    "text": "direkt miteinander vergleichen, indem man ihre ROC Kurven übereinanderlegt."
+  },
+  {
+    "start": 893.26,
+    "end": 895.66,
+    "text": "Und die bessere Kurve ist dann die, die weiter oben ist?"
+  },
+  {
+    "start": 895.98,
+    "end": 896.12,
+    "text": "Genau."
+  },
+  {
+    "start": 896.8,
+    "end": 899.58,
+    "text": "Die Kurve, die die größere Fläche unter sich einschließt,"
+  },
+  {
+    "start": 899.86,
+    "end": 902.56,
+    "text": "repräsentiert in der Regel das leistungsfähige Modell."
+  },
+  {
+    "start": 903.1,
+    "end": 906.92,
+    "text": "Okay, hier kommt jetzt ein Punkt in deinen Unterlagen, der..."
+  },
+  {
+    "start": 906.92,
+    "end": 908.7,
+    "text": "Ja, der fast nach Teamwork klingt."
+  },
+  {
+    "start": 909.24,
+    "end": 911.16,
+    "text": "Die sog. Ensemble-Methoden."
+  },
+  {
+    "start": 911.74,
+    "end": 917.02,
+    "text": "Die Grundidee ist, nicht auf ein einziges, vielleicht geniales Modell zu setzen,"
+  },
+  {
+    "start": 917.48,
+    "end": 920.44,
+    "text": "sondern mehrere eher schwache Modelle zu kombinieren,"
+  },
+  {
+    "start": 920.82,
+    "end": 923.2,
+    "text": "um am Ende ein super starkes zu erhalten."
+  },
+  {
+    "start": 923.74,
+    "end": 925.58,
+    "text": "Das ist doch ein wirklich spannender Gedanke."
+  },
+  {
+    "start": 925.68,
+    "end": 925.94,
+    "text": "Absolut."
+  },
+  {
+    "start": 926.62,
+    "end": 928.5,
+    "text": "Wenn wir das mit dem größeren Bild verbinden,"
+  },
+  {
+    "start": 928.92,
+    "end": 931.08,
+    "text": "ist das wie das Prinzip der Weisheit der vielen."
+  },
+  {
+    "start": 1135.4199999999998,
+    "end": 1136.06,
+    "text": "Ich möchte das всем etwasاخ backside screening machen."
+  },
+  {
+    "start": 1136.06,
+    "end": 1141.9,
+    "text": "Dieчики brauchen das Genehmens important."
+  },
+  {
+    "start": 1141.92,
+    "end": 1146.9,
+    "text": "Hier wie an der großen undmeg 챌� future Kaspel brunchmanעל,"
+  },
+  {
+    "start": 1146.9,
+    "end": 1146.9,
+    "text": ""
+  },
+  {
+    "start": 1146.9,
+    "end": 1146.9,
+    "text": ""
+  },
+  {
+    "start": 1146.9,
+    "end": 1146.9,
+    "text": ""
+  },
+  {
+    "start": 1146.9,
+    "end": 1150.82,
+    "text": "fast nach Teamwork klingt, die sog. Ensemble-Methoden."
+  },
+  {
+    "start": 1151.22,
+    "end": 1157.08,
+    "text": "Die Grundidee ist, nicht auf ein einziges, vielleicht geniales Modell zu setzen, sondern"
+  },
+  {
+    "start": 1157.08,
+    "end": 1162.48,
+    "text": "mehrere eher schwache Modelle zu kombinieren, um am Ende ein super starkes zu erhalten."
+  },
+  {
+    "start": 1163.08,
+    "end": 1165.04,
+    "text": "Das ist doch ein wirklich spannender Gedanke."
+  },
+  {
+    "start": 1165.22,
+    "end": 1165.58,
+    "text": "Absolut."
+  },
+  {
+    "start": 1166.22,
+    "end": 1170.5,
+    "text": "Wenn wir das mit dem größeren Bild verbinden, ist das wie das Prinzip der Weisheit der"
+  },
+  {
+    "start": 1170.5,
+    "end": 1170.8,
+    "text": "vielen."
+  },
+  {
+    "start": 1171.28,
+    "end": 1176.48,
+    "text": "Ein einzelner Experte, egal wie präliant, kann sich irren oder hat blinde Flecken."
+  },
+  {
+    "start": 1176.48,
+    "end": 1182.46,
+    "text": "Aber der Konsens, einer vielfältigen Gruppe von Experten, ist oft extrem treffsicher"
+  },
+  {
+    "start": 1182.46,
+    "end": 1183.02,
+    "text": "und robust."
+  },
+  {
+    "start": 1183.58,
+    "end": 1186.3,
+    "text": "Genau dieses Prinzip nutzen Ensemble-Methoden."
+  },
+  {
+    "start": 1186.78,
+    "end": 1192.48,
+    "text": "Anstatt einen einzigen, riesigen, perfekten Entscheidungsbaum zu züchten, trainiert man lieber"
+  },
+  {
+    "start": 1192.48,
+    "end": 1197.5,
+    "text": "Hunderte von kleineren, einfacheren Bäumen und lässt sie am Ende zusammen entscheiden."
+  },
+  {
+    "start": 1198.06,
+    "end": 1200.64,
+    "text": "Und wie funktioniert dieses Zusammenarbeiten genau?"
+  },
+  {
+    "start": 1201.64,
+    "end": 1203.76,
+    "text": "Die Quellen nennen da drei verschiedene Ansätze."
+  },
+  {
+    "start": 1204.38,
+    "end": 1206.32,
+    "text": "Bagging, Boosting und…"
+  },
+  {
+    "start": 1206.32,
+    "end": 1207.06,
+    "text": "Zufallzwälder."
+  },
+  {
+    "start": 1207.22,
+    "end": 1209.6,
+    "text": "Genau, das sind die drei prominentesten Techniken."
+  },
+  {
+    "start": 1209.88,
+    "end": 1211.14,
+    "text": "Fangen wir mit Bagging an."
+  },
+  {
+    "start": 1211.84,
+    "end": 1213.92,
+    "text": "Das steht für Bootstrap aggregating."
+  },
+  {
+    "start": 1214.78,
+    "end": 1218.38,
+    "text": "Hier ist die Idee, Vielfalt durch die Daten zu erzeugen."
+  },
+  {
+    "start": 1218.84,
+    "end": 1224.98,
+    "text": "Man nimmt die ursprünglichen Trainingsdaten und zieht daraus viele verschiedene, leicht unterschiedliche"
+  },
+  {
+    "start": 1224.98,
+    "end": 1225.68,
+    "text": "Stichproben."
+  },
+  {
+    "start": 1225.68,
+    "end": 1228.72,
+    "text": "Ok, also nicht immer die gleichen Daten für alle, richtig."
+  },
+  {
+    "start": 1229.46,
+    "end": 1235.38,
+    "text": "Auf jeder dieser Stichproben trainiert man ein separates Modell zum Beispiel einen einfachen"
+  },
+  {
+    "start": 1235.38,
+    "end": 1236.2,
+    "text": "Entscheidungsbaum."
+  },
+  {
+    "start": 1237.08,
+    "end": 1242.38,
+    "text": "Wenn dann eine neue, unbekannte Transaktion kommt, lässt man einfach alle trainierten Bäume"
+  },
+  {
+    "start": 1242.38,
+    "end": 1242.92,
+    "text": "abstimmen."
+  },
+  {
+    "start": 1243.58,
+    "end": 1244.9,
+    "text": "Und die Mehrheit gewinnt."
+  },
+  {
+    "start": 1245.22,
+    "end": 1250.2,
+    "text": "Die Kategorie, die die Mehrheit der Stimmen erhält, betrug oder nicht betrug, gewinnt."
+  },
+  {
+    "start": 1250.64,
+    "end": 1252.66,
+    "text": "Es ist eine reine Demokratie der Modelle."
+  },
+  {
+    "start": 1253.66,
+    "end": 1255.42,
+    "text": "Das klingt simpel und effektiv."
+  },
+  {
+    "start": 1256.02,
+    "end": 1257.1,
+    "text": "Was macht Boosting anders?"
+  },
+  {
+    "start": 1257.48,
+    "end": 1261.06,
+    "text": "Der Name klingt ja schon dynamischer als würde man sich, gegenseitig anstacheln."
+  },
+  {
+    "start": 1261.72,
+    "end": 1265.4,
+    "text": "Boosting ist ein sequenzieller und viel zielgerichteterer Prozess."
+  },
+  {
+    "start": 1266.1,
+    "end": 1268.22,
+    "text": "Die bekannteste Variante ist Adabust."
+  },
+  {
+    "start": 1268.9,
+    "end": 1271.5,
+    "text": "Man startet mit einem ersten einfachen Modell."
+  },
+  {
+    "start": 1271.88,
+    "end": 1273.28,
+    "text": "Dieses Modell wird Fehler machen."
+  },
+  {
+    "start": 1273.92,
+    "end": 1278.08,
+    "text": "Einige Betrugsfälle übersehen, einige normale Käufe fällt schlich markieren."
+  },
+  {
+    "start": 1278.28,
+    "end": 1279.86,
+    "text": "Klar, jetzt kommt der Crew."
+  },
+  {
+    "start": 1279.86,
+    "end": 1286.6,
+    "text": "Das zweite Modell, das trainiert wird, konzentriert sich gezielt auf die Fehleres erst Modells."
+  },
+  {
+    "start": 1287.12,
+    "end": 1290.56,
+    "text": "Die falsch-klassifizierten Datenpunkte bekommen einen höheres Gewicht."
+  },
+  {
+    "start": 1290.9,
+    "end": 1297.14,
+    "text": "So dass das zweite Modell einen stärkeren Anreiz hat, es bei diesen schwierigen Fällen richtig zu machen."
+  },
+  {
+    "start": 1297.28,
+    "end": 1297.66,
+    "text": "Exakt."
+  },
+  {
+    "start": 1299.3,
+    "end": 1303.46,
+    "text": "Und das dritte Modell konzentriert sich dann auf die verbleibenden Fehler des Zweiten."
+  },
+  {
+    "start": 1304.5,
+    "end": 1304.94,
+    "text": "Und so weiter."
+  },
+  {
+    "start": 1305.2,
+    "end": 1306.72,
+    "text": "Moment, da muss ich kurz einhaken."
+  },
+  {
+    "start": 1306.72,
+    "end": 1310.04,
+    "text": "Wenn jedes neue Modell die Fehler des alten korrigiert,"
+  },
+  {
+    "start": 1310.64,
+    "end": 1316.02,
+    "text": "lernt das Gesamtsystem dann nicht am Ende auch nur die Fehler und Eigenheiten der Trainingsdaten auswendig."
+  },
+  {
+    "start": 1316.5,
+    "end": 1321.12,
+    "text": "Das klingt für mich wieder gefährlich nahm Ova-Fitting, dass wir bei den einzelnen Bäumen vermeiden wollten."
+  },
+  {
+    "start": 1321.34,
+    "end": 1322.88,
+    "text": "Ein absolut berechtigter Einwand."
+  },
+  {
+    "start": 1323.4,
+    "end": 1326.46,
+    "text": "Das ist genau die Gefahr, die man bei Boosting im Auge behalten muss."
+  },
+  {
+    "start": 1327.12,
+    "end": 1328.68,
+    "text": "Der Trick liegt in der Gewichtung."
+  },
+  {
+    "start": 1328.94,
+    "end": 1331.16,
+    "text": "Es geht nicht darum, die Fehler auswendig zu lernen,"
+  },
+  {
+    "start": 1331.16,
+    "end": 1336.68,
+    "text": "sondern darum, den Fokus des Lernprozesses immer wieder auf die schwierigsten Beispiele zu lenken."
+  },
+  {
+    "start": 1337.28,
+    "end": 1339.8,
+    "text": "Es ist kein demokratisches Nebeneinander wie beim Begging,"
+  },
+  {
+    "start": 1340.24,
+    "end": 1342.26,
+    "text": "sondern ein kooperatives Nacheinander,"
+  },
+  {
+    "start": 1342.62,
+    "end": 1347.58,
+    "text": "bei dem das Team über die Zeit lernt, die wirklich knisslegen Grenzfälle besser zu unterscheiden."
+  },
+  {
+    "start": 1348.12,
+    "end": 1351.34,
+    "text": "Richtig eingesetzt führt das zu extrem starten Modellen."
+  },
+  {
+    "start": 1351.72,
+    "end": 1356.68,
+    "text": "Ein Team also, dass sich gegenseitig seine Fehler aufzeigt und daran wächst, spannend."
+  },
+  {
+    "start": 1357.08,
+    "end": 1360.96,
+    "text": "Und was sind dann die Zufallswälder, die Run-Em-Forrests?"
+  },
+  {
+    "start": 1360.96,
+    "end": 1363.54,
+    "text": "Das ist ja wahrscheinlich die populärste Methode von allen."
+  },
+  {
+    "start": 1364.0,
+    "end": 1366.88,
+    "text": "Ein Zufallswalt ist im Grunde eine Weiterentwicklung von Begging,"
+  },
+  {
+    "start": 1367.2,
+    "end": 1369.66,
+    "text": "die speziell auf Entscheidungsbeume zugeschnitten ist."
+  },
+  {
+    "start": 1370.14,
+    "end": 1372.8,
+    "text": "Und noch eine zusätzliche Dosis Zufall einbringt."
+  },
+  {
+    "start": 1373.18,
+    "end": 1374.3,
+    "text": "Noch mehr Zufall."
+  },
+  {
+    "start": 1374.8,
+    "end": 1380.44,
+    "text": "Ja. Wie beim Begging werden viele Bäume auf unterschiedlichen Stichproben der Daten trainiert."
+  },
+  {
+    "start": 1381.04,
+    "end": 1382.86,
+    "text": "Aber es gibt einen entscheidenden Zusatz."
+  },
+  {
+    "start": 1383.52,
+    "end": 1387.4,
+    "text": "Bei jeder Aufteilung innerhalb eines Baumes darf der Algorithmus"
+  },
+  {
+    "start": 1387.4,
+    "end": 1390.88,
+    "text": "nicht aus allen verfügbaren Merkmeinen die beste Frage auswählen."
+  },
+  {
+    "start": 1391.48,
+    "end": 1391.68,
+    "text": "Sondern?"
+  },
+  {
+    "start": 1391.88,
+    "end": 1394.94,
+    "text": "Sondern nur aus einer zufälligen Teilmenge der Merkmeine."
+  },
+  {
+    "start": 1395.7,
+    "end": 1397.8,
+    "text": "In unserem Betrugsbeispiel dürfte ein Baum,"
+  },
+  {
+    "start": 1397.94,
+    "end": 1400.76,
+    "text": "also vielleicht nur zwischen Betrag und Uhrzeit wählen,"
+  },
+  {
+    "start": 1401.2,
+    "end": 1403.9,
+    "text": "ein anderer nur zwischen Land und Shopkategorie."
+  },
+  {
+    "start": 1404.0,
+    "end": 1409.28,
+    "text": "Das zwingt die einzelnen Bäume dazu noch unterschiedlicher und vielfältiger zu werden."
+  },
+  {
+    "start": 1409.74,
+    "end": 1411.6,
+    "text": "Genau. Das verrückte daran ist,"
+  },
+  {
+    "start": 1412.08,
+    "end": 1415.5,
+    "text": "oft wissen wir nicht einmal warum der Konsens dieser Tausenden"
+  },
+  {
+    "start": 1415.5,
+    "end": 1419.68,
+    "text": "auf unterschiedliche Aspekte spezialisierten Bäume so prilianth ist."
+  },
+  {
+    "start": 1420.1,
+    "end": 1422.64,
+    "text": "Es ist ein Akt ehemagentaintelligenz."
+  },
+  {
+    "start": 1422.76,
+    "end": 1422.92,
+    "text": "Wo."
+  },
+  {
+    "start": 1424.44,
+    "end": 1429.42,
+    "text": "Es zeigt uns, dass die beste Lösung nicht immer die elegante oder für uns verständlichste sein muss."
+  },
+  {
+    "start": 1429.74,
+    "end": 1431.44,
+    "text": "Also, was bedeutet das alles?"
+  },
+  {
+    "start": 1432.14,
+    "end": 1433.12,
+    "text": "Fassen wir mal zusammen."
+  },
+  {
+    "start": 1434.0,
+    "end": 1437.74,
+    "text": "Wir haben gesehen, maschinelles Lern basiert auf einem klaren,"
+  },
+  {
+    "start": 1438.06,
+    "end": 1442.66,
+    "text": "zwei stufigen Prozess aus, Training und Testen, ganz wen der Schule."
+  },
+  {
+    "start": 1442.66,
+    "end": 1446.96,
+    "text": "Und es kommt vor allem auf die Fähigkeit zur Generalisierung an."
+  },
+  {
+    "start": 1447.66,
+    "end": 1450.66,
+    "text": "Wir haben die Werkzeuge kennengelernt von logischen Entscheidungsbäumen"
+  },
+  {
+    "start": 1451.3,
+    "end": 1455.98,
+    "text": "über naive, beies Klassifikatoren bis zu klaren, wenn dann regeln."
+  },
+  {
+    "start": 1456.68,
+    "end": 1457.62,
+    "text": "Und wir haben verstanden."
+  },
+  {
+    "start": 1457.74,
+    "end": 1460.1,
+    "text": "Genau. Das Intelligentezusammenspiel"
+  },
+  {
+    "start": 1460.1,
+    "end": 1463.88,
+    "text": "vieler einfacherer Modelle im Team, die Osomble-Methoden,"
+  },
+  {
+    "start": 1464.38,
+    "end": 1468.32,
+    "text": "die durch Demokratie oder schrittweise Verbesserungen zu Ergebnissen kommen,"
+  },
+  {
+    "start": 1468.64,
+    "end": 1471.04,
+    "text": "die ein einzelnes Modell kaum erreichen könnte."
+  },
+  {
+    "start": 1471.04,
+    "end": 1474.24,
+    "text": "Du hast uns mit deinen Quellen wirklich einen tiefen Einblick"
+  },
+  {
+    "start": 1474.24,
+    "end": 1476.6,
+    "text": "in den Maschinenraum des maschinellen Lernens gegeben."
+  },
+  {
+    "start": 1477.02,
+    "end": 1481.82,
+    "text": "Es ist schon erstaunlich zu sehen, welche logischen und mathematischen Konzepte"
+  },
+  {
+    "start": 1481.82,
+    "end": 1486.08,
+    "text": "hinter der Technologie stecken, die wir jeden Tag fast beiläufig nutzen."
+  },
+  {
+    "start": 1486.54,
+    "end": 1489.5,
+    "text": "Das wirft eine wichtige Frage auf, über die du nachdenken kannst."
+  },
+  {
+    "start": 1490.24,
+    "end": 1494.3,
+    "text": "Diese Modelle, besonders die komplexen Osombles wie Random Forests,"
+  },
+  {
+    "start": 1494.46,
+    "end": 1498.86,
+    "text": "werden immer präziser. Gleichzeitig werden sie aber oft zu einer Black Box."
+  },
+  {
+    "start": 1498.86,
+    "end": 1502.36,
+    "text": "Eine Black Box. Wir wissen mit hoher Wahrscheinlichkeit,"
+  },
+  {
+    "start": 1502.54,
+    "end": 1503.96,
+    "text": "dass sie die richtige Entscheidung treffen."
+  },
+  {
+    "start": 1504.44,
+    "end": 1508.82,
+    "text": "Aber wir können nicht immer einfach nachvollziehen, warum sie genau diese Entscheidung getroffen haben."
+  },
+  {
+    "start": 1509.34,
+    "end": 1511.28,
+    "text": "Die Frage, die sich daraus ergibt ist also,"
+  },
+  {
+    "start": 1511.8,
+    "end": 1516.42,
+    "text": "wie viel Nachvollziehbarkeit sind wir bereit, für das letzte Prozent an Genauigkeit zu opfern."
+  },
+  {
+    "start": 1516.84,
+    "end": 1519.74,
+    "text": "Besonders, wenn es um Entscheidungen geht, die Menschen betreffen."
+  },
+  {
+    "start": 1520.52,
+    "end": 1522.92,
+    "text": "Wie bei einem Kredit oder einer medizinischen Diagnose."
+  },
+  {
+    "start": 1523.3,
+    "end": 1526.28,
+    "text": "Genau. Eine wirklich spannende Frage zum Abschluss,"
+  },
+  {
+    "start": 1526.28,
+    "end": 1528.04,
+    "text": "die weit über die Technik hinausgeht."
+  },
+  {
+    "start": 1528.98,
+    "end": 1531.04,
+    "text": "Damit beenden wir unsere heutige Analyse."
+  },
+  {
+    "start": 1531.38,
+    "end": 1534.26,
+    "text": "Vielen Dank, dass du uns diese Unterlagen zur Verfügung gestellt hast."
+  }
+]

@@ -1,0 +1,60 @@
+{
+  "nodes": [
+    {
+      "id": "node_0",
+      "text": "Ausstellerinformationen jobmesse Leipzig",
+      "x": 0,
+      "y": 0,
+      "isExpandable": true,
+      "isExpanded": true
+    },
+    {
+      "id": "node_1",
+      "text": "Zeitplan (Messe 22.-23.11.2025)",
+      "x": 502.46875,
+      "y": -200,
+      "isExpandable": true,
+      "isExpanded": false
+    },
+    {
+      "id": "node_2",
+      "text": "Auf- & Abbau Regelungen",
+      "x": 502.46875,
+      "y": -120,
+      "isExpandable": true,
+      "isExpanded": false
+    },
+    {
+      "id": "node_3",
+      "text": "Technik & Versorgung",
+      "x": 502.46875,
+      "y": -40,
+      "isExpandable": true,
+      "isExpanded": false
+    },
+    {
+      "id": "node_4",
+      "text": "Logistik & Parken",
+      "x": 502.46875,
+      "y": 40,
+      "isExpandable": true,
+      "isExpanded": false
+    },
+    {
+      "id": "node_5",
+      "text": "Service, Catering & Sicherheit",
+      "x": 502.46875,
+      "y": 120,
+      "isExpandable": true,
+      "isExpanded": false
+    },
+    {
+      "id": "node_6",
+      "text": "Kontakt",
+      "x": 502.46875,
+      "y": 200,
+      "isExpandable": true,
+      "isExpanded": false
+    }
+  ]
+}

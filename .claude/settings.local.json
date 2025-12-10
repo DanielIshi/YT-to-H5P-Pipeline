@@ -14,7 +14,8 @@
       "WebFetch(domain:h5p.org)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(powershell:*)",
-      "Bash(python -m src.adapters.notebooklm.notebook_harvester:*)"
+      "Bash(python -m src.adapters.notebooklm.notebook_harvester:*)",
+      "Bash(gh issue view:*)"
     ],
     "deny": [],
     "ask": []

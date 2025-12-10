@@ -17,31 +17,81 @@ MOODLE_URL = "https://moodle.srv947487.hstgr.cloud"
 MOODLE_USER = "student1"
 MOODLE_PASS = "Student2025!"
 
-# H5P Activities (Course Module IDs 92-100 - deployed with fixed h5p framework integration)
+# H5P Activities - Course 25 (Corporate LLM Masterclass)
+# Updated: 2024-12-04 with AI-generated images and autoCheck=true
 H5P_ACTIVITIES = [
-    {"cmid": 92, "name": "1. Themenübersicht", "type": "ImageHotspots"},
-    {"cmid": 93, "name": "2. Wichtige Begriffe", "type": "Dialogcards"},
-    {"cmid": 94, "name": "3. Kernaussagen", "type": "Accordion"},
-    {"cmid": 95, "name": "4. Video mit Quizfragen", "type": "InteractiveVideo"},
-    {"cmid": 96, "name": "5. Verständnischeck", "type": "MultiChoice"},
-    {"cmid": 97, "name": "6. Lückentext", "type": "Blanks"},
-    {"cmid": 98, "name": "7. Faktencheck", "type": "TrueFalse"},
-    {"cmid": 99, "name": "8. Zuordnung", "type": "DragAndDrop"},
-    {"cmid": 100, "name": "9. Zusammenfassung", "type": "Summary"},
+    {"cmid": 184, "name": "1. imagehotspots", "type": "ImageHotspots"},
+    {"cmid": 185, "name": "2. dialogcards", "type": "Dialogcards"},
+    {"cmid": 186, "name": "3. accordion", "type": "Accordion"},
+    {"cmid": 187, "name": "4. interactivevideo", "type": "InteractiveVideo"},
+    {"cmid": 188, "name": "5. multichoice", "type": "MultiChoice"},
+    {"cmid": 189, "name": "6. blanks", "type": "Blanks"},
+    {"cmid": 190, "name": "7. truefalse", "type": "TrueFalse"},
+    {"cmid": 191, "name": "8. draganddrop", "type": "DragAndDrop"},
+    {"cmid": 192, "name": "9. summary", "type": "Summary"},
 ]
+
+# Minimum contrast ratio for WCAG AA compliance
+MIN_CONTRAST_RATIO = 4.5
 
 # Screenshot-Verzeichnis
 SCREENSHOT_DIR = os.path.join(os.path.dirname(__file__), "screenshots")
 os.makedirs(SCREENSHOT_DIR, exist_ok=True)
 
 
+def parse_color(color_str: str) -> tuple:
+    """Parse CSS color string to RGB tuple"""
+    import re
+    if not color_str:
+        return (255, 255, 255)  # Default white
+
+    # rgb(r, g, b) or rgba(r, g, b, a)
+    match = re.search(r'rgba?\((\d+),\s*(\d+),\s*(\d+)', color_str)
+    if match:
+        return (int(match.group(1)), int(match.group(2)), int(match.group(3)))
+
+    # Hex colors
+    if color_str.startswith('#'):
+        hex_color = color_str.lstrip('#')
+        if len(hex_color) == 3:
+            hex_color = ''.join([c*2 for c in hex_color])
+        return tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+
+    return (255, 255, 255)
+
+
+def get_luminance(rgb: tuple) -> float:
+    """Calculate relative luminance for contrast ratio"""
+    def adjust(c):
+        c = c / 255
+        return c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
+
+    r, g, b = rgb
+    return 0.2126 * adjust(r) + 0.7152 * adjust(g) + 0.0722 * adjust(b)
+
+
+def contrast_ratio(color1: str, color2: str) -> float:
+    """Calculate WCAG contrast ratio between two colors"""
+    rgb1 = parse_color(color1)
+    rgb2 = parse_color(color2)
+
+    lum1 = get_luminance(rgb1)
+    lum2 = get_luminance(rgb2)
+
+    lighter = max(lum1, lum2)
+    darker = min(lum1, lum2)
+
+    return (lighter + 0.05) / (darker + 0.05)
+
+
 class MoodleH5PTest:
-    """Test-Klasse für Moodle H5P Visual Tests"""
+    """Test-Klasse für Moodle H5P Visual Tests mit CSS-Kontrast-Prüfung"""
 
     def __init__(self):
         self.browser = None
         self.page = None
         self.js_errors = []
+        self.contrast_issues = []
 
     def setup(self):
         """Browser starten und einloggen"""

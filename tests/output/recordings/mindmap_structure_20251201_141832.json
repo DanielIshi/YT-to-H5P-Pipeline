@@ -1,0 +1,12 @@
+{
+  "nodes": [
+    {
+      "id": "node_0",
+      "text": "Ausstellerinformationen jobmesse Leipzig",
+      "x": 0,
+      "y": 0,
+      "isExpandable": true,
+      "isExpanded": false
+    }
+  ]
+}

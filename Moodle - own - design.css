@@ -1,0 +1,214 @@
+/* --- MÜHELOSE KI: FINAL COMPLETE THEME (v3) --- */
+
+/* 1. HINTERGRÜNDE & HAUPTBEREICHE */
+body, 
+#page, 
+#region-main, 
+#page-wrapper,
+#topofscroll, 
+#topofscroll > div.secondary-navigation.d-print-none,
+.drawer, 
+.drawer-content {
+    background-color: #050505 !important; /* Tiefschwarz */
+    color: #f0f0f0 !important;
+}
+
+/* 2. OBERE NAVBAR */
+#page-wrapper > nav,
+.navbar,
+.navbar-light,
+.bg-white,
+.fixed-top {
+    background-color: #000000 !important;
+    border-bottom: 1px solid #222 !important;
+    box-shadow: none !important;
+}
+
+/* Schriftfarbe der oberen Leiste auf LILA (Primary) */
+.navbar-light .navbar-nav .nav-link,
+.navbar-light .navbar-brand,
+.primary-navigation .nav-link {
+    color: #bd66ff !important;
+}
+.navbar-light .navbar-nav .nav-link:hover,
+.primary-navigation .nav-link:hover {
+    color: #00FFFF !important; /* Cyan Hover */
+}
+
+/* 3. LABELS & TEXTE (Helle Beschriftungen) */
+label, 
+.col-form-label, 
+.form-label, 
+legend, 
+.mform .fitem div.fitemtitle,
+span.input-group-text {
+    color: #ffffff !important;
+    font-weight: 500;
+}
+.text-muted, .dimmed_text {
+    color: #cccccc !important; 
+}
+h1, h2, h3, h4, h5, h6 {
+    color: #ffffff !important;
+}
+
+/* 4. NAVIGATIONSTABS (Secondary Navigation) */
+.secondary-navigation,
+.moremenu,
+.tab-content {
+    background-color: #050505 !important;
+    border-bottom: 1px solid #222 !important;
+}
+.secondary-navigation .nav-tabs {
+    background-color: transparent !important;
+    border-bottom: none !important;
+}
+.secondary-navigation .nav-tabs .nav-item .nav-link {
+    background-color: transparent !important;
+    color: #aaaaaa !important;
+    border: none !important;
+}
+.secondary-navigation .nav-tabs .nav-item .nav-link:hover {
+    color: #00FFFF !important;
+    background-color: rgba(255, 255, 255, 0.05) !important;
+}
+.secondary-navigation .nav-link.active,
+.secondary-navigation .nav-tabs .nav-item .nav-link.active {
+    background-color: transparent !important;
+    border-bottom: 3px solid #bd66ff !important; /* Lila Linie */
+    color: #ffffff !important;
+    font-weight: bold;
+}
+
+/* 5. DROPDOWN MENÜS */
+.dropdown-menu {
+    background-color: #141414 !important;
+    border: 1px solid #bd66ff !important;
+}
+.dropdown-item {
+    color: #eee !important;
+}
+.dropdown-item:hover, .dropdown-item:focus {
+    background-color: #bd66ff !important;
+    color: #fff !important;
+}
+
+/* 6. KARTEN & BOXEN */
+.card, .card-body {
+    background-color: #141414 !important;
+    border: 1px solid #333 !important;
+    color: #f0f0f0 !important;
+}
+.card-header {
+    background-color: #1a1a1a !important;
+    border-bottom: 1px solid #333 !important;
+}
+
+/* 7. EINGABEFELDER */
+input.form-control, textarea, select, .custom-select {
+    background-color: #222 !important;
+    color: #fff !important;
+    border: 1px solid #555 !important;
+}
+input.form-control:focus {
+    border-color: #bd66ff !important;
+    box-shadow: 0 0 5px rgba(189, 102, 255, 0.5);
+}
+
+/* 8. BUTTONS (Gradient) */
+.btn-primary {
+    background-image: linear-gradient(135deg, #8A2BE2 0%, #00FFFF 100%) !important;
+    border: none !important;
+    color: #000 !important;
+    font-weight: bold;
+}
+
+/* 9. KURS INDEX / SIDEBAR (Das fehlte noch!) */
+#courseindex, 
+.courseindex,
+.drawer-left {
+    background-color: #050505 !important; /* Hintergrund Schwarz */
+    border-right: 1px solid #222 !important;
+}
+
+/* Die Links im Index */
+.courseindex .courseindex-link, 
+.courseindex .courseindex-chevron {
+    color: #cccccc !important; /* Hellgrau normal */
+}
+.courseindex .courseindex-link:hover, 
+.courseindex .courseindex-chevron:hover {
+    color: #00FFFF !important; /* Cyan beim Hover */
+    text-decoration: none !important;
+}
+
+/* Überschriften der Sektionen im Index */
+.courseindex-section-title .courseindex-link {
+    color: #bd66ff !important; /* Lila für Abschnittstitel */
+    font-weight: 600;
+}
+
+/* Aktives Element im Index (Wo man gerade ist) */
+.courseindex-item.pageitem {
+    background-color: #1a1a1a !important;
+    border-left: 3px solid #00FFFF !important; /* Cyan Markierung links */
+}
+.courseindex-item.pageitem .courseindex-link {
+    color: #ffffff !important;
+    font-weight: bold;
+}
+
+/* 10. SCROLLBARS DUNKEL MACHEN */
+::-webkit-scrollbar {
+    width: 10px;
+    background-color: #050505;
+}
+::-webkit-scrollbar-thumb {
+    background-color: #333;
+    border-radius: 5px;
+}
+::-webkit-scrollbar-track {
+    background-color: #050505;
+}
+
+/* --- ENDE CODE --- */
+
+/* --- 11. DROPDOWN & SPRACHMENU FIX --- */
+
+/* 1. Alle Links und Buttons in der oberen Navbar zwingend hell machen */
+.navbar .nav-item .nav-link,
+.navbar .dropdown-toggle,
+.navbar .btn,
+.usermenu .dropdown-toggle {
+    color: #ffffff !important; /* Weißer Text */
+}
+
+/* 2. Speziell für das Sprachmenü (Language Selector) */
+.langmenu .dropdown-toggle,
+.langmenu .btn {
+    color: #bd66ff !important; /* Lila Brand-Farbe (optional, sonst #fff nehmen) */
+}
+
+/* 3. Pfeile und Icons neben dem Text (z.B. Dropdown-Pfeil) */
+.navbar .dropdown-toggle::after {
+    color: #00FFFF !important; /* Cyan Pfeil */
+    border-top-color: #00FFFF !important; /* Für CSS-Pfeile */
+}
+
+/* 4. Dropdown-Inhalt (Wenn es aufklappt) - Sicherstellen, dass Text lesbar ist */
+.dropdown-menu a.dropdown-item {
+    color: #eeeeee !important; /* Hellgrau */
+}
+.dropdown-menu a.dropdown-item:hover {
+    color: #ffffff !important; /* Weiß bei Hover */
+    background-color: #bd66ff !important; /* Lila Hintergrund */
+}
+
+/* 5. User-Initialen oder Avatar-Text */
+.userinitials {
+    background-color: #bd66ff !important;
+    color: #ffffff !important;
+    border: 1px solid #00FFFF !important;
+}
+
+/* --- ENDE FIX --- */
