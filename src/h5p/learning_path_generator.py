@@ -115,158 +115,144 @@ def download_and_encode_image(image_url: str) -> Optional[tuple]:
 # LLM PROMPT - Generates complete learning path with all content types
 # ============================================================================
 
-LEARNING_PATH_PROMPT = """Du bist ein E-Learning Experte. Erstelle aus dem Video-Transkript einen
-strukturierten Lernpfad mit verschiedenen H5P-Aktivitäten.
+LEARNING_PATH_PROMPT = """Du bist ein erfahrener E-Learning-Designer. Erstelle aus dem Transcript einen
+professionellen Lernpfad mit H5P-Aktivitäten. Der Kurs muss für Endkunden präsentabel sein!
 
-VERFÜGBARE CONTENT-TYPEN:
-1. dialogcards - Karteikarten für Begriffe/Definitionen
-2. accordion - Aufklappbare Sektionen für Erklärungen
-3. multichoice - Multiple Choice Quiz
-4. truefalse - Wahr/Falsch Aussagen
-5. blanks - Lückentext zum Ausfüllen
-6. summary - Zusammenfassung mit Aussagen-Auswahl
-7. draganddrop - Begriffe in Kategorien ziehen
-8. interactivevideo - YouTube-Video mit eingebetteten Quizfragen (NUR wenn video_url vorhanden!)
-9. imagehotspots - Interaktives Bild mit klickbaren Hotspots (NUR wenn image_url vorhanden!)
+== DIDAKTISCHES FRAMEWORK ==
 
-OUTPUT FORMAT (JSON):
+GOLDENE REGEL: Nach jedem PASSIVEN Element (Wissensaufnahme) MUSS ein AKTIVES Element (Anwendung) folgen!
+
+PASSIVE ELEMENTE (Wissen vermitteln):
+- dialogcards: Karteikarten für 3-5 Kernbegriffe aus dem Transcript
+- accordion: Aufklappbare Erklärungen zu 3-4 Hauptthemen
+
+AKTIVE ELEMENTE (Wissen anwenden):
+- multichoice: Quiz mit 4 Optionen zu den vermittelten Inhalten
+- truefalse: Schneller Faktencheck zu einer konkreten Aussage aus dem Transcript
+- blanks: Lückentext mit 2-4 Schlüsselbegriffen zum Ausfüllen
+- draganddrop: Begriffe den richtigen Kategorien zuordnen
+- summary: Kernaussagen identifizieren (IMMER als letztes Element!)
+
+SPEZIELLE ELEMENTE (nur wenn URL vorhanden):
+- interactivevideo: NUR wenn {{VIDEO_URL}} vorhanden - Video mit eingebetteten Fragen
+- imagehotspots: NICHT verwenden (Bild passt selten zum Transcript-Inhalt)
+
+== TITEL-REGELN (KRITISCH!) ==
+
+FALSCH: "2. Wichtige Begriffe", "3. accordion", "5. Verständnischeck"
+RICHTIG: Inhaltsbezogene Titel aus dem Transcript!
+
+Beispiele für gute Titel:
+- "KI-Modelle im Vergleich" statt "Wichtige Begriffe"
+- "Wie funktioniert ein LLM?" statt "Kernaussagen"
+- "Testen Sie Ihr Wissen zu Transformern" statt "Verständnischeck"
+
+== STRUKTUR (8-10 Aktivitäten) ==
+
+1. EINFÜHRUNG (Passiv): dialogcards mit 3-5 Kernbegriffen aus dem Transcript
+2. VERSTÄNDNIS (Aktiv): multichoice zu den gerade gelernten Begriffen
+3. VERTIEFUNG (Passiv): accordion mit 3-4 Hauptthemen/Erklärungen
+4. ANWENDUNG (Aktiv): blanks mit wichtigen Sätzen aus dem Transcript
+5. PRAXIS (Aktiv): draganddrop - Begriffe kategorisieren
+6. FAKTENCHECK (Aktiv): truefalse zu einer spezifischen Aussage
+7. ABSCHLUSS (Aktiv): summary mit 3-4 Kernaussagen zum Auswählen
+
+Falls {{VIDEO_URL}} vorhanden: interactivevideo nach Aktivität 3 einfügen
+
+== OUTPUT FORMAT (JSON) ==
 {
-  "module_title": "Übergeordneter Modultitel",
+  "module_title": "Spezifischer Titel aus dem Transcript-Thema",
   "activities": [
     {
       "order": 1,
-      "type": "imagehotspots",
-      "title": "1. Themenübersicht",
-      "image_url": "{{IMAGE_URL}}",
-      "hotspots": [
-        {"x": 20, "y": 30, "header": "Thema A", "content": "Kurze Erklärung zu Thema A..."},
-        {"x": 60, "y": 50, "header": "Thema B", "content": "Kurze Erklärung zu Thema B..."},
-        {"x": 80, "y": 70, "header": "Thema C", "content": "Kurze Erklärung zu Thema C..."}
+      "type": "dialogcards",
+      "title": "[Themenspezifischer Titel]",
+      "cards": [
+        {"front": "Was versteht man unter <span class='h5p-term'>[Begriff]</span>?", "back": "[Definition aus Transcript]"},
+        {"front": "Erkläre <span class='h5p-term'>[Begriff]</span>.", "back": "[Erklärung aus Transcript]"}
       ]
     },
     {
       "order": 2,
-      "type": "dialogcards",
-      "title": "2. Wichtige Begriffe",
-      "cards": [
-        {"front": "Begriff 1", "back": "Definition/Erklärung zu Begriff 1"},
-        {"front": "Begriff 2", "back": "Definition/Erklärung zu Begriff 2"}
+      "type": "multichoice",
+      "title": "[Inhaltsbezogene Frage]",
+      "question": "[Konkrete Frage zum Transcript-Inhalt]",
+      "answers": [
+        {"text": "[Korrekte Antwort aus Transcript]", "correct": true, "feedback": "Richtig! [Erklärung]"},
+        {"text": "[Plausible aber falsche Option]", "correct": false, "feedback": "[Warum falsch]"},
+        {"text": "[Weitere falsche Option]", "correct": false, "feedback": "[Warum falsch]"},
+        {"text": "[Weitere falsche Option]", "correct": false, "feedback": "[Warum falsch]"}
       ]
     },
     {
       "order": 3,
       "type": "accordion",
-      "title": "3. Kernaussagen",
+      "title": "[Thema der Vertiefung]",
       "panels": [
-        {"title": "Kernaussage 1", "content": "<p>Detaillierte Erklärung zur ersten Kernaussage...</p>"},
-        {"title": "Kernaussage 2", "content": "<p>Detaillierte Erklärung zur zweiten Kernaussage...</p>"}
+        {"title": "[Konkretes Unterthema]", "content": "<p>[Detaillierte Erklärung aus Transcript]</p>"},
+        {"title": "[Weiteres Unterthema]", "content": "<p>[Weitere Erklärung]</p>"}
       ]
     },
     {
       "order": 4,
-      "type": "interactivevideo",
-      "title": "4. Video mit Quizfragen",
-      "video_url": "{{VIDEO_URL}}",
-      "interactions": [
-        {
-          "time": 60,
-          "type": "multichoice",
-          "label": "Verständnisfrage",
-          "question": "Was wurde gerade erklärt?",
-          "answers": [
-            {"text": "Korrekte Antwort", "correct": true, "feedback": "Genau!"},
-            {"text": "Falsche Option", "correct": false, "feedback": "Nicht ganz..."}
-          ]
-        },
-        {
-          "time": 180,
-          "type": "truefalse",
-          "label": "Faktencheck",
-          "statement": "Diese Aussage ist korrekt.",
-          "correct": true
-        },
-        {
-          "time": 300,
-          "type": "text",
-          "label": "Wichtiger Hinweis",
-          "text": "Achte auf diesen wichtigen Punkt..."
-        }
-      ]
+      "type": "blanks",
+      "title": "[Thema des Lückentexts]",
+      "text": "[Wichtiger Satz aus Transcript] mit *Schlüsselbegriff1* und *Schlüsselbegriff2*."
     },
     {
       "order": 5,
-      "type": "multichoice",
-      "title": "5. Verständnischeck",
-      "question": "Was ist die Hauptaussage des Videos?",
-      "answers": [
-        {"text": "Korrekte Antwort", "correct": true, "feedback": "Genau richtig!"},
-        {"text": "Falsche Option A", "correct": false, "feedback": "Nicht ganz, weil..."},
-        {"text": "Falsche Option B", "correct": false, "feedback": "Leider nein, denn..."},
-        {"text": "Falsche Option C", "correct": false, "feedback": "Das stimmt nicht, weil..."}
+      "type": "draganddrop",
+      "title": "[Kategorisierungs-Thema]",
+      "task": "[Konkrete Aufgabenstellung]",
+      "categories": ["[Kategorie aus Transcript]", "[Andere Kategorie]"],
+      "items": [
+        {"text": "[Begriff]", "category": 0},
+        {"text": "[Begriff]", "category": 1}
       ]
     },
     {
       "order": 6,
-      "type": "blanks",
-      "title": "6. Lückentext",
-      "text": "Das wichtigste Konzept ist *Antwort1*. Es wird verwendet für *Antwort2*."
+      "type": "truefalse",
+      "title": "Stimmt das?",
+      "statement": "[Konkrete Aussage aus dem Transcript]",
+      "correct": true,
+      "feedback_correct": "Genau! [Begründung aus Transcript]",
+      "feedback_wrong": "Nicht ganz. [Richtige Information]"
     },
     {
       "order": 7,
-      "type": "truefalse",
-      "title": "7. Faktencheck",
-      "statement": "Diese Aussage aus dem Video ist korrekt.",
-      "correct": true,
-      "feedback_correct": "Richtig! Diese Aussage stimmt weil...",
-      "feedback_wrong": "Falsch! Diese Aussage ist korrekt weil..."
-    },
-    {
-      "order": 8,
-      "type": "draganddrop",
-      "title": "8. Zuordnung",
-      "task": "Ordne die Begriffe den richtigen Kategorien zu.",
-      "categories": ["Kategorie A", "Kategorie B"],
-      "items": [
-        {"text": "Begriff 1", "category": 0},
-        {"text": "Begriff 2", "category": 1},
-        {"text": "Begriff 3", "category": 0}
-      ]
-    },
-    {
-      "order": 9,
       "type": "summary",
-      "title": "9. Zusammenfassung",
-      "intro": "Wähle die korrekten Aussagen:",
+      "title": "Was haben Sie gelernt?",
+      "intro": "Wählen Sie die korrekten Kernaussagen:",
       "statements": [
         {
-          "correct": "Die korrekte Zusammenfassung des ersten Punktes.",
-          "wrong": ["Falsche Alternative A", "Falsche Alternative B"]
-        },
-        {
-          "correct": "Die korrekte Zusammenfassung des zweiten Punktes.",
-          "wrong": ["Falsche Alternative C", "Falsche Alternative D"]
+          "correct": "[Korrekte Hauptaussage aus Transcript]",
+          "wrong": ["[Falsche Alternative]", "[Weitere falsche Alternative]"]
         }
       ]
     }
   ]
 }
 
-REGELN:
-- Erstelle 8-12 Aktivitäten in didaktischer Reihenfolge
-- Beginne mit ImageHotspots als Themenübersicht (NUR wenn {{IMAGE_URL}} vorhanden)
-- Dann passive Elemente (Dialogcards, Accordion) zur Wissensvermittlung
-- InteractiveVideo in der Mitte platzieren (NUR wenn {{VIDEO_URL}} vorhanden)
-- Dann aktive Elemente (MultiChoice, Blanks, TrueFalse, DragAndDrop) zur Überprüfung
-- Ende mit Summary als Abschluss
-- Nummeriere alle Titel (1., 2., 3., ...)
-- Sprache: Deutsch
-- Keine Emojis
-- Bei blanks: Markiere Lücken mit *Antwort*
-- Bei draganddrop: category ist der Index (0, 1, 2...)
-- Bei interactivevideo: time in Sekunden, verteile 3-5 Interaktionen über das Video
-- Bei imagehotspots: x/y sind Prozentwerte (0-100), verteile 3-5 Hotspots sinnvoll
-- Verwende mindestens 5 verschiedene Content-Typen
-- WICHTIG: Ersetze {{VIDEO_URL}} und {{IMAGE_URL}} durch die tatsächlichen URLs unten!
+== QUALITÄTSKRITERIEN ==
+
+1. ALLE Inhalte MÜSSEN aus dem Transcript stammen - keine erfundenen Fakten!
+2. Titel MÜSSEN inhaltsbezogen sein - KEINE generischen Titel wie "Wichtige Begriffe"!
+3. Abwechslung: Passiv → Aktiv → Passiv → Aktiv (niemals 2x gleicher Typ hintereinander)
+4. Mindestens 5 verschiedene Content-Typen verwenden
+5. Sprache: Deutsch, keine Emojis
+6. Formatierung:
+   - dialogcards: Vorderseite als FRAGE, <span class='h5p-term'>Begriff</span> für Hervorhebung
+   - blanks: Lücken mit *Antwort* markieren
+   - draganddrop: category ist Index (0, 1, 2...)
+
+== VERBOTEN ==
+
+- Generische Titel ("Begriffe", "Quiz", "Faktencheck")
+- Zwei passive Elemente hintereinander
+- imagehotspots (Bilder passen selten zum Audio-Transcript)
+- Inhalte erfinden, die nicht im Transcript stehen
+- Interaktives Video ohne {{VIDEO_URL}}
 
 VIDEO-TRANSKRIPT:
 """
@@ -298,34 +284,24 @@ def call_openai_learning_path(transcript: str, title: str = "Lernmodul", video_u
             video_id = video_id_match.group(1)
             image_url = f"https://img.youtube.com/vi/{video_id}/maxresdefault.jpg"
 
-    # Replace placeholders or remove related examples if URLs not available
+    # Replace placeholders or indicate unavailable URLs
     if video_url:
         prompt = prompt.replace("{{VIDEO_URL}}", video_url)
     else:
-        # Remove interactivevideo example if no video URL
+        # Mark interactivevideo as unavailable
         prompt = prompt.replace(
-            '8. interactivevideo - YouTube-Video mit eingebetteten Quizfragen (NUR wenn video_url vorhanden!)',
-            '8. interactivevideo - (NICHT VERWENDEN - keine video_url vorhanden)'
+            "- interactivevideo: NUR wenn {{VIDEO_URL}} vorhanden - Video mit eingebetteten Fragen",
+            "- interactivevideo: NICHT VERFÜGBAR (keine Video-URL)"
         )
 
-    if image_url:
-        prompt = prompt.replace("{{IMAGE_URL}}", image_url)
-    else:
-        # Remove imagehotspots example if no image URL
-        prompt = prompt.replace(
-            '9. imagehotspots - Interaktives Bild mit klickbaren Hotspots (NUR wenn image_url vorhanden!)',
-            '9. imagehotspots - (NICHT VERWENDEN - keine image_url vorhanden)'
-        )
+    # imagehotspots are disabled by default in the new prompt
+    # No replacement needed since they're already marked as "NICHT verwenden"
 
     prompt = prompt + transcript
 
     # Add URL context at the end
-    if video_url or image_url:
-        prompt += f"\n\nVERFÜGBARE URLs:\n"
-        if video_url:
-            prompt += f"- VIDEO_URL: {video_url}\n"
-        if image_url:
-            prompt += f"- IMAGE_URL: {image_url}\n"
+    if video_url:
+        prompt += f"\n\nVERFÜGBARE VIDEO-URL: {video_url}\n"
 
     response = httpx.post(
         "https://api.openai.com/v1/chat/completions",
@@ -519,7 +495,7 @@ def build_multichoice_h5p(data: Dict[str, Any], output_path: str) -> str:
         "title": data.get("title", "Quiz"),
         "language": "de",
         "mainLibrary": "H5P.MultiChoice",
-        "embedTypes": ["div"],
+        "embedTypes": ["iframe"],
         "license": "U",
         "preloadedDependencies": [
             {"machineName": "H5P.MultiChoice", "majorVersion": 1, "minorVersion": 16},
@@ -585,7 +561,7 @@ def build_truefalse_h5p(data: Dict[str, Any], output_path: str) -> str:
         "title": data.get("title", "Wahr oder Falsch"),
         "language": "de",
         "mainLibrary": "H5P.TrueFalse",
-        "embedTypes": ["div"],
+        "embedTypes": ["iframe"],
         "license": "U",
         "preloadedDependencies": [
             {"machineName": "H5P.TrueFalse", "majorVersion": 1, "minorVersion": 8},
@@ -671,7 +647,7 @@ def build_blanks_h5p(data: Dict[str, Any], output_path: str) -> str:
         "title": data.get("title", "Lückentext"),
         "language": "de",
         "mainLibrary": "H5P.Blanks",
-        "embedTypes": ["div"],
+        "embedTypes": ["iframe"],
         "license": "U",
         "preloadedDependencies": [
             {"machineName": "H5P.Blanks", "majorVersion": 1, "minorVersion": 14},
@@ -739,7 +715,7 @@ def build_dialogcards_h5p(data: Dict[str, Any], output_path: str) -> str:
         "title": data.get("title", "Karteikarten"),
         "language": "de",
         "mainLibrary": "H5P.Dialogcards",
-        "embedTypes": ["div"],
+        "embedTypes": ["iframe"],
         "license": "U",
         "preloadedDependencies": [
             {"machineName": "H5P.Dialogcards", "majorVersion": 1, "minorVersion": 9},
@@ -777,7 +753,7 @@ def build_accordion_h5p(data: Dict[str, Any], output_path: str) -> str:
         "title": data.get("title", "Accordion"),
         "language": "de",
         "mainLibrary": "H5P.Accordion",
-        "embedTypes": ["div"],
+        "embedTypes": ["iframe"],
         "license": "U",
         "preloadedDependencies": [
             {"machineName": "H5P.Accordion", "majorVersion": 1, "minorVersion": 0},
@@ -839,7 +815,7 @@ def build_summary_h5p(data: Dict[str, Any], output_path: str) -> str:
         "title": data.get("title", "Zusammenfassung"),
         "language": "de",
         "mainLibrary": "H5P.Summary",
-        "embedTypes": ["div"],
+        "embedTypes": ["iframe"],
         "license": "U",
         "preloadedDependencies": [
             {"machineName": "H5P.Summary", "majorVersion": 1, "minorVersion": 10},
@@ -913,7 +889,7 @@ def build_draganddrop_h5p(data: Dict[str, Any], output_path: str) -> str:
         "title": data.get("title", "Zuordnung"),
         "language": "de",
         "mainLibrary": "H5P.DragText",
-        "embedTypes": ["div"],
+        "embedTypes": ["iframe"],
         "license": "U",
         "preloadedDependencies": [
             {"machineName": "H5P.DragText", "majorVersion": 1, "minorVersion": 10},
@@ -1316,7 +1292,7 @@ def build_image_hotspots_h5p(data: Dict[str, Any], output_path: str, transcript:
             "title": title,
             "language": "de",
             "mainLibrary": "H5P.ImageHotspots",
-            "embedTypes": ["div"],
+            "embedTypes": ["iframe"],
             "license": "U",
             "preloadedDependencies": [
                 {"machineName": "H5P.ImageHotspots", "majorVersion": 1, "minorVersion": 10},
@@ -1350,7 +1326,7 @@ def build_image_hotspots_h5p(data: Dict[str, Any], output_path: str, transcript:
             "title": title,
             "language": "de",
             "mainLibrary": "H5P.ImageHotspots",
-            "embedTypes": ["div"],
+            "embedTypes": ["iframe"],
             "license": "U",
             "preloadedDependencies": [
                 {"machineName": "H5P.ImageHotspots", "majorVersion": 1, "minorVersion": 10},
@@ -1426,7 +1402,7 @@ def import_h5p_to_moodle(h5p_path: str, courseid: int, title: str) -> Dict[str, 
                    check=True, capture_output=True)
 
     cmd = ["docker", "exec", "moodle-app", "php", "/opt/bitnami/moodle/local/import_h5p.php",
-           f"--file=/tmp/generated.h5p", f"--title={title}", f"--course={courseid}"]
+           f"--file=/tmp/generated.h5p", f"--title={title}", f"--courseid={courseid}"]
 
     result = subprocess.run(cmd, capture_output=True, text=True)
 
@@ -1437,15 +1413,60 @@ def import_h5p_to_moodle(h5p_path: str, courseid: int, title: str) -> Dict[str, 
     return {"status": "error", "message": result.stderr or result.stdout}
 
 
+def create_moodle_course(coursename: str, courseimage: Optional[str] = None) -> Dict[str, Any]:
+    """Create a new Moodle course via PHP script"""
+    # Build command with optional courseimage
+    cmd = [
+        "docker", "exec", "moodle-app", "php", "/opt/bitnami/moodle/local/import_h5p.php",
+        "--createcourse",
+        f"--coursename={coursename}",
+        "--file=/dev/null"  # Dummy file, we just want to create the course
+    ]
+
+    if courseimage:
+        cmd.append(f"--courseimage={courseimage}")
+
+    result = subprocess.run(cmd, capture_output=True, text=True)
+
+    for line in result.stdout.split("\n"):
+        if line.startswith("{"):
+            data = json.loads(line)
+            # Extract courseid from the response - ensure it's an integer
+            if data.get("status") == "success" or data.get("courseid"):
+                courseid = data.get("courseid")
+                if courseid:
+                    courseid = int(courseid)  # Ensure integer
+                return {"status": "success", "courseid": courseid}
+            return data
+
+    return {"status": "error", "message": result.stderr or result.stdout}
+
+
 def generate_learning_path(
     transcript: str,
     title: str,
     courseid: int,
     output_dir: str = "/tmp/h5p_learning_path",
-    video_url: Optional[str] = None
+    video_url: Optional[str] = None,
+    createcourse: bool = False,
+    coursename: Optional[str] = None,
+    courseimage: Optional[str] = None
 ) -> Dict[str, Any]:
     """Generate complete learning path with diverse H5P activities"""
     os.makedirs(output_dir, exist_ok=True)
+
+    # Create course if requested
+    if createcourse:
+        course_result = create_moodle_course(coursename or title, courseimage)
+        if course_result.get("status") == "success":
+            courseid = course_result.get("courseid", 0)
+            print(json.dumps({
+                "status": "info",
+                "message": f"Created course: {coursename or title}",
+                "courseid": courseid
+            }), file=sys.stderr)
+        else:
+            return {"status": "error", "message": f"Failed to create course: {course_result.get('message')}"}
 
     # Generate learning path via LLM
     print(json.dumps({"status": "info", "message": "Generating learning path via LLM..."}),
@@ -1522,11 +1543,38 @@ def generate_learning_path(
 
     successful = sum(1 for r in results if "moodle" in r and r["moodle"].get("status") == "success")
 
+    # E2E Validation: Verify H5P content is accessible via HTTP
+    e2e_results = []
+    moodle_base = os.environ.get("MOODLE_URL", "https://moodle.srv947487.hstgr.cloud")
+
+    for r in results:
+        if r.get("moodle", {}).get("status") == "success":
+            cmid = r["moodle"].get("cmid")
+            if cmid:
+                try:
+                    # Check if the H5P activity page is reachable
+                    url = f"{moodle_base}/mod/h5pactivity/view.php?id={cmid}"
+                    resp = httpx.get(url, follow_redirects=True, timeout=10.0)
+                    # 200 OK or 303 redirect (to login) both indicate the page exists
+                    if resp.status_code in [200, 303]:
+                        e2e_results.append({"cmid": cmid, "status": "reachable"})
+                    else:
+                        e2e_results.append({"cmid": cmid, "status": "error", "http_status": resp.status_code})
+                except Exception as e:
+                    e2e_results.append({"cmid": cmid, "status": "error", "message": str(e)})
+
+    e2e_passed = sum(1 for r in e2e_results if r.get("status") == "reachable")
+
     return {
         "status": "success" if successful > 0 else "error",
         "module_title": path_data.get("module_title", title),
         "total_activities": len(activities),
         "successful_imports": successful,
+        "e2e_validation": {
+            "verified": e2e_passed,
+            "total": len(e2e_results),
+            "all_passed": e2e_passed == len(e2e_results)
+        },
         "activities": results
     }
 
@@ -1603,12 +1651,26 @@ if __name__ == "__main__":
         print(json.dumps({"status": "error", "message": "Provide --courseid or --createcourse"}))
         sys.exit(1)
 
+    # Extract YouTube thumbnail for course image if creating course
+    courseimage = None
+    if args.createcourse and video_url:
+        video_id_match = re.search(
+            r'(?:youtube\.com/watch\?v=|youtu\.be/|youtube\.com/embed/)([a-zA-Z0-9_-]{11})',
+            video_url
+        )
+        if video_id_match:
+            video_id = video_id_match.group(1)
+            courseimage = f"https://img.youtube.com/vi/{video_id}/hqdefault.jpg"
+
     result = generate_learning_path(
-        transcript,
-        title,
-        args.courseid or 0,
-        args.output_dir,
-        video_url
+        transcript=transcript,
+        title=title,
+        courseid=args.courseid or 0,
+        output_dir=args.output_dir,
+        video_url=video_url,
+        createcourse=args.createcourse,
+        coursename=args.coursename,
+        courseimage=courseimage
     )
 
     print(json.dumps(result, indent=2, ensure_ascii=False))

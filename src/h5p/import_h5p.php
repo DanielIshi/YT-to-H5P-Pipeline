@@ -29,12 +29,14 @@ list($options, $unrecognized) = cli_get_params([
     'section' => 0,
     'createcourse' => false,
     'coursename' => '',
+    'courseimage' => '',  // URL to course image (YouTube thumbnail or generated)
     'help' => false
 ], [
     'f' => 'file',
     'c' => 'courseid',
     't' => 'title',
     's' => 'section',
+    'i' => 'courseimage',
     'h' => 'help'
 ]);
 
@@ -43,7 +45,10 @@ if ($options['help']) {
     exit(0);
 }
 
-if (empty($options['file']) || !file_exists($options['file'])) {
+// Allow "create course only" mode without H5P file
+$createCourseOnly = $options['createcourse'] && (empty($options['file']) || $options['file'] === '/dev/null');
+
+if (!$createCourseOnly && (empty($options['file']) || !file_exists($options['file']))) {
     echo json_encode(['status' => 'error', 'message' => 'H5P file not found: ' . $options['file']]) . "\n";
     exit(1);
 }
@@ -64,14 +69,76 @@ if ($options['createcourse']) {
     $newcourse->shortname = 'C' . time();
     $newcourse->summary = 'Auto-generated course';
     $newcourse->format = 'topics';
-    $newcourse->numsections = 5;
+    $newcourse->numsections = 0;  // Only General section - no empty topics
     $newcourse->visible = 1;
 
     $course = create_course($newcourse);
     $courseid = $course->id;
 
+    // Set course image if provided
+    if (!empty($options['courseimage'])) {
+        $imageurl = $options['courseimage'];
+        $context = context_course::instance($courseid);
+
+        // Download image
+        $imagedata = @file_get_contents($imageurl);
+        if ($imagedata) {
+            $fs = get_file_storage();
+
+            // Delete existing overview files
+            $fs->delete_area_files($context->id, 'course', 'overviewfiles');
+
+            // Determine file extension
+            $ext = 'jpg';
+            if (strpos($imageurl, '.png') !== false) {
+                $ext = 'png';
+            }
+
+            $filerecord = [
+                'contextid' => $context->id,
+                'component' => 'course',
+                'filearea' => 'overviewfiles',
+                'itemid' => 0,
+                'filepath' => '/',
+                'filename' => 'course_image.' . $ext
+            ];
+
+            $fs->create_file_from_string($filerecord, $imagedata);
+        }
+    }
+
+    // Enable self-enrolment for the course
+    $enrolplugin = enrol_get_plugin('self');
+    if ($enrolplugin) {
+        // Check if self-enrolment already exists
+        $enrolinstance = $DB->get_record('enrol', ['courseid' => $courseid, 'enrol' => 'self']);
+        if ($enrolinstance) {
+            // Enable existing instance
+            $enrolinstance->status = 0; // 0 = enabled
+            $DB->update_record('enrol', $enrolinstance);
+        } else {
+            // Add new self-enrolment instance
+            $enrolplugin->add_instance($course, [
+                'status' => 0,  // 0 = enabled
+                'roleid' => 5,  // Student role
+                'enrolperiod' => 0,  // No time limit
+            ]);
+        }
+    }
+
     // Rebuild course cache
     rebuild_course_cache($courseid, true);
+
+    // If "create course only" mode, return success with courseid and exit
+    if ($createCourseOnly) {
+        echo json_encode([
+            'status' => 'success',
+            'courseid' => $courseid,
+            'coursename' => $coursename,
+            'message' => 'Course created successfully'
+        ]) . "\n";
+        exit(0);
+    }
 }
 
 if ($courseid <= 0) {
@@ -147,49 +214,98 @@ try {
 
     $storedfile = $fs->create_file_from_pathname($filerecord, $h5pfilepath);
 
-    // Step 4: CRITICAL - Deploy H5P content via core_h5p framework
-    // This is what was missing - the H5P package must be processed/deployed
+    // Step 4: Deploy H5P content via core_h5p framework
+    // H5P packages must be deployed/validated before they can be played
     $factory = new factory();
-    $h5pcore = $factory->get_core();
 
-    // Get the file URL for H5P framework
-    $fileurl = \moodle_url::make_pluginfile_url(
-        $modcontext->id,
-        'mod_h5pactivity',
-        'package',
-        0,
-        '/',
-        $h5pfilename
-    );
-
-    // Deploy the H5P content - this processes the .h5p file and creates the playable content
+    // Deploy config - allow all display options
     $config = new stdClass();
     $config->frame = 1;
     $config->export = 0;
     $config->embed = 0;
     $config->copyright = 0;
 
-    // Use the API to deploy the H5P file
-    $h5pid = helper::save_h5p($factory, $storedfile, $config);
+    // Try to deploy the H5P file - this validates and extracts the package
+    $h5pid = false;
+    $deployError = null;
 
+    try {
+        // Method 1: Use helper::save_h5p (preferred)
+        $h5pid = helper::save_h5p($factory, $storedfile, $config);
+    } catch (Exception $e) {
+        $deployError = $e->getMessage();
+    }
+
+    // If deployment failed, try alternative method with full content extraction
     if ($h5pid === false) {
-        // Alternative: Deploy via file_api directly
-        $h5papi = new \core_h5p\api();
-        // Get pathnamehash for the stored file
-        $pathnamehash = $storedfile->get_pathnamehash();
+        try {
+            // Method 2: Manual deployment - extract content from H5P package
+            $pathnamehash = $storedfile->get_pathnamehash();
+            $contenthash = $storedfile->get_contenthash();
 
-        // Create H5P content entry manually if helper fails
-        $h5pcontent = new stdClass();
-        $h5pcontent->jsoncontent = '{}';
-        $h5pcontent->mainlibraryid = 0;
-        $h5pcontent->displayoptions = 15;
-        $h5pcontent->pathnamehash = $pathnamehash;
-        $h5pcontent->contenthash = $storedfile->get_contenthash();
-        $h5pcontent->filtered = null;
-        $h5pcontent->timecreated = time();
-        $h5pcontent->timemodified = time();
+            // Check if there's already an h5p entry for this file
+            $existing = $DB->get_record('h5p', ['pathnamehash' => $pathnamehash]);
+            if ($existing) {
+                $h5pid = $existing->id;
+            } else {
+                // Extract content from H5P package
+                $mainLibraryId = 0;
+                $jsoncontent = '{}';
+                $zip = new ZipArchive();
 
-        $h5pid = $DB->insert_record('h5p', $h5pcontent);
+                if ($zip->open($h5pfilepath) === true) {
+                    // Get h5p.json for library info
+                    $h5pjson = $zip->getFromName('h5p.json');
+                    if ($h5pjson) {
+                        $h5pdata = json_decode($h5pjson, true);
+                        if (isset($h5pdata['mainLibrary'])) {
+                            $mainLib = $h5pdata['mainLibrary'];
+                            // Find library ID in database
+                            $lib = $DB->get_record_sql(
+                                "SELECT id FROM {h5p_libraries} WHERE machinename = ? ORDER BY majorversion DESC, minorversion DESC LIMIT 1",
+                                [$mainLib]
+                            );
+                            if ($lib) {
+                                $mainLibraryId = $lib->id;
+                            }
+                        }
+                    }
+
+                    // Get content/content.json - this is the actual H5P content!
+                    $contentjson = $zip->getFromName('content/content.json');
+                    if ($contentjson) {
+                        // Validate it's proper JSON
+                        $contentdata = json_decode($contentjson, true);
+                        if ($contentdata !== null) {
+                            $jsoncontent = $contentjson;
+                        }
+                    }
+
+                    $zip->close();
+                }
+
+                // Create H5P content entry with extracted content
+                $h5pcontent = new stdClass();
+                $h5pcontent->jsoncontent = $jsoncontent;
+                $h5pcontent->mainlibraryid = $mainLibraryId;
+                $h5pcontent->displayoptions = 15;
+                $h5pcontent->pathnamehash = $pathnamehash;
+                $h5pcontent->contenthash = $contenthash;
+                $h5pcontent->filtered = null;
+                $h5pcontent->timecreated = time();
+                $h5pcontent->timemodified = time();
+
+                $h5pid = $DB->insert_record('h5p', $h5pcontent);
+            }
+        } catch (Exception $e2) {
+            $deployError = ($deployError ? $deployError . '; ' : '') . $e2->getMessage();
+        }
+    }
+
+    // If still no h5pid, report error but don't fail completely
+    // The content will be deployed on first view
+    if ($h5pid === false && !$deployError) {
+        $h5pid = -1; // Indicates pending deployment
     }
 
     rebuild_course_cache($courseid, true);
