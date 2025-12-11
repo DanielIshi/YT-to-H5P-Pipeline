@@ -478,6 +478,7 @@ def build_multichoice_h5p(data: Dict[str, Any], output_path: str) -> str:
             "enableRetry": True,
             "enableSolutionsButton": True,
             "enableCheckButton": True,
+            "autoCheck": True,
             "randomAnswers": True,
             "singlePoint": False,
             "showSolutionsRequiresInput": True,
@@ -878,7 +879,7 @@ def build_draganddrop_h5p(data: Dict[str, Any], output_path: str) -> str:
             "enableRetry": True,
             "enableSolutionsButton": True,
             "enableCheckButton": True,
-            "instantFeedback": False
+            "instantFeedback": True
         },
         "a11yCheck": "Überprüfe die Antworten. Die Antworten werden als richtig, falsch oder unbeantwortet markiert.",
         "a11yShowSolution": "Zeige die Lösung. Die Aufgabe wird mit der korrekten Lösung markiert.",
