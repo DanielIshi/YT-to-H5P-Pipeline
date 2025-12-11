@@ -16,21 +16,35 @@
         matcherFallbackUrl: 'http://148.230.71.150:8085/api/match' // Fallback ohne SSL
     };
 
-    // ========== DARK MODE CSS ==========
+    // ========== DARK MODE CSS + BRANDING ==========
     var H5P_DARK_CSS = `
-        /* ========== GLOBAL ========== */
+        /* ========== GLOBAL BRANDING ========== */
         body, .h5p-content, .h5p-container, .h5p-question-content, .h5p-standalone {
             background-color: #141414 !important;
             color: #f0f0f0 !important;
-            font-family: sans-serif !important;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif !important;
+        }
+
+        /* ========== QUESTION TITLES - ACCENT COLOR ========== */
+        .h5p-question-introduction,
+        .h5p-multichoice .h5p-question-content > p:first-child,
+        .h5p-true-false .h5p-question-content > p:first-child,
+        .h5p-blanks .h5p-question-content > p:first-child,
+        .h5p-summary-intro,
+        .h5p-drag-task-description {
+            color: #00FFFF !important;
+            font-size: 1.3rem !important;
+            font-weight: 600 !important;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.2) !important;
         }
 
         /* ========== DIALOGCARDS ========== */
         .h5p-dialogcards-card-content {
-            background-color: #1a1a2e !important;
+            background: linear-gradient(145deg, #1a1a2e 0%, #252538 100%) !important;
             color: #f0f0f0 !important;
             border: 1px solid #333 !important;
-            box-shadow: 0 4px 15px rgba(0, 165, 183, 0.3) !important;
+            box-shadow: 0 4px 20px rgba(0, 165, 183, 0.25), 0 0 40px rgba(138, 43, 226, 0.1) !important;
+            border-radius: 12px !important;
         }
         .h5p-dialogcards-card-text, .h5p-dialogcards-card-text-inner,
         .h5p-dialogcards-card-text-inner-content, .h5p-dialogcards-card-text-area {
@@ -38,109 +52,236 @@
             color: #f0f0f0 !important;
         }
         .h5p-dialogcards-cardwrap { background-color: transparent !important; }
-        .h5p-dialogcards-description { color: #b0b0b0 !important; }
+        .h5p-dialogcards-description {
+            color: #00FFFF !important;
+            font-size: 1.1rem !important;
+            font-weight: 500 !important;
+        }
         .h5p-dialogcards-card-footer {
-            background-color: #1a1a2e !important;
-            border-top: 1px solid #333 !important;
+            background: linear-gradient(145deg, #1a1a2e 0%, #252538 100%) !important;
+            border-top: 1px solid rgba(0, 165, 183, 0.3) !important;
         }
         .h5p-dialogcards .h5p-joubelui-button {
             background: linear-gradient(135deg, #00A5B7, #8A2BE2) !important;
             color: #fff !important;
             border: none !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
         }
         .h5p-dialogcards .h5p-joubelui-button:hover {
             background: linear-gradient(135deg, #8A2BE2, #00FFFF) !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 4px 15px rgba(0, 255, 255, 0.3) !important;
+        }
+        /* Card front (question) styling */
+        .h5p-dialogcards-card-side.h5p-dialogcards-card-side-front .h5p-dialogcards-card-text-inner-content {
+            color: #00FFFF !important;
+        }
+        /* Card back (answer) styling */
+        .h5p-dialogcards-card-side.h5p-dialogcards-card-side-back .h5p-dialogcards-card-text-inner-content {
+            color: #f0f0f0 !important;
+        }
+
+        /* ========== DIALOGCARDS TERM HIGHLIGHTING ========== */
+        .h5p-dialogcards .h5p-term,
+        .h5p-dialogcards-card-text .h5p-term,
+        .h5p-term {
+            color: #00FFFF !important;
+            font-weight: bold !important;
+            text-shadow: 0 0 8px rgba(0, 255, 255, 0.4) !important;
+        }
+        .h5p-dialogcards-card-text-inner-content {
+            font-size: 1.3rem !important;
+            line-height: 1.6 !important;
+            text-align: center !important;
         }
 
         /* ========== ACCORDION ========== */
         .h5p-accordion, .h5p-accordion-container { background-color: #141414 !important; }
         .h5p-accordion .h5p-panel-title {
-            background-color: #1a1a2e !important;
+            background: linear-gradient(145deg, #1a1a2e 0%, #252538 100%) !important;
             color: #00FFFF !important;
             border: 1px solid #333 !important;
+            border-left: 4px solid #00A5B7 !important;
+            font-weight: 600 !important;
+            font-size: 1.1rem !important;
+            transition: all 0.3s ease !important;
         }
         .h5p-accordion .h5p-panel-title:hover {
-            background-color: #252547 !important;
+            background: linear-gradient(145deg, #252538 0%, #2a2a4a 100%) !important;
             border-color: #00A5B7 !important;
+            border-left-color: #00FFFF !important;
+        }
+        .h5p-accordion .h5p-panel-title[aria-expanded="true"] {
+            border-left: 4px solid #8A2BE2 !important;
+            background: linear-gradient(145deg, #252538 0%, #2a2a4a 100%) !important;
         }
         .h5p-accordion .h5p-panel-content {
             background-color: #1a1a2e !important;
             color: #f0f0f0 !important;
             border: 1px solid #333 !important;
+            border-left: 4px solid rgba(138, 43, 226, 0.5) !important;
+            font-size: 1.05rem !important;
+            line-height: 1.6 !important;
         }
 
-        /* ========== QUIZ BUTTONS ========== */
+        /* ========== QUIZ ANSWER OPTIONS ========== */
         .h5p-true-false-answer, .h5p-answer, .h5p-alternative-container, .h5p-multichoice-answer {
-            background-color: #222 !important;
+            background: linear-gradient(145deg, #1e1e2e 0%, #252538 100%) !important;
             color: #fff !important;
             border: 1px solid #444 !important;
-            transition: all 0.2s ease !important;
-            border-radius: 4px !important;
+            border-left: 3px solid transparent !important;
+            transition: all 0.25s ease !important;
+            border-radius: 8px !important;
             font-size: 1.1rem !important;
-            padding: 12px 16px !important;
+            padding: 14px 18px !important;
+            margin-bottom: 8px !important;
         }
         .h5p-true-false-answer:hover, .h5p-answer:hover,
         .h5p-alternative-container:hover, .h5p-multichoice-answer:hover {
-            background-color: #333 !important;
-            border-color: #00FFFF !important;
+            background: linear-gradient(145deg, #252538 0%, #2a2a4a 100%) !important;
+            border-color: #00A5B7 !important;
+            border-left: 3px solid #00FFFF !important;
+            transform: translateX(4px) !important;
         }
         .h5p-true-false-answer[aria-checked="true"], .h5p-answer[aria-checked="true"],
         .h5p-alternative-container.h5p-selected {
-            border-left: 5px solid #bd66ff !important;
-            background-color: #2a2a2a !important;
+            border-left: 4px solid #bd66ff !important;
+            background: linear-gradient(145deg, #2a2a4a 0%, #353560 100%) !important;
+            box-shadow: 0 0 15px rgba(189, 102, 255, 0.2) !important;
         }
 
-        /* ========== QUIZ FONTS LARGER ========== */
+        /* ========== QUIZ FONTS & QUESTIONS ========== */
         .h5p-multichoice .h5p-question-content,
         .h5p-question-content p,
         .h5p-question-content,
         .h5p-multichoice-answer div,
         .h5p-true-false .h5p-question-content {
-            font-size: 1.2rem !important;
-            line-height: 1.5 !important;
+            font-size: 1.15rem !important;
+            line-height: 1.6 !important;
         }
-        .h5p-question-introduction { font-size: 1.3rem !important; }
+        .h5p-question-introduction {
+            font-size: 1.3rem !important;
+            color: #00FFFF !important;
+            font-weight: 600 !important;
+            margin-bottom: 1rem !important;
+        }
 
         /* ========== BLANKS ========== */
         .h5p-blanks { background-color: #141414 !important; }
+        .h5p-blanks .h5p-question-content {
+            color: #f0f0f0 !important;
+            font-size: 1.15rem !important;
+            line-height: 1.8 !important;
+        }
         .h5p-blanks .h5p-text-input {
             background-color: #1a1a2e !important;
-            color: #fff !important;
+            color: #00FFFF !important;
             border: 2px solid #00A5B7 !important;
-            border-radius: 4px !important;
+            border-radius: 6px !important;
+            padding: 8px 12px !important;
+            font-size: 1rem !important;
+            font-weight: 500 !important;
+            transition: all 0.2s ease !important;
         }
         .h5p-blanks .h5p-text-input:focus {
             border-color: #00FFFF !important;
-            box-shadow: 0 0 8px rgba(0, 255, 255, 0.5) !important;
+            box-shadow: 0 0 12px rgba(0, 255, 255, 0.4) !important;
+            background-color: #252538 !important;
         }
+        .h5p-blanks .h5p-correct { border-color: #00A5B7 !important; color: #00FFFF !important; }
+        .h5p-blanks .h5p-wrong { border-color: #ff6b6b !important; }
 
         /* ========== DRAG TEXT ========== */
         .h5p-drag-text { background-color: #141414 !important; color: #f0f0f0 !important; }
-        .h5p-drag-text .h5p-drag-droppable-words { background-color: #1a1a2e !important; }
+        .h5p-drag-text .h5p-drag-task-description {
+            color: #00FFFF !important;
+            font-size: 1.2rem !important;
+            font-weight: 600 !important;
+        }
+        .h5p-drag-text .h5p-drag-droppable-words {
+            background-color: #1a1a2e !important;
+            border-radius: 8px !important;
+            padding: 16px !important;
+        }
         .h5p-drag-text .h5p-drag-draggable {
-            background-color: #00A5B7 !important;
-            color: #000 !important;
-            border-radius: 4px !important;
+            background: linear-gradient(135deg, #00A5B7, #8A2BE2) !important;
+            color: #fff !important;
+            border-radius: 6px !important;
+            font-weight: 600 !important;
+            padding: 8px 14px !important;
+            box-shadow: 0 2px 8px rgba(0, 165, 183, 0.3) !important;
+            transition: all 0.2s ease !important;
+        }
+        .h5p-drag-text .h5p-drag-draggable:hover {
+            transform: scale(1.05) !important;
+            box-shadow: 0 4px 15px rgba(0, 255, 255, 0.4) !important;
+        }
+        .h5p-drag-text .h5p-drag-dropzone {
+            background-color: #252538 !important;
+            border: 2px dashed #00A5B7 !important;
+            border-radius: 6px !important;
+        }
+        .h5p-drag-text .h5p-drag-dropzone-has-draggable {
+            background-color: #1a1a2e !important;
+            border: 2px solid #8A2BE2 !important;
         }
 
         /* ========== SUMMARY ========== */
         .h5p-summary { background-color: #141414 !important; }
+        .h5p-summary .h5p-summary-intro {
+            color: #00FFFF !important;
+            font-size: 1.2rem !important;
+            font-weight: 600 !important;
+            margin-bottom: 1rem !important;
+        }
         .h5p-summary .h5p-summary-statement {
-            background-color: #1a1a2e !important;
+            background: linear-gradient(145deg, #1a1a2e 0%, #252538 100%) !important;
             color: #f0f0f0 !important;
             border: 1px solid #333 !important;
+            border-left: 3px solid transparent !important;
+            border-radius: 8px !important;
+            padding: 12px 16px !important;
+            margin-bottom: 8px !important;
+            transition: all 0.25s ease !important;
         }
         .h5p-summary .h5p-summary-statement:hover {
-            background-color: #252547 !important;
+            background: linear-gradient(145deg, #252538 0%, #2a2a4a 100%) !important;
             border-color: #00A5B7 !important;
+            border-left: 3px solid #00FFFF !important;
+            transform: translateX(4px) !important;
+        }
+        .h5p-summary .h5p-summary-statement.h5p-summary-correct {
+            border-left: 4px solid #00A5B7 !important;
+            background: linear-gradient(145deg, #1a2a2e 0%, #253538 100%) !important;
         }
 
         /* ========== IMAGE HOTSPOTS ========== */
         .h5p-image-hotspots { background-color: #141414 !important; }
         .h5p-image-hotspot-popup {
-            background-color: #1a1a2e !important;
+            background: linear-gradient(145deg, #1a1a2e 0%, #252538 100%) !important;
             color: #f0f0f0 !important;
             border: 1px solid #00A5B7 !important;
+            border-radius: 12px !important;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 40px rgba(0, 165, 183, 0.2) !important;
+        }
+        .h5p-image-hotspot-popup-header {
+            color: #00FFFF !important;
+            font-size: 1.2rem !important;
+            font-weight: 600 !important;
+            border-bottom: 1px solid rgba(0, 165, 183, 0.3) !important;
+        }
+        .h5p-image-hotspot-popup-body { color: #f0f0f0 !important; line-height: 1.6 !important; }
+        .h5p-image-hotspots-overlay { background-color: rgba(0, 0, 0, 0.7) !important; }
+        .h5p-image-hotspot {
+            background: linear-gradient(135deg, #00A5B7, #8A2BE2) !important;
+            border: 2px solid #fff !important;
+            box-shadow: 0 2px 10px rgba(0, 165, 183, 0.5) !important;
+            transition: all 0.3s ease !important;
+        }
+        .h5p-image-hotspot:hover {
+            transform: scale(1.2) !important;
+            box-shadow: 0 4px 20px rgba(0, 255, 255, 0.6) !important;
         }
 
         /* ========== BUTTONS ========== */
@@ -676,6 +817,120 @@
         return (2 * intersection) / (str1.length + str2.length - 2);
     }
 
+    // ========== STT FOR TEXT INPUTS (Issue #4) ==========
+    function injectSTTForTextInputs(doc) {
+        // Find all text inputs in H5P content types
+        var selectors = [
+            '.h5p-blanks .h5p-text-input',           // Blanks/Fill-in
+            '.h5p-drag-text input[type="text"]',     // Drag Text (if any)
+            '.h5p-essay textarea',                    // Essay
+            '.h5p-free-text-question textarea',       // Free Text
+            'input.h5p-textinput',                    // Generic H5P text input
+            '.h5p-question input[type="text"]'        // Any question text input
+        ];
+
+        var inputs = [];
+        selectors.forEach(function(sel) {
+            var found = doc.querySelectorAll(sel);
+            found.forEach(function(el) { inputs.push(el); });
+        });
+
+        inputs.forEach(function(input) {
+            // Skip if already has mic button
+            if (input.parentElement && input.parentElement.querySelector('.h5p-stt-input-btn')) return;
+
+            // Create mic button
+            var micBtn = doc.createElement('button');
+            micBtn.className = 'h5p-stt-input-btn';
+            micBtn.textContent = '🎤';
+            micBtn.title = 'Spracheingabe';
+            micBtn.type = 'button';
+            micBtn.style.cssText = 'position:absolute;right:5px;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:50%;border:none;background:linear-gradient(135deg,#8A2BE2,#00A5B7);color:#fff;font-size:14px;cursor:pointer;z-index:100;display:flex;align-items:center;justify-content:center;';
+
+            // Wrap input if needed
+            var wrapper = input.parentElement;
+            if (!wrapper.style.position || wrapper.style.position === 'static') {
+                wrapper.style.position = 'relative';
+            }
+            input.style.paddingRight = '35px';
+
+            // Insert button after input
+            input.parentElement.insertBefore(micBtn, input.nextSibling);
+
+            // STT for this specific input
+            var inputRecognition = null;
+            var isRecording = false;
+
+            micBtn.onclick = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                if (isRecording) {
+                    // Stop recording
+                    if (inputRecognition) inputRecognition.stop();
+                    isRecording = false;
+                    micBtn.textContent = '🎤';
+                    micBtn.style.background = 'linear-gradient(135deg,#8A2BE2,#00A5B7)';
+                    return;
+                }
+
+                // Start recording
+                var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (!SpeechRecognition) {
+                    alert('Spracheingabe wird in diesem Browser nicht unterstützt. Bitte Chrome oder Edge verwenden.');
+                    return;
+                }
+
+                inputRecognition = new SpeechRecognition();
+                inputRecognition.lang = CONFIG.lang;
+                inputRecognition.continuous = false;
+                inputRecognition.interimResults = true;
+
+                inputRecognition.onstart = function() {
+                    isRecording = true;
+                    micBtn.textContent = '⏹';
+                    micBtn.style.background = 'linear-gradient(135deg,#ff4444,#ff8800)';
+                    input.placeholder = 'Sprechen Sie jetzt...';
+                };
+
+                inputRecognition.onresult = function(event) {
+                    var transcript = '';
+                    for (var i = 0; i < event.results.length; i++) {
+                        transcript += event.results[i][0].transcript;
+                    }
+                    input.value = transcript;
+                    // Trigger input event for H5P validation
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                    input.dispatchEvent(new Event('change', { bubbles: true }));
+                };
+
+                inputRecognition.onend = function() {
+                    isRecording = false;
+                    micBtn.textContent = '🎤';
+                    micBtn.style.background = 'linear-gradient(135deg,#8A2BE2,#00A5B7)';
+                    input.placeholder = '';
+                };
+
+                inputRecognition.onerror = function(event) {
+                    console.log('STT Input Error:', event.error);
+                    isRecording = false;
+                    micBtn.textContent = '🎤';
+                    micBtn.style.background = 'linear-gradient(135deg,#8A2BE2,#00A5B7)';
+                };
+
+                try {
+                    inputRecognition.start();
+                } catch (err) {
+                    console.log('STT already running');
+                }
+            };
+        });
+
+        if (inputs.length > 0) {
+            console.log('H5P STT: Injected mic buttons for ' + inputs.length + ' text inputs');
+        }
+    }
+
     // ========== INJECTION LOGIC ==========
     function injectAll(doc, depth) {
         if (!doc || depth > 5) return;
@@ -692,6 +947,9 @@
             if (doc.querySelector('.h5p-dialogcards')) {
                 injectVoiceControls(doc);
             }
+
+            // Inject STT for all text inputs (Issue #4)
+            injectSTTForTextInputs(doc);
 
             var iframes = doc.getElementsByTagName('iframe');
             for (var i = 0; i < iframes.length; i++) {

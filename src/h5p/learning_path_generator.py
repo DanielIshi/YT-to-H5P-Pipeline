@@ -21,24 +21,113 @@ import httpx
 # AI IMAGE GENERATION FOR IMAGEHOTSPOTS
 # ============================================================================
 
-def generate_infographic_image(transcript: str, hotspots: list, title: str = "") -> Optional[str]:
+def generate_infographic_image_gemini(transcript: str, hotspots: list, title: str = "") -> Optional[str]:
     """
-    Generate a thematic infographic image using DALL-E based on transcript content.
+    Generate a thematic infographic image using Gemini/Imagen 3.
+    Gemini can generate images with correct, readable text labels.
 
-    Returns: URL of the generated image, or None if generation fails
+    Returns: URL/path of the generated image, or None if generation fails
     """
-    api_key = os.environ.get("OPENAI_API_KEY", "")
+    import google.generativeai as genai
+    import base64
+    import tempfile
+
+    api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY", "")
     if not api_key:
-        print('{"status": "warning", "message": "No OPENAI_API_KEY for image generation"}')
-        return None
+        print('{"status": "warning", "message": "No GEMINI_API_KEY for image generation, trying DALL-E fallback"}')
+        return generate_infographic_image_dalle(transcript, hotspots, title)
 
     # Extract key topics from hotspots for the image prompt
     topics = [hs.get("header", "") for hs in hotspots if hs.get("header")]
-    topics_text = ", ".join(topics[:5]) if topics else "key concepts"
+    topics_text = ", ".join(topics[:5]) if topics else "Kernkonzepte"
 
-    # Create a focused prompt for infographic-style image
-    # Truncate transcript to first 500 chars for context
-    context = transcript[:500] if transcript else ""
+    # Create labels for the infographic
+    labels_text = "\n".join([f"- {hs.get('header', '')}" for hs in hotspots[:6] if hs.get('header')])
+
+    image_prompt = f"""Erstelle eine professionelle deutsche Infografik für E-Learning.
+
+Thema: {title or 'Lerninhalt'}
+
+WICHTIG - Diese Beschriftungen MÜSSEN im Bild lesbar erscheinen:
+{labels_text}
+
+Stil-Anforderungen:
+- Modernes, flaches Design mit klaren Linien
+- Farbpalette: Dunkelblau (#1a1a2e), Cyan (#00FFFF), Lila (#8A2BE2)
+- Jedes Konzept als beschriftete Box oder Icon-Bereich
+- Deutsche Beschriftungen gut lesbar (mindestens 14pt äquivalent)
+- Querformat 16:9
+- Dunkler Hintergrund für bessere Lesbarkeit
+- Verbindungslinien zwischen verwandten Konzepten
+- Professioneller, wissenschaftlicher Stil
+
+Die Beschriftungen im Bild MÜSSEN exakt diese deutschen Begriffe zeigen: {topics_text}"""
+
+    try:
+        genai.configure(api_key=api_key)
+
+        # Try Imagen 3 first (best for infographics with text)
+        try:
+            from google.generativeai import types
+            imagen = genai.ImageGenerationModel("imagen-3.0-generate-001")
+            result = imagen.generate_images(
+                prompt=image_prompt,
+                number_of_images=1,
+                aspect_ratio="16:9",
+                safety_filter_level="block_only_high",
+                person_generation="dont_allow"
+            )
+
+            if result.images:
+                # Save image to temp file and return path
+                img_data = result.images[0]._pil_image
+                temp_path = tempfile.mktemp(suffix=".png")
+                img_data.save(temp_path)
+                print(f'{{"status": "info", "message": "Generated infographic via Gemini Imagen 3"}}')
+                return temp_path
+
+        except Exception as imagen_err:
+            print(f'{{"status": "info", "message": "Imagen 3 not available, trying Gemini vision model"}}')
+
+        # Fallback: Use Gemini 2.0 Flash with image generation capability
+        model = genai.GenerativeModel('gemini-2.0-flash-exp')
+        response = model.generate_content(
+            f"Generate an infographic image: {image_prompt}",
+            generation_config=genai.types.GenerationConfig(
+                response_mime_type="image/png"
+            )
+        )
+
+        if response.candidates and hasattr(response.candidates[0], 'content'):
+            for part in response.candidates[0].content.parts:
+                if hasattr(part, 'inline_data') and part.inline_data:
+                    img_bytes = base64.b64decode(part.inline_data.data)
+                    temp_path = tempfile.mktemp(suffix=".png")
+                    with open(temp_path, 'wb') as f:
+                        f.write(img_bytes)
+                    print(f'{{"status": "info", "message": "Generated infographic via Gemini 2.0 Flash"}}')
+                    return temp_path
+
+        print('{"status": "warning", "message": "Gemini did not return image, trying DALL-E fallback"}')
+        return generate_infographic_image_dalle(transcript, hotspots, title)
+
+    except Exception as e:
+        print(f'{{"status": "warning", "message": "Gemini image generation failed: {str(e)}, trying DALL-E"}}')
+        return generate_infographic_image_dalle(transcript, hotspots, title)
+
+
+def generate_infographic_image_dalle(transcript: str, hotspots: list, title: str = "") -> Optional[str]:
+    """
+    Fallback: Generate infographic using DALL-E 3.
+    Note: DALL-E cannot reliably generate readable text in images.
+    """
+    api_key = os.environ.get("OPENAI_API_KEY", "")
+    if not api_key:
+        print('{"status": "warning", "message": "No OPENAI_API_KEY for DALL-E fallback"}')
+        return None
+
+    topics = [hs.get("header", "") for hs in hotspots if hs.get("header")]
+    topics_text = ", ".join(topics[:5]) if topics else "key concepts"
 
     image_prompt = f"""Create a clean, professional infographic-style illustration for an e-learning module.
 
@@ -47,13 +136,12 @@ Key concepts to visualize: {topics_text}
 
 Style requirements:
 - Clean, flat design with a modern look
-- Use a cohesive color palette (blues, teals, or professional colors)
+- Use a cohesive color palette (dark blue #1a1a2e, cyan #00FFFF, purple #8A2BE2)
 - Include visual icons or simple graphics representing the key concepts
-- Leave space for text overlays (hotspots will be added)
-- No text or labels in the image itself
+- DO NOT include any text or labels (they will be added as overlays)
 - Abstract/conceptual representation, not photorealistic
-- Suitable as a background for interactive hotspots
-- Resolution: 1280x720 (landscape)
+- Dark background for better contrast
+- Resolution: 1792x1024 (landscape)
 
 The image should feel educational, professional, and inviting for learning."""
 
@@ -68,7 +156,7 @@ The image should feel educational, professional, and inviting for learning."""
                 "model": "dall-e-3",
                 "prompt": image_prompt,
                 "n": 1,
-                "size": "1792x1024",  # Closest to 16:9 available
+                "size": "1792x1024",
                 "quality": "standard",
                 "response_format": "url"
             },
@@ -77,12 +165,22 @@ The image should feel educational, professional, and inviting for learning."""
         response.raise_for_status()
 
         image_url = response.json()["data"][0]["url"]
-        print(f'{{"status": "info", "message": "Generated infographic image via DALL-E"}}')
+        print(f'{{"status": "info", "message": "Generated infographic image via DALL-E (fallback)"}}')
         return image_url
 
     except Exception as e:
-        print(f'{{"status": "warning", "message": "Image generation failed: {str(e)}"}}')
+        print(f'{{"status": "warning", "message": "DALL-E fallback failed: {str(e)}"}}')
         return None
+
+
+def generate_infographic_image(transcript: str, hotspots: list, title: str = "") -> Optional[str]:
+    """
+    Generate a thematic infographic image. Uses Gemini/Imagen 3 (preferred) or DALL-E (fallback).
+    Gemini can generate images with correct, readable text labels - DALL-E cannot.
+
+    Returns: URL/path of the generated image, or None if generation fails
+    """
+    return generate_infographic_image_gemini(transcript, hotspots, title)
 
 
 def download_and_encode_image(image_url: str) -> Optional[tuple]:
